@@ -5,99 +5,9 @@ import 'package:uuid/uuid.dart';
 
 import '../models/enums/app_category.dart';
 import '../models/enums/environment.dart';
-import '../models/enums/todo_status.dart';
 import '../models/project.dart';
-import '../repositories/project_repository.dart';
-
-class ProjectProvider extends ChangeNotifier {
-  ProjectProvider(this._repository);
-
-  final ProjectRepository _repository;
-  final List<Project> _projects = [];
-  bool _isLoading = false;
-  String? _error;
-
-  List<Project> get projects => List.unmodifiable(_projects);
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-
-  Future<void> loadProjects({bool showLoading = true}) async {
-    if (showLoading) {
-      _setLoading(true);
-    }
-
-    try {
-      final data = await _repository.getAllProjects();
-      _projects
-        ..clear()
-        ..addAll(data);
-      _error = null;
-    } catch (error) {
-      _error = error.toString();
-    } finally {
-      if (showLoading) {
-        _setLoading(false);
-      } else {
-        notifyListeners();
-      }
-    }
-  }
-
-  Future<void> createProject(Project project) async {
-    await _runGuarded(() async {
-      await _repository.createProject(project);
-      await loadProjects(showLoading: false);
-    });
-  }
-
-  Future<void> updateProject(Project project) async {
-    await _runGuarded(() async {
-      await _repository.updateProject(project);
-      await loadProjects(showLoading: false);
-    });
-  }
-
-  Future<void> deleteProject(String id) async {
-    await _runGuarded(() async {
-      await _repository.deleteProject(id);
-      _projects.removeWhere((project) => project.id == id);
-    });
-  }
-
-  Future<void> updateTodoStatus(
-    String projectId,
-    String todoId,
-    TodoStatus status,
-  ) async {
-    await _runGuarded(() async {
-      await _repository.updateTodoStatus(projectId, todoId, status);
-      await loadProjects(showLoading: false);
-    });
-  }
-
-  Future<void> _runGuarded(Future<void> Function() runner) async {
-    _setLoading(true);
-    try {
-      await runner();
-      _error = null;
-    } catch (error) {
-      _error = error.toString();
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  void _setLoading(bool value) {
-    if (_isLoading == value) {
-      if (!value) {
-        notifyListeners();
-      }
-      return;
-    }
-    _isLoading = value;
-    notifyListeners();
-  }
-}
+import '../providers/project_provider.dart';
+import 'project_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -121,7 +31,10 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Projects')),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      appBar: AppBar(title: const Text('My Projects'), centerTitle: false),
       body: Consumer<ProjectProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
@@ -148,6 +61,7 @@ class HomeScreen extends StatelessWidget {
                 final project = provider.projects[index];
                 return _ProjectCard(
                   project: project,
+                  onOpenDetail: () => _openProjectDetail(context, project.id),
                   onEdit: () => _showProjectDialog(context, project: project),
                   onDelete: () => _confirmDelete(context, project),
                 );
@@ -267,29 +181,45 @@ class HomeScreen extends StatelessWidget {
                 if (!formKey.currentState!.validate()) return;
 
                 final now = DateTime.now();
-                if (project == null) {
-                  final newProject = Project(
-                    id: _uuid.v4(),
-                    title: titleController.text.trim(),
-                    description: descriptionController.text.trim(),
-                    category: selectedCategory,
-                    environment: selectedEnvironment,
-                    createdAt: now,
-                    updatedAt: now,
-                  );
-                  await provider.createProject(newProject);
-                } else {
-                  project
-                    ..title = titleController.text.trim()
-                    ..description = descriptionController.text.trim()
-                    ..category = selectedCategory
-                    ..environment = selectedEnvironment
-                    ..updatedAt = now;
-                  await provider.updateProject(project);
-                }
+                final success = project == null
+                    ? await provider.createProject(
+                        Project(
+                          id: _uuid.v4(),
+                          title: titleController.text.trim(),
+                          description: descriptionController.text.trim(),
+                          category: selectedCategory,
+                          environment: selectedEnvironment,
+                          createdAt: now,
+                          updatedAt: now,
+                        ),
+                      )
+                    : await provider.updateProject(
+                        project
+                          ..title = titleController.text.trim()
+                          ..description = descriptionController.text.trim()
+                          ..category = selectedCategory
+                          ..environment = selectedEnvironment
+                          ..updatedAt = now,
+                      );
 
-                if (context.mounted) {
+                if (!context.mounted) return;
+
+                if (success) {
+                  if (!dialogContext.mounted) return;
                   Navigator.of(dialogContext).pop();
+                  _showOperationResult(
+                    context,
+                    success: true,
+                    message: project == null
+                        ? 'Project created successfully'
+                        : 'Project updated successfully',
+                  );
+                } else {
+                  _showOperationResult(
+                    context,
+                    success: false,
+                    message: provider.error ?? 'Failed to save project',
+                  );
                 }
               },
               child: Text(project == null ? 'Create' : 'Save'),
@@ -328,12 +258,15 @@ class HomeScreen extends StatelessWidget {
     );
 
     if (confirmed == true) {
-      await provider.deleteProject(project.id);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Project "${project.title}" deleted.')),
-        );
-      }
+      final success = await provider.deleteProject(project.id);
+      if (!context.mounted) return;
+      _showOperationResult(
+        context,
+        success: success,
+        message: success
+            ? 'Project "${project.title}" deleted'
+            : provider.error ?? 'Failed to delete project',
+      );
     }
   }
 
@@ -342,34 +275,81 @@ class HomeScreen extends StatelessWidget {
   static Color _categoryColor(AppCategory category, BuildContext context) {
     return _categoryColors[category] ?? Theme.of(context).colorScheme.primary;
   }
+
+  void _openProjectDetail(BuildContext context, String projectId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProjectDetailScreen(projectId: projectId),
+      ),
+    );
+  }
+
+  void _showOperationResult(
+    BuildContext context, {
+    required bool success,
+    required String message,
+  }) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: success
+            ? const Color(0xFF2E7D32)
+            : const Color(0xFFC62828),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
 }
 
 class _ProjectCard extends StatelessWidget {
   const _ProjectCard({
     required this.project,
+    required this.onOpenDetail,
     required this.onEdit,
     required this.onDelete,
   });
 
   final Project project;
+  final VoidCallback onOpenDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final categoryColor = HomeScreen._categoryColor(project.category, context);
+    final cardStart = Color.lerp(categoryColor, Colors.white, 0.65)!;
+    final cardEnd = Color.lerp(categoryColor, theme.colorScheme.surface, 0.2)!;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Card(
-        elevation: 0,
-        clipBehavior: Clip.antiAlias,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
         child: InkWell(
-          onTap: onEdit,
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
+          borderRadius: BorderRadius.circular(24),
+          onTap: onOpenDetail,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [cardStart, cardEnd],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: categoryColor.withValues(alpha: 0.18),
+                  blurRadius: 18,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -382,17 +362,23 @@ class _ProjectCard extends StatelessWidget {
                           children: [
                             Text(
                               project.title,
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: theme.textTheme.titleLarge,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               project.description.isEmpty
                                   ? 'No description provided.'
                                   : project.description,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filledTonal(
+                        onPressed: onEdit,
+                        icon: const Icon(Icons.edit_outlined),
+                        tooltip: 'Edit project',
                       ),
                       PopupMenuButton<String>(
                         onSelected: (value) {
@@ -402,14 +388,35 @@ class _ProjectCard extends StatelessWidget {
                             onDelete();
                           }
                         },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(value: 'edit', child: Text('Edit')),
-                          PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: const [
+                                Icon(Icons.edit_outlined),
+                                SizedBox(width: 12),
+                                Text('Edit'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: const [
+                                Icon(Icons.delete_outline, color: Colors.red),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -425,7 +432,7 @@ class _ProjectCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       _InfoBadge(
@@ -450,12 +457,12 @@ class _ProjectCard extends StatelessWidget {
                   const Divider(height: 32),
                   Text(
                     'Created: ${HomeScreen.formatDate(project.createdAt)}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Updated: ${HomeScreen.formatDate(project.updatedAt)}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
               ),

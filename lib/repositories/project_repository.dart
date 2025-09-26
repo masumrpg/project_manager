@@ -84,6 +84,17 @@ class ProjectRepository {
     await target.delete();
   }
 
+  Future<void> updateNote(String projectId, Note note) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null) return;
+
+    note.updatedAt = DateTime.now();
+    await note.save();
+
+    project.updatedAt = DateTime.now();
+    await project.save();
+  }
+
   Future<void> addRevisionToProject(String projectId, Revision revision) async {
     final project = HiveBoxes.projectsBox.get(projectId);
     if (project == null) return;
@@ -91,6 +102,39 @@ class ProjectRepository {
     await HiveBoxes.revisionsBox.put(revision.id, revision);
     project.revisions ??= HiveList(HiveBoxes.revisionsBox);
     project.revisions!.add(revision);
+    project.updatedAt = DateTime.now();
+    await project.save();
+  }
+
+  Future<void> removeRevisionFromProject(
+    String projectId,
+    String revisionId,
+  ) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null || project.revisions == null) return;
+
+    Revision? target;
+    for (final revision in project.revisions!) {
+      if (revision.id == revisionId) {
+        target = revision;
+        break;
+      }
+    }
+
+    if (target == null) return;
+
+    project.revisions!.remove(target);
+    project.updatedAt = DateTime.now();
+    await project.save();
+    await target.delete();
+  }
+
+  Future<void> updateRevision(String projectId, Revision revision) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null) return;
+
+    await revision.save();
+
     project.updatedAt = DateTime.now();
     await project.save();
   }
@@ -131,5 +175,35 @@ class ProjectRepository {
 
     project.updatedAt = DateTime.now();
     await project.save();
+  }
+
+  Future<void> updateTodo(String projectId, Todo todo) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null) return;
+
+    await todo.save();
+
+    project.updatedAt = DateTime.now();
+    await project.save();
+  }
+
+  Future<void> removeTodoFromProject(String projectId, String todoId) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null || project.todos == null) return;
+
+    Todo? target;
+    for (final todo in project.todos!) {
+      if (todo.id == todoId) {
+        target = todo;
+        break;
+      }
+    }
+
+    if (target == null) return;
+
+    project.todos!.remove(target);
+    project.updatedAt = DateTime.now();
+    await project.save();
+    await target.delete();
   }
 }

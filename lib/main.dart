@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'providers/project_provider.dart';
 import 'repositories/project_repository.dart';
 import 'screens/home_screen.dart';
 import 'services/hive_boxes.dart';
@@ -18,8 +19,11 @@ class ProjectManagerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider(create: (_) => ProjectRepository()),
         ChangeNotifierProvider(
-          create: (_) => ProjectProvider(ProjectRepository())..loadProjects(),
+          create: (context) =>
+              ProjectProvider(context.read<ProjectRepository>())
+                ..loadProjects(),
         ),
       ],
       child: MaterialApp(
