@@ -611,173 +611,268 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     var selectedEnvironment = project.environment;
 
     try {
-      await showDialog<bool>(
+      await showModalBottomSheet<bool>(
         context: context,
-        builder: (dialogContext) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFFFFBF7), // cardBackground
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: Text(
-              'Edit Project',
-              style: TextStyle(color: const Color(0xFF2D3436), fontWeight: FontWeight.w600), // darkText
-            ),
-            content: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: titleController,
-                      decoration: InputDecoration(
-                        labelText: 'Title',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                        ),
-                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                        filled: true,
-                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Title is required';
-                        }
-                        return null;
-                      },
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (bottomSheetContext) {
+          return StatefulBuilder(
+            builder: (sheetContext, setModalState) {
+              final viewInsets = MediaQuery.of(bottomSheetContext).viewInsets;
+              final sheetHeight = MediaQuery.of(context).size.height * 0.85;
+
+              return Padding(
+                padding: EdgeInsets.only(bottom: viewInsets.bottom),
+                child: Container(
+                  height: sheetHeight,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBF7), // cardBackground
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 12, bottom: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                        ),
-                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                        filled: true,
-                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                       ),
-                      maxLines: 2,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Description is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonFormField<AppCategory>(
-                        initialValue: selectedCategory,
-                        decoration: const InputDecoration(
-                          labelText: 'Category',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        items: AppCategory.values
-                            .map(
-                              (value) => DropdownMenuItem(
-                                value: value,
-                                child: Text(value.label),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Edit Project',
+                              style: TextStyle(
+                                color: Color(0xFF2D3436), // darkText
+                                fontWeight: FontWeight.w600,
+                                fontSize: 24,
                               ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) selectedCategory = value;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonFormField<Environment>(
-                        initialValue: selectedEnvironment,
-                        decoration: const InputDecoration(
-                          labelText: 'Environment',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        items: Environment.values
-                            .map(
-                              (value) => DropdownMenuItem(
-                                value: value,
-                                child: Text(value.label),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: () => Navigator.of(bottomSheetContext).pop(false),
+                              icon: const Icon(Icons.close),
+                              style: IconButton.styleFrom(
+                                backgroundColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                foregroundColor: const Color(0xFF636E72), // lightText
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) selectedEnvironment = value;
-                        },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: Form(
+                          key: formKey,
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TextFormField(
+                                  controller: titleController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Title',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                                    ),
+                                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    filled: true,
+                                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Title is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: descriptionController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Description',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                                    ),
+                                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    filled: true,
+                                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
+                                  ),
+                                  maxLines: 3,
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Description is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: const Color(0xFFE8D5C4)), // secondaryBeige
+                                  ),
+                                  child: DropdownButtonFormField<AppCategory>(
+                                    initialValue: selectedCategory,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Category',
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    ),
+                                    dropdownColor: const Color(0xFFFFFBF7), // cardBackground
+                                    borderRadius: BorderRadius.circular(16),
+                                    items: AppCategory.values
+                                        .map(
+                                          (value) => DropdownMenuItem<AppCategory>(
+                                            value: value,
+                                            child: Text(
+                                              value.label,
+                                              style: const TextStyle(color: Color(0xFF2D3436)), // darkText
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setModalState(() {
+                                          selectedCategory = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: const Color(0xFFE8D5C4)), // secondaryBeige
+                                  ),
+                                  child: DropdownButtonFormField<Environment>(
+                                    initialValue: selectedEnvironment,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Environment',
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    ),
+                                    dropdownColor: const Color(0xFFFFFBF7), // cardBackground
+                                    borderRadius: BorderRadius.circular(16),
+                                    items: Environment.values
+                                        .map(
+                                          (value) => DropdownMenuItem<Environment>(
+                                            value: value,
+                                            child: Text(
+                                              value.label,
+                                              style: const TextStyle(color: Color(0xFF2D3436)), // darkText
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setModalState(() {
+                                          selectedEnvironment = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () => Navigator.of(bottomSheetContext).pop(false),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: const Color(0xFF636E72), // lightText
+                                ),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: () async {
+                                  if (!formKey.currentState!.validate()) {
+                                    return;
+                                  }
+
+                                  final now = DateTime.now();
+                                  project
+                                    ..title = titleController.text.trim()
+                                    ..description = descriptionController.text.trim()
+                                    ..category = selectedCategory
+                                    ..environment = selectedEnvironment
+                                    ..updatedAt = now;
+
+                                  final success = await projectProvider.updateProject(project);
+
+                                  if (success) {
+                                    await detailProvider.loadProject(showLoading: false);
+                                    if (!context.mounted || !bottomSheetContext.mounted) {
+                                      return;
+                                    }
+                                    Navigator.of(bottomSheetContext).pop(true);
+                                    _showFeedback(
+                                      context,
+                                      success: true,
+                                      message: 'Project updated successfully',
+                                    );
+                                  } else {
+                                    if (!context.mounted) {
+                                      return;
+                                    }
+                                    _showFeedback(
+                                      context,
+                                      success: false,
+                                      message: projectProvider.error ?? 'Failed to update project',
+                                    );
+                                  }
+                                },
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFFE07A5F), // accentOrange
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                ),
+                                child: const Text('Save'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () async {
-                  if (!formKey.currentState!.validate()) return;
-
-                  final now = DateTime.now();
-                  project
-                    ..title = titleController.text.trim()
-                    ..description = descriptionController.text.trim()
-                    ..category = selectedCategory
-                    ..environment = selectedEnvironment
-                    ..updatedAt = now;
-
-                  final success = await projectProvider.updateProject(project);
-
-                  if (success) {
-                    await detailProvider.loadProject(showLoading: false);
-                    if (!context.mounted || !dialogContext.mounted) return;
-                    Navigator.of(dialogContext).pop(true);
-                    _showFeedback(
-                      context,
-                      success: true,
-                      message: 'Project updated successfully',
-                    );
-                  } else {
-                    if (!context.mounted) return;
-                    _showFeedback(
-                      context,
-                      success: false,
-                      message:
-                          projectProvider.error ?? 'Failed to update project',
-                    );
-                  }
-                },
-                child: const Text('Save'),
-              ),
-            ],
+              );
+            },
           );
         },
       );
