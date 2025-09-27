@@ -373,20 +373,14 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       ),
       floatingActionButton: _buildModernFab(context, provider, accentOrange),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+        child: Column(
             children: [
               // Project header
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(isDesktop ? 32 : 24),
                 decoration: BoxDecoration(
-                  color: cardBackground,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
+                color: cardBackground,
                   boxShadow: [
                     BoxShadow(
                       color: shadowColor.withValues(alpha: 0.1),
@@ -437,7 +431,6 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
               decoration: BoxDecoration(
                 color: primaryBeige,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Container(
                 decoration: BoxDecoration(
                   color: cardBackground,
@@ -521,8 +514,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             ),
               ],
             ),
-          ),
-        ),
+      ),
     );
   }
 
@@ -1733,7 +1725,6 @@ class _NotesTab extends StatelessWidget {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       itemBuilder: (context, index) {
         final note = notes[index];
         return Card(
@@ -1826,7 +1817,6 @@ class _RevisionsTab extends StatelessWidget {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       itemBuilder: (context, index) {
         final revision = revisions[index];
         return Card(
