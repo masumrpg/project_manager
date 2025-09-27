@@ -199,11 +199,14 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     final provider = context.watch<ProjectDetailProvider>();
     final project = provider.project;
 
-    // Modern color scheme
-    const primaryBeige = Color(0xFFF5F1E8);
-    const accentBrown = Color(0xFF8B7355);
-    const darkText = Color(0xFF2C2C2C);
-    const lightText = Color(0xFF6B6B6B);
+    // Modern warm color palette - consistent with home screen
+    const primaryBeige = Color(0xFFF5E6D3);
+    const secondaryBeige = Color(0xFFE8D5C4);
+    const accentOrange = Color(0xFFE07A5F);
+    const darkText = Color(0xFF2D3436);
+    const lightText = Color(0xFF636E72);
+    const cardBackground = Color(0xFFFFFBF7);
+    const shadowColor = Color(0x1A2D3436);
 
     // Responsive breakpoints
     final screenWidth = MediaQuery.of(context).size.width;
@@ -216,11 +219,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardBackground,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
+                  color: shadowColor,
                   blurRadius: 24,
                   offset: const Offset(0, 8),
                 ),
@@ -230,7 +233,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(
-                  color: accentBrown,
+                  color: accentOrange,
                   strokeWidth: 3,
                 ),
                 const SizedBox(height: 16),
@@ -253,7 +256,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       return Scaffold(
         backgroundColor: primaryBeige,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: cardBackground,
           elevation: 0,
           title: Text(
             'Project',
@@ -275,7 +278,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       return Scaffold(
         backgroundColor: primaryBeige,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: cardBackground,
           elevation: 0,
           title: Text(
             'Project',
@@ -291,11 +294,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             margin: const EdgeInsets.all(24),
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardBackground,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
+                  color: shadowColor,
                   blurRadius: 24,
                   offset: const Offset(0, 8),
                 ),
@@ -346,7 +349,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     return Scaffold(
       backgroundColor: primaryBeige,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: cardBackground,
         elevation: 0,
         title: Text(
           project.title,
@@ -360,27 +363,38 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: cardBackground.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
               tooltip: 'Edit project',
               onPressed: () => _showEditProjectDialog(context, provider, project),
-              icon: Icon(Icons.edit_outlined, color: accentBrown),
+              icon: Icon(Icons.edit_outlined, color: accentOrange),
             ),
           ),
         ],
       ),
-      floatingActionButton: _buildModernFab(context, provider, accentBrown),
+      floatingActionButton: _buildModernFab(context, provider, accentOrange),
       body: SafeArea(
         child: Column(
           children: [
             // Project header
             Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: EdgeInsets.all(isDesktop ? 32 : 24),
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(bottom: BorderSide(color: primaryBeige, width: 1)),
+                color: cardBackground,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: shadowColor.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,35 +432,66 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 ],
               ),
             ),
-            // Tab bar
+            // Tab bar with badge/card style
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(bottom: BorderSide(color: primaryBeige, width: 1)),
+                color: primaryBeige,
               ),
-              child: TabBar(
-                controller: _tabController,
-                labelColor: accentBrown,
-                unselectedLabelColor: Colors.grey[600],
-                indicatorColor: accentBrown,
-                indicatorWeight: 3,
-                labelStyle: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: isDesktop ? 16 : 14,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cardBackground,
+                  boxShadow: [
+                    BoxShadow(
+                      color: shadowColor.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                tabs: const [
-                  Tab(text: 'Notes'),
-                  Tab(text: 'Revisions'),
-                  Tab(text: 'Todos'),
-                ],
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _TabButton(
+                        text: 'Notes',
+                        isSelected: _tabController.index == 0,
+                        onTap: () => _tabController.animateTo(0),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _TabButton(
+                        text: 'Revisions',
+                        isSelected: _tabController.index == 1,
+                        onTap: () => _tabController.animateTo(1),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _TabButton(
+                        text: 'Todos',
+                        isSelected: _tabController.index == 2,
+                        onTap: () => _tabController.animateTo(2),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             // Tab content
             Expanded(
               child: Container(
-                color: primaryBeige,
+                decoration: BoxDecoration(
+                  color: primaryBeige,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                  ),
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: EdgeInsets.symmetric(
-                  horizontal: isDesktop ? 48 : 16,
+                  horizontal: isDesktop ? 32 : 16,
                   vertical: isDesktop ? 24 : 16,
                 ),
                 child: TabBarView(
@@ -481,7 +526,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     );
   }
 
-  Widget? _buildModernFab(BuildContext context, ProjectDetailProvider provider, Color accentBrown) {
+  Widget? _buildModernFab(BuildContext context, ProjectDetailProvider provider, Color accentOrange) {
     switch (_tabController.index) {
       case 0:
         return Container(
@@ -489,14 +534,14 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: accentBrown.withValues(alpha: 0.3),
+                color: accentOrange.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
             ],
           ),
           child: FloatingActionButton.extended(
-            backgroundColor: accentBrown,
+            backgroundColor: accentOrange,
             foregroundColor: Colors.white,
             elevation: 0,
             onPressed: () => _showNoteSheet(context, provider),
@@ -510,14 +555,14 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: accentBrown.withValues(alpha: 0.3),
+                color: accentOrange.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
             ],
           ),
           child: FloatingActionButton.extended(
-            backgroundColor: accentBrown,
+            backgroundColor: accentOrange,
             foregroundColor: Colors.white,
             elevation: 0,
             onPressed: () => _showRevisionSheet(context, provider),
@@ -531,14 +576,14 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: accentBrown.withValues(alpha: 0.3),
+                color: accentOrange.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
             ],
           ),
           child: FloatingActionButton.extended(
-            backgroundColor: accentBrown,
+            backgroundColor: accentOrange,
             foregroundColor: Colors.white,
             elevation: 0,
             onPressed: () => _showTodoSheet(context, provider),
@@ -570,7 +615,12 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
         context: context,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text('Edit Project'),
+            backgroundColor: const Color(0xFFFFFBF7), // cardBackground
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            title: Text(
+              'Edit Project',
+              style: TextStyle(color: const Color(0xFF2D3436), fontWeight: FontWeight.w600), // darkText
+            ),
             content: Form(
               key: formKey,
               child: SingleChildScrollView(
@@ -579,9 +629,19 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                   children: [
                     TextFormField(
                       controller: titleController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Title',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                        ),
+                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                        filled: true,
+                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -593,13 +653,28 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: descriptionController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Description',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                        ),
+                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                        filled: true,
+                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                       ),
-                      maxLines: 3,
+                      maxLines: 2,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Description is required';
+                        }
+                        return null;
+                      },
                     ),
-                    const SizedBox(height: 12),
                     const SizedBox(height: 12),
                     Container(
                       decoration: BoxDecoration(
@@ -726,30 +801,59 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
-            top: 24,
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.85,
+          decoration: const BoxDecoration(
+            color: Color(0xFFFFFBF7), // cardBackground
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
           ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  note == null ? 'Add Note' : 'Edit Note',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Text(
+                    note == null ? 'Add Note' : 'Edit Note',
+                    style: const TextStyle(
+                      color: Color(0xFF2D3436), // darkText
+                      fontWeight: FontWeight.w600,
+                      fontSize: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 TextFormField(
                   controller: titleController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Title',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -761,9 +865,19 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: contentController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Content',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                   ),
                   minLines: 4,
                   maxLines: 8,
@@ -844,7 +958,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                   ],
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -915,30 +1030,59 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
-            top: 24,
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.85,
+          decoration: const BoxDecoration(
+            color: Color(0xFFFFFBF7), // cardBackground
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
           ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  revision == null ? 'Add Revision' : 'Edit Revision',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Text(
+                    revision == null ? 'Add Revision' : 'Edit Revision',
+                    style: const TextStyle(
+                      color: Color(0xFF2D3436), // darkText
+                      fontWeight: FontWeight.w600,
+                      fontSize: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 TextFormField(
                   controller: versionController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Version',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -950,21 +1094,47 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: descriptionController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Description',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                   ),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: changeLogController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Changes',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                   ),
                   minLines: 4,
                   maxLines: 8,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Changes is required';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -1005,7 +1175,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                   ],
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -1075,32 +1246,61 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 24,
-                right: 24,
-                bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
-                top: 24,
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.85,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFFBF7), // cardBackground
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
               ),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      todo == null ? 'Add Todo' : 'Edit Todo',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Handle bar
+                      Container(
+                        margin: const EdgeInsets.only(top: 12, bottom: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      Text(
+                        todo == null ? 'Add Todo' : 'Edit Todo',
+                        style: const TextStyle(
+                          color: Color(0xFF2D3436), // darkText
+                          fontWeight: FontWeight.w600,
+                          fontSize: 24,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                     TextFormField(
                       controller: titleController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Title',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                        ),
+                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                        filled: true,
+                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -1112,13 +1312,22 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: descriptionController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Description',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                        ),
+                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                        filled: true,
+                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
                       ),
                       maxLines: 3,
                     ),
-                    const SizedBox(height: 12),
                     const SizedBox(height: 12),
                     Container(
                       decoration: BoxDecoration(
@@ -1149,35 +1358,6 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const SizedBox(height: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonFormField<TodoStatus>(
-                        initialValue: selectedStatus,
-                        decoration: const InputDecoration(
-                          labelText: 'Status',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        items: TodoStatus.values
-                            .map(
-                              (status) => DropdownMenuItem(
-                                value: status,
-                                child: Text(status.label),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) selectedStatus = value;
-                        },
-                      ),
-                    ),
                     const SizedBox(height: 12),
                     Container(
                       decoration: BoxDecoration(
@@ -1300,7 +1480,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         ),
                       ],
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -1379,17 +1560,27 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text(title),
-          content: Text(message),
+          backgroundColor: const Color(0xFFFFFBF7), // cardBackground
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(
+            title,
+            style: const TextStyle(color: Color(0xFF2D3436), fontWeight: FontWeight.w600), // darkText
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Color(0xFF636E72)), // lightText
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
+              style: TextButton.styleFrom(foregroundColor: const Color(0xFF636E72)), // lightText
               child: const Text('Cancel'),
             ),
             FilledButton.tonal(
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFFFE5E5),
-                foregroundColor: Colors.red.shade700,
+                foregroundColor: const Color(0xFFE07A5F),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: const Text('Delete'),
@@ -1452,6 +1643,7 @@ class _NotesTab extends StatelessWidget {
         final note = notes[index];
         return Card(
           elevation: 0,
+          color: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -1481,7 +1673,7 @@ class _NotesTab extends StatelessWidget {
                 IconButton(
                   tooltip: 'Delete note',
                   onPressed: () => onDelete(note),
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
                 ),
               ],
             ),
@@ -1544,6 +1736,7 @@ class _RevisionsTab extends StatelessWidget {
         final revision = revisions[index];
         return Card(
           elevation: 0,
+          color: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -1599,7 +1792,7 @@ class _RevisionsTab extends StatelessWidget {
                 IconButton(
                   tooltip: 'Delete revision',
                   onPressed: () => onDelete(revision),
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
                 ),
               ],
             ),
@@ -1640,22 +1833,20 @@ class _TodosTab extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
+    return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-      itemCount: todos.length,
       itemBuilder: (context, index) {
         final todo = todos[index];
         return Card(
           elevation: 0,
+          color: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: CircleAvatar(
-              backgroundColor: _badgeColor(
-                todo.priority,
-              ).withValues(alpha: 0.2),
+              backgroundColor: _badgeColor(todo.priority).withValues(alpha: 0.2),
               foregroundColor: _badgeColor(todo.priority),
               child: Icon(_priorityIcon(todo.priority)),
             ),
@@ -1690,9 +1881,7 @@ class _TodosTab extends StatelessWidget {
                         Chip(
                           avatar: const Icon(Icons.event_outlined, size: 16),
                           label: Text(
-                            DateFormat(
-                              'dd MMM yyyy',
-                            ).format(todo.dueDate!.toLocal()),
+                            DateFormat('dd MMM yyyy').format(todo.dueDate!.toLocal()),
                           ),
                         ),
                     ],
@@ -1700,21 +1889,39 @@ class _TodosTab extends StatelessWidget {
                 ),
               ],
             ),
-            trailing: PopupMenuButton<TodoStatus>(
-              tooltip: 'Update status',
-              onSelected: (status) => onStatusChange(todo, status),
-              itemBuilder: (context) => TodoStatus.values
-                  .map(
-                    (status) =>
-                        PopupMenuItem(value: status, child: Text(status.label)),
-                  )
-                  .toList(),
+            trailing: Wrap(
+              spacing: 8,
+              children: [
+                IconButton(
+                  tooltip: 'Edit todo',
+                  onPressed: () => onEdit(todo),
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+                IconButton(
+                  tooltip: 'Delete todo',
+                  onPressed: () => onDelete(todo),
+                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
+                ),
+                PopupMenuButton<TodoStatus>(
+                  tooltip: 'Update status',
+                  onSelected: (status) => onStatusChange(todo, status),
+                  itemBuilder: (context) => TodoStatus.values
+                      .map(
+                        (status) => PopupMenuItem(
+                          value: status,
+                          child: Text(status.label),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
             ),
             onTap: () => onEdit(todo),
-            onLongPress: () => onDelete(todo),
           ),
         );
       },
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemCount: todos.length,
     );
   }
 
@@ -1810,6 +2017,55 @@ class _ErrorSection extends StatelessWidget {
       description: message,
       actionLabel: 'Retry',
       onAction: onRetry,
+    );
+  }
+}
+
+// Custom Tab Button Widget for badge/card style
+class _TabButton extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _TabButton({
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const accentOrange = Color(0xFFE07A5F);
+    const lightText = Color(0xFF636E72);
+    const cardBackground = Color(0xFFFFFBF7);
+    const primaryBeige = Color(0xFFF5E6D3);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? accentOrange : primaryBeige,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: accentOrange.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ] : null,
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: isSelected ? cardBackground : lightText,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 14,
+          ),
+        ),
+      ),
     );
   }
 }
