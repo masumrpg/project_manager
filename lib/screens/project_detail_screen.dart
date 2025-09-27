@@ -231,10 +231,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(
-                  color: accentOrange,
-                  strokeWidth: 3,
-                ),
+                CircularProgressIndicator(color: accentOrange, strokeWidth: 3),
                 const SizedBox(height: 16),
                 Text(
                   'Loading project...',
@@ -306,11 +303,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.folder_off_outlined,
-                  size: 64,
-                  color: lightText,
-                ),
+                Icon(Icons.folder_off_outlined, size: 64, color: lightText),
                 const SizedBox(height: 16),
                 Text(
                   'Project not found',
@@ -323,10 +316,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 const SizedBox(height: 8),
                 Text(
                   'It may have been deleted.',
-                  style: TextStyle(
-                    color: lightText,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: lightText, fontSize: 16),
                 ),
               ],
             ),
@@ -365,7 +355,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             ),
             child: IconButton(
               tooltip: 'Edit project',
-              onPressed: () => _showEditProjectDialog(context, provider, project),
+              onPressed: () =>
+                  _showEditProjectDialog(context, provider, project),
               icon: Icon(Icons.edit_outlined, color: accentOrange),
             ),
           ),
@@ -374,21 +365,25 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       floatingActionButton: _buildModernFab(context, provider, accentOrange),
       body: SafeArea(
         child: Column(
-            children: [
-              // Project header
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(isDesktop ? 32 : 24),
-                decoration: BoxDecoration(
+          children: [
+            // Project header
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(isDesktop ? 32 : 24),
+              decoration: BoxDecoration(
                 color: cardBackground,
-                  boxShadow: [
-                    BoxShadow(
-                      color: shadowColor.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(isDesktop ? 32 : 24),
+                  bottomRight: Radius.circular(isDesktop ? 32 : 24),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: shadowColor.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -411,14 +406,15 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_outlined, size: 16, color: lightText),
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 16,
+                        color: lightText,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Created ${DateFormat('MMM d, y').format(project.createdAt)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: lightText,
-                        ),
+                        style: TextStyle(fontSize: 14, color: lightText),
                       ),
                     ],
                   ),
@@ -428,9 +424,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             // Tab bar with badge/card style
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: primaryBeige,
-              ),
+              decoration: BoxDecoration(color: primaryBeige),
               child: Container(
                 decoration: BoxDecoration(
                   color: cardBackground,
@@ -487,38 +481,52 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                   vertical: isDesktop ? 24 : 16,
                 ),
                 child: TabBarView(
-                   controller: _tabController,
-                   children: [
-                     _NotesTab(
-                       notes: notes,
-                       onEdit: (note) => _showNoteSheet(context, provider, note: note),
-                       onDelete: (note) => _confirmDeleteNote(context, provider, note),
-                       onAdd: () => _showNoteSheet(context, provider),
-                     ),
-                     _RevisionsTab(
-                       revisions: revisions,
-                       onEdit: (revision) => _showRevisionSheet(context, provider, revision: revision),
-                       onDelete: (revision) => _confirmDeleteRevision(context, provider, revision),
-                       onAdd: () => _showRevisionSheet(context, provider),
-                     ),
-                     _TodosTab(
-                       todos: todos,
-                       onEdit: (todo) => _showTodoSheet(context, provider, todo: todo),
-                       onDelete: (todo) => _confirmDeleteTodo(context, provider, todo),
-                       onStatusChange: (todo, status) => _updateTodoStatus(context, provider, todo, status),
-                       onAdd: () => _showTodoSheet(context, provider),
-                     ),
-                   ],
-                 ),
+                  controller: _tabController,
+                  children: [
+                    _NotesTab(
+                      notes: notes,
+                      onEdit: (note) =>
+                          _showNoteSheet(context, provider, note: note),
+                      onDelete: (note) =>
+                          _confirmDeleteNote(context, provider, note),
+                      onAdd: () => _showNoteSheet(context, provider),
+                    ),
+                    _RevisionsTab(
+                      revisions: revisions,
+                      onEdit: (revision) => _showRevisionSheet(
+                        context,
+                        provider,
+                        revision: revision,
+                      ),
+                      onDelete: (revision) =>
+                          _confirmDeleteRevision(context, provider, revision),
+                      onAdd: () => _showRevisionSheet(context, provider),
+                    ),
+                    _TodosTab(
+                      todos: todos,
+                      onEdit: (todo) =>
+                          _showTodoSheet(context, provider, todo: todo),
+                      onDelete: (todo) =>
+                          _confirmDeleteTodo(context, provider, todo),
+                      onStatusChange: (todo, status) =>
+                          _updateTodoStatus(context, provider, todo, status),
+                      onAdd: () => _showTodoSheet(context, provider),
+                    ),
+                  ],
+                ),
               ),
             ),
-              ],
-            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget? _buildModernFab(BuildContext context, ProjectDetailProvider provider, Color accentOrange) {
+  Widget? _buildModernFab(
+    BuildContext context,
+    ProjectDetailProvider provider,
+    Color accentOrange,
+  ) {
     switch (_tabController.index) {
       case 0:
         return Container(
@@ -631,12 +639,17 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                          color: const Color(
+                            0xFF636E72,
+                          ).withValues(alpha: 0.3), // lightText
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
                         child: Row(
                           children: [
                             const Text(
@@ -649,11 +662,16 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                             ),
                             const Spacer(),
                             IconButton(
-                              onPressed: () => Navigator.of(bottomSheetContext).pop(false),
+                              onPressed: () =>
+                                  Navigator.of(bottomSheetContext).pop(false),
                               icon: const Icon(Icons.close),
                               style: IconButton.styleFrom(
-                                backgroundColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                                foregroundColor: const Color(0xFF636E72), // lightText
+                                backgroundColor: const Color(
+                                  0xFFF5E6D3,
+                                ).withValues(alpha: 0.3), // primaryBeige
+                                foregroundColor: const Color(
+                                  0xFF636E72,
+                                ), // lightText
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -676,15 +694,24 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     labelText: 'Title',
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE8D5C4),
+                                      ), // secondaryBeige
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE07A5F),
+                                        width: 2,
+                                      ), // accentOrange
                                     ),
-                                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    fillColor: const Color(
+                                      0xFFF5E6D3,
+                                    ).withValues(alpha: 0.3), // primaryBeige
                                     filled: true,
-                                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
+                                    labelStyle: const TextStyle(
+                                      color: Color(0xFF636E72),
+                                    ), // lightText
                                   ),
                                   validator: (value) {
                                     if (value == null || value.trim().isEmpty) {
@@ -700,15 +727,24 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     labelText: 'Description',
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE8D5C4),
+                                      ), // secondaryBeige
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFFE07A5F),
+                                        width: 2,
+                                      ), // accentOrange
                                     ),
-                                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    fillColor: const Color(
+                                      0xFFF5E6D3,
+                                    ).withValues(alpha: 0.3), // primaryBeige
                                     filled: true,
-                                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
+                                    labelStyle: const TextStyle(
+                                      color: Color(0xFF636E72),
+                                    ), // lightText
                                   ),
                                   maxLines: 3,
                                   validator: (value) {
@@ -721,28 +757,40 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                 const SizedBox(height: 16),
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    color: const Color(
+                                      0xFFF5E6D3,
+                                    ).withValues(alpha: 0.3), // primaryBeige
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: const Color(0xFFE8D5C4)), // secondaryBeige
+                                    border: Border.all(
+                                      color: const Color(0xFFE8D5C4),
+                                    ), // secondaryBeige
                                   ),
                                   child: DropdownButtonFormField<AppCategory>(
                                     initialValue: selectedCategory,
                                     decoration: const InputDecoration(
                                       labelText: 'Category',
                                       border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
                                     ),
-                                    dropdownColor: const Color(0xFFFFFBF7), // cardBackground
+                                    dropdownColor: const Color(
+                                      0xFFFFFBF7,
+                                    ), // cardBackground
                                     borderRadius: BorderRadius.circular(16),
                                     items: AppCategory.values
                                         .map(
-                                          (value) => DropdownMenuItem<AppCategory>(
-                                            value: value,
-                                            child: Text(
-                                              value.label,
-                                              style: const TextStyle(color: Color(0xFF2D3436)), // darkText
-                                            ),
-                                          ),
+                                          (value) =>
+                                              DropdownMenuItem<AppCategory>(
+                                                value: value,
+                                                child: Text(
+                                                  value.label,
+                                                  style: const TextStyle(
+                                                    color: Color(0xFF2D3436),
+                                                  ), // darkText
+                                                ),
+                                              ),
                                         )
                                         .toList(),
                                     onChanged: (value) {
@@ -757,28 +805,40 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                 const SizedBox(height: 16),
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
+                                    color: const Color(
+                                      0xFFF5E6D3,
+                                    ).withValues(alpha: 0.3), // primaryBeige
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: const Color(0xFFE8D5C4)), // secondaryBeige
+                                    border: Border.all(
+                                      color: const Color(0xFFE8D5C4),
+                                    ), // secondaryBeige
                                   ),
                                   child: DropdownButtonFormField<Environment>(
                                     initialValue: selectedEnvironment,
                                     decoration: const InputDecoration(
                                       labelText: 'Environment',
                                       border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
                                     ),
-                                    dropdownColor: const Color(0xFFFFFBF7), // cardBackground
+                                    dropdownColor: const Color(
+                                      0xFFFFFBF7,
+                                    ), // cardBackground
                                     borderRadius: BorderRadius.circular(16),
                                     items: Environment.values
                                         .map(
-                                          (value) => DropdownMenuItem<Environment>(
-                                            value: value,
-                                            child: Text(
-                                              value.label,
-                                              style: const TextStyle(color: Color(0xFF2D3436)), // darkText
-                                            ),
-                                          ),
+                                          (value) =>
+                                              DropdownMenuItem<Environment>(
+                                                value: value,
+                                                child: Text(
+                                                  value.label,
+                                                  style: const TextStyle(
+                                                    color: Color(0xFF2D3436),
+                                                  ), // darkText
+                                                ),
+                                              ),
                                         )
                                         .toList(),
                                     onChanged: (value) {
@@ -802,9 +862,12 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                           children: [
                             Expanded(
                               child: TextButton(
-                                onPressed: () => Navigator.of(bottomSheetContext).pop(false),
+                                onPressed: () =>
+                                    Navigator.of(bottomSheetContext).pop(false),
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFF636E72), // lightText
+                                  foregroundColor: const Color(
+                                    0xFF636E72,
+                                  ), // lightText
                                 ),
                                 child: const Text('Cancel'),
                               ),
@@ -820,16 +883,21 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                   final now = DateTime.now();
                                   project
                                     ..title = titleController.text.trim()
-                                    ..description = descriptionController.text.trim()
+                                    ..description = descriptionController.text
+                                        .trim()
                                     ..category = selectedCategory
                                     ..environment = selectedEnvironment
                                     ..updatedAt = now;
 
-                                  final success = await projectProvider.updateProject(project);
+                                  final success = await projectProvider
+                                      .updateProject(project);
 
                                   if (success) {
-                                    await detailProvider.loadProject(showLoading: false);
-                                    if (!context.mounted || !bottomSheetContext.mounted) {
+                                    await detailProvider.loadProject(
+                                      showLoading: false,
+                                    );
+                                    if (!context.mounted ||
+                                        !bottomSheetContext.mounted) {
                                       return;
                                     }
                                     Navigator.of(bottomSheetContext).pop(true);
@@ -845,14 +913,20 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     _showFeedback(
                                       context,
                                       success: false,
-                                      message: projectProvider.error ?? 'Failed to update project',
+                                      message:
+                                          projectProvider.error ??
+                                          'Failed to update project',
                                     );
                                   }
                                 },
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFFE07A5F), // accentOrange
+                                  backgroundColor: const Color(
+                                    0xFFE07A5F,
+                                  ), // accentOrange
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                 ),
                                 child: const Text('Save'),
                               ),
@@ -913,7 +987,9 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                      color: const Color(
+                        0xFF636E72,
+                      ).withValues(alpha: 0.3), // lightText
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -926,125 +1002,146 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                   ),
                   const SizedBox(height: 16),
-                TextFormField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                  TextFormField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Title',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE8D5C4),
+                        ), // secondaryBeige
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE07A5F),
+                          width: 2,
+                        ), // accentOrange
+                      ),
+                      fillColor: const Color(
+                        0xFFF5E6D3,
+                      ).withValues(alpha: 0.3), // primaryBeige
+                      filled: true,
+                      labelStyle: const TextStyle(
+                        color: Color(0xFF636E72),
+                      ), // lightText
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Title is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: contentController,
-                  decoration: InputDecoration(
-                    labelText: 'Content',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
-                  ),
-                  minLines: 4,
-                  maxLines: 8,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Content is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: DropdownButtonFormField<ContentType>(
-                    initialValue: selectedType,
-                    decoration: const InputDecoration(
-                      labelText: 'Content Type',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                    dropdownColor: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    items: ContentType.values
-                        .map(
-                          (type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type.label),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        selectedType = value;
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Title is required';
                       }
+                      return null;
                     },
                   ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(sheetContext).pop(false),
-                      child: const Text('Cancel'),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: contentController,
+                    decoration: InputDecoration(
+                      labelText: 'Content',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE8D5C4),
+                        ), // secondaryBeige
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE07A5F),
+                          width: 2,
+                        ), // accentOrange
+                      ),
+                      fillColor: const Color(
+                        0xFFF5E6D3,
+                      ).withValues(alpha: 0.3), // primaryBeige
+                      filled: true,
+                      labelStyle: const TextStyle(
+                        color: Color(0xFF636E72),
+                      ), // lightText
                     ),
-                    const SizedBox(width: 12),
-                    FilledButton(
-                      onPressed: () async {
-                        if (!formKey.currentState!.validate()) return;
-
-                        final now = DateTime.now();
-                        final didSucceed = note == null
-                            ? await provider.addNote(
-                                Note(
-                                  id: _uuid.v4(),
-                                  title: titleController.text.trim(),
-                                  content: contentController.text.trim(),
-                                  contentType: selectedType,
-                                  createdAt: now,
-                                  updatedAt: now,
-                                ),
-                              )
-                            : await provider.updateNote(
-                                note
-                                  ..title = titleController.text.trim()
-                                  ..content = contentController.text.trim()
-                                  ..contentType = selectedType,
-                              );
-
-                        if (!sheetContext.mounted) return;
-                        Navigator.of(sheetContext).pop(didSucceed);
+                    minLines: 4,
+                    maxLines: 8,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Content is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: DropdownButtonFormField<ContentType>(
+                      initialValue: selectedType,
+                      decoration: const InputDecoration(
+                        labelText: 'Content Type',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      dropdownColor: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      items: ContentType.values
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(type.label),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          selectedType = value;
+                        }
                       },
-                      child: Text(note == null ? 'Create' : 'Save'),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 12),
+                      FilledButton(
+                        onPressed: () async {
+                          if (!formKey.currentState!.validate()) return;
+
+                          final now = DateTime.now();
+                          final didSucceed = note == null
+                              ? await provider.addNote(
+                                  Note(
+                                    id: _uuid.v4(),
+                                    title: titleController.text.trim(),
+                                    content: contentController.text.trim(),
+                                    contentType: selectedType,
+                                    createdAt: now,
+                                    updatedAt: now,
+                                  ),
+                                )
+                              : await provider.updateNote(
+                                  note
+                                    ..title = titleController.text.trim()
+                                    ..content = contentController.text.trim()
+                                    ..contentType = selectedType,
+                                );
+
+                          if (!sheetContext.mounted) return;
+                          Navigator.of(sheetContext).pop(didSucceed);
+                        },
+                        child: Text(note == null ? 'Create' : 'Save'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -1142,7 +1239,9 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                      color: const Color(
+                        0xFF636E72,
+                      ).withValues(alpha: 0.3), // lightText
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1155,113 +1254,140 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                   ),
                   const SizedBox(height: 16),
-                TextFormField(
-                  controller: versionController,
-                  decoration: InputDecoration(
-                    labelText: 'Version',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                  TextFormField(
+                    controller: versionController,
+                    decoration: InputDecoration(
+                      labelText: 'Version',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE8D5C4),
+                        ), // secondaryBeige
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE07A5F),
+                          width: 2,
+                        ), // accentOrange
+                      ),
+                      fillColor: const Color(
+                        0xFFF5E6D3,
+                      ).withValues(alpha: 0.3), // primaryBeige
+                      filled: true,
+                      labelStyle: const TextStyle(
+                        color: Color(0xFF636E72),
+                      ), // lightText
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Version is required';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Version is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE8D5C4),
+                        ), // secondaryBeige
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE07A5F),
+                          width: 2,
+                        ), // accentOrange
+                      ),
+                      fillColor: const Color(
+                        0xFFF5E6D3,
+                      ).withValues(alpha: 0.3), // primaryBeige
+                      filled: true,
+                      labelStyle: const TextStyle(
+                        color: Color(0xFF636E72),
+                      ), // lightText
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
+                    maxLines: 2,
                   ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: changeLogController,
-                  decoration: InputDecoration(
-                    labelText: 'Changes',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: changeLogController,
+                    decoration: InputDecoration(
+                      labelText: 'Changes',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE8D5C4),
+                        ), // secondaryBeige
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE07A5F),
+                          width: 2,
+                        ), // accentOrange
+                      ),
+                      fillColor: const Color(
+                        0xFFF5E6D3,
+                      ).withValues(alpha: 0.3), // primaryBeige
+                      filled: true,
+                      labelStyle: const TextStyle(
+                        color: Color(0xFF636E72),
+                      ), // lightText
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
+                    minLines: 4,
+                    maxLines: 8,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Changes is required';
+                      }
+                      return null;
+                    },
                   ),
-                  minLines: 4,
-                  maxLines: 8,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Changes is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(sheetContext).pop(false),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: 12),
-                    FilledButton(
-                      onPressed: () async {
-                        if (!formKey.currentState!.validate()) return;
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 12),
+                      FilledButton(
+                        onPressed: () async {
+                          if (!formKey.currentState!.validate()) return;
 
-                        final didSucceed = revision == null
-                            ? await provider.addRevision(
-                                Revision(
-                                  id: _uuid.v4(),
-                                  version: versionController.text.trim(),
-                                  description: descriptionController.text
-                                      .trim(),
-                                  changes: changeLogController.text.trim(),
-                                  createdAt: DateTime.now(),
-                                ),
-                              )
-                            : await provider.updateRevision(
-                                revision
-                                  ..version = versionController.text.trim()
-                                  ..description = descriptionController.text
-                                      .trim()
-                                  ..changes = changeLogController.text.trim(),
-                              );
+                          final didSucceed = revision == null
+                              ? await provider.addRevision(
+                                  Revision(
+                                    id: _uuid.v4(),
+                                    version: versionController.text.trim(),
+                                    description: descriptionController.text
+                                        .trim(),
+                                    changes: changeLogController.text.trim(),
+                                    createdAt: DateTime.now(),
+                                  ),
+                                )
+                              : await provider.updateRevision(
+                                  revision
+                                    ..version = versionController.text.trim()
+                                    ..description = descriptionController.text
+                                        .trim()
+                                    ..changes = changeLogController.text.trim(),
+                                );
 
-                        if (!sheetContext.mounted) return;
-                        Navigator.of(sheetContext).pop(didSucceed);
-                      },
-                      child: Text(revision == null ? 'Create' : 'Save'),
-                    ),
-                  ],
-                ),
+                          if (!sheetContext.mounted) return;
+                          Navigator.of(sheetContext).pop(didSucceed);
+                        },
+                        child: Text(revision == null ? 'Create' : 'Save'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -1360,7 +1486,9 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF636E72).withValues(alpha: 0.3), // lightText
+                          color: const Color(
+                            0xFF636E72,
+                          ).withValues(alpha: 0.3), // lightText
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -1373,200 +1501,230 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         ),
                       ),
                       const SizedBox(height: 16),
-                    TextFormField(
-                      controller: titleController,
-                      decoration: InputDecoration(
-                        labelText: 'Title',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                      TextFormField(
+                        controller: titleController,
+                        decoration: InputDecoration(
+                          labelText: 'Title',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE8D5C4),
+                            ), // secondaryBeige
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE07A5F),
+                              width: 2,
+                            ), // accentOrange
+                          ),
+                          fillColor: const Color(
+                            0xFFF5E6D3,
+                          ).withValues(alpha: 0.3), // primaryBeige
+                          filled: true,
+                          labelStyle: const TextStyle(
+                            color: Color(0xFF636E72),
+                          ), // lightText
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                        ),
-                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                        filled: true,
-                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Title is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2), // accentOrange
-                        ),
-                        fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3), // primaryBeige
-                        filled: true,
-                        labelStyle: const TextStyle(color: Color(0xFF636E72)), // lightText
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonFormField<TodoPriority>(
-                        initialValue: selectedPriority,
-                        decoration: const InputDecoration(
-                          labelText: 'Priority',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        items: TodoPriority.values
-                            .map(
-                              (priority) => DropdownMenuItem(
-                                value: priority,
-                                child: Text(priority.label),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) selectedPriority = value;
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Title is required';
+                          }
+                          return null;
                         },
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    const SizedBox(height: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonFormField<TodoStatus>(
-                        initialValue: selectedStatus,
-                        decoration: const InputDecoration(
-                          labelText: 'Status',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: descriptionController,
+                        decoration: InputDecoration(
+                          labelText: 'Description',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE8D5C4),
+                            ), // secondaryBeige
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE07A5F),
+                              width: 2,
+                            ), // accentOrange
+                          ),
+                          fillColor: const Color(
+                            0xFFF5E6D3,
+                          ).withValues(alpha: 0.3), // primaryBeige
+                          filled: true,
+                          labelStyle: const TextStyle(
+                            color: Color(0xFF636E72),
+                          ), // lightText
                         ),
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        items: TodoStatus.values
-                            .map(
-                              (status) => DropdownMenuItem(
-                                value: status,
-                                child: Text(status.label),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) selectedStatus = value;
-                        },
+                        maxLines: 3,
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              final picked = await showDatePicker(
-                                context: sheetContext,
-                                initialDate: dueDate ?? DateTime.now(),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2100),
-                              );
-                              if (picked != null) {
-                                setSheetState(() {
-                                  dueDate = picked;
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.event_outlined),
-                            label: Text(
-                              dueDate == null
-                                  ? 'Due date (optional)'
-                                  : DateFormat('dd MMM yyyy').format(dueDate!),
+                      const SizedBox(height: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: DropdownButtonFormField<TodoPriority>(
+                          initialValue: selectedPriority,
+                          decoration: const InputDecoration(
+                            labelText: 'Priority',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
                             ),
                           ),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          items: TodoPriority.values
+                              .map(
+                                (priority) => DropdownMenuItem(
+                                  value: priority,
+                                  child: Text(priority.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) selectedPriority = value;
+                          },
                         ),
-                        if (dueDate != null) ...[
-                          const SizedBox(width: 8),
-                          IconButton(
-                            tooltip: 'Clear due date',
-                            onPressed: () {
-                              setSheetState(() {
-                                dueDate = null;
-                              });
+                      ),
+                      const SizedBox(height: 12),
+                      const SizedBox(height: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: DropdownButtonFormField<TodoStatus>(
+                          initialValue: selectedStatus,
+                          decoration: const InputDecoration(
+                            labelText: 'Status',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          items: TodoStatus.values
+                              .map(
+                                (status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) selectedStatus = value;
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                final picked = await showDatePicker(
+                                  context: sheetContext,
+                                  initialDate: dueDate ?? DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2100),
+                                );
+                                if (picked != null) {
+                                  setSheetState(() {
+                                    dueDate = picked;
+                                  });
+                                }
+                              },
+                              icon: const Icon(Icons.event_outlined),
+                              label: Text(
+                                dueDate == null
+                                    ? 'Due date (optional)'
+                                    : DateFormat(
+                                        'dd MMM yyyy',
+                                      ).format(dueDate!),
+                              ),
+                            ),
+                          ),
+                          if (dueDate != null) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              tooltip: 'Clear due date',
+                              onPressed: () {
+                                setSheetState(() {
+                                  dueDate = null;
+                                });
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(sheetContext).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          const SizedBox(width: 12),
+                          FilledButton(
+                            onPressed: () async {
+                              if (!formKey.currentState!.validate()) return;
+
+                              final now = DateTime.now();
+                              final didSucceed = todo == null
+                                  ? await provider.addTodo(
+                                      Todo(
+                                        id: _uuid.v4(),
+                                        title: titleController.text.trim(),
+                                        description: descriptionController.text
+                                            .trim(),
+                                        priority: selectedPriority,
+                                        status: selectedStatus,
+                                        dueDate: dueDate,
+                                        createdAt: now,
+                                        completedAt:
+                                            selectedStatus ==
+                                                TodoStatus.completed
+                                            ? now
+                                            : null,
+                                      ),
+                                    )
+                                  : await provider.updateTodo(
+                                      todo
+                                        ..title = titleController.text.trim()
+                                        ..description = descriptionController
+                                            .text
+                                            .trim()
+                                        ..priority = selectedPriority
+                                        ..status = selectedStatus
+                                        ..dueDate = dueDate
+                                        ..completedAt =
+                                            selectedStatus ==
+                                                TodoStatus.completed
+                                            ? (todo.completedAt ??
+                                                  DateTime.now())
+                                            : null,
+                                    );
+
+                              if (!sheetContext.mounted) return;
+                              Navigator.of(sheetContext).pop(didSucceed);
                             },
-                            icon: const Icon(Icons.close),
+                            child: Text(todo == null ? 'Create' : 'Save'),
                           ),
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () =>
-                              Navigator.of(sheetContext).pop(false),
-                          child: const Text('Cancel'),
-                        ),
-                        const SizedBox(width: 12),
-                        FilledButton(
-                          onPressed: () async {
-                            if (!formKey.currentState!.validate()) return;
-
-                            final now = DateTime.now();
-                            final didSucceed = todo == null
-                                ? await provider.addTodo(
-                                    Todo(
-                                      id: _uuid.v4(),
-                                      title: titleController.text.trim(),
-                                      description: descriptionController.text
-                                          .trim(),
-                                      priority: selectedPriority,
-                                      status: selectedStatus,
-                                      dueDate: dueDate,
-                                      createdAt: now,
-                                      completedAt:
-                                          selectedStatus == TodoStatus.completed
-                                          ? now
-                                          : null,
-                                    ),
-                                  )
-                                : await provider.updateTodo(
-                                    todo
-                                      ..title = titleController.text.trim()
-                                      ..description = descriptionController.text
-                                          .trim()
-                                      ..priority = selectedPriority
-                                      ..status = selectedStatus
-                                      ..dueDate = dueDate
-                                      ..completedAt =
-                                          selectedStatus == TodoStatus.completed
-                                          ? (todo.completedAt ?? DateTime.now())
-                                          : null,
-                                  );
-
-                            if (!sheetContext.mounted) return;
-                            Navigator.of(sheetContext).pop(didSucceed);
-                          },
-                          child: Text(todo == null ? 'Create' : 'Save'),
-                        ),
-                      ],
-                    ),
+                      ),
                     ],
                   ),
                 ),
@@ -1648,10 +1806,15 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: const Color(0xFFFFFBF7), // cardBackground
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           title: Text(
             title,
-            style: const TextStyle(color: Color(0xFF2D3436), fontWeight: FontWeight.w600), // darkText
+            style: const TextStyle(
+              color: Color(0xFF2D3436),
+              fontWeight: FontWeight.w600,
+            ), // darkText
           ),
           content: Text(
             message,
@@ -1660,14 +1823,18 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              style: TextButton.styleFrom(foregroundColor: const Color(0xFF636E72)), // lightText
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF636E72),
+              ), // lightText
               child: const Text('Cancel'),
             ),
             FilledButton.tonal(
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFFFE5E5),
                 foregroundColor: const Color(0xFFE07A5F),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: const Text('Delete'),
@@ -1759,7 +1926,10 @@ class _NotesTab extends StatelessWidget {
                 IconButton(
                   tooltip: 'Delete note',
                   onPressed: () => onDelete(note),
-                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFE07A5F),
+                  ),
                 ),
               ],
             ),
@@ -1828,23 +1998,26 @@ class _RevisionsTab extends StatelessWidget {
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: const Icon(Icons.history_toggle_off, size: 28),
-            title: Text('Version ${revision.version}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (revision.description.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
+            title: Text(
+              'Version ${revision.version}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (revision.description.isNotEmpty) ...[
+                    Text(
                       revision.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                if (revision.changes.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
+                    const SizedBox(height: 6),
+                  ],
+                  if (revision.changes.isNotEmpty) ...[
+                    Text(
                       revision.changes,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
@@ -1852,10 +2025,9 @@ class _RevisionsTab extends StatelessWidget {
                         color: Theme.of(context).hintColor,
                       ),
                     ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
+                    const SizedBox(height: 6),
+                  ],
+                  Text(
                     DateFormat(
                       'dd MMM yyyy, HH:mm',
                     ).format(revision.createdAt.toLocal()),
@@ -1863,8 +2035,8 @@ class _RevisionsTab extends StatelessWidget {
                       color: Theme.of(context).hintColor,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             trailing: Wrap(
               spacing: 8,
@@ -1877,10 +2049,14 @@ class _RevisionsTab extends StatelessWidget {
                 IconButton(
                   tooltip: 'Delete revision',
                   onPressed: () => onDelete(revision),
-                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFE07A5F),
+                  ),
                 ),
               ],
             ),
+            onTap: () => onEdit(revision),
           ),
         );
       },
@@ -1919,7 +2095,6 @@ class _TodosTab extends StatelessWidget {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       itemBuilder: (context, index) {
         final todo = todos[index];
         return Card(
@@ -1931,26 +2106,31 @@ class _TodosTab extends StatelessWidget {
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: CircleAvatar(
-              backgroundColor: _badgeColor(todo.priority).withValues(alpha: 0.2),
+              backgroundColor: _badgeColor(
+                todo.priority,
+              ).withValues(alpha: 0.2),
               foregroundColor: _badgeColor(todo.priority),
               child: Icon(_priorityIcon(todo.priority)),
             ),
-            title: Text(todo.title),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (todo.description.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
+            title: Text(
+              todo.title,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (todo.description.isNotEmpty) ...[
+                    Text(
                       todo.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Wrap(
+                    const SizedBox(height: 6),
+                  ],
+                  Wrap(
                     spacing: 8,
                     runSpacing: 4,
                     children: [
@@ -1966,13 +2146,15 @@ class _TodosTab extends StatelessWidget {
                         Chip(
                           avatar: const Icon(Icons.event_outlined, size: 16),
                           label: Text(
-                            DateFormat('dd MMM yyyy').format(todo.dueDate!.toLocal()),
+                            DateFormat(
+                              'dd MMM yyyy',
+                            ).format(todo.dueDate!.toLocal()),
                           ),
                         ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             trailing: Wrap(
               spacing: 8,
@@ -1985,7 +2167,10 @@ class _TodosTab extends StatelessWidget {
                 IconButton(
                   tooltip: 'Delete todo',
                   onPressed: () => onDelete(todo),
-                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFE07A5F),
+                  ),
                 ),
                 PopupMenuButton<TodoStatus>(
                   tooltip: 'Update status',
@@ -2133,13 +2318,15 @@ class _TabButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? accentOrange : primaryBeige,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: accentOrange.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ] : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: accentOrange.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           text,
