@@ -37,23 +37,24 @@ class ProjectManagerApp extends StatelessWidget {
 }
 
 ThemeData _buildTheme() {
-  const primary = Color(0xFF8A4AF3);
-  const secondary = Color(0xFFBB86FC);
-  const background = Color(0xFF1A1A1A);
-  const surface = Color(0xFF2D2D2D);
-  const onPrimary = Color(0xFFFFFFFF);
-  const onBackground = Color(0xFFD3D3D3);
+  // Consistent color palette matching the app design
+  const primary = Color(0xFFE07A5F); // accentOrange
+  const secondary = Color(0xFFF5E6D3); // primaryBeige
+  const background = Color(0xFFFFFBF7); // cardBackground
+  const surface = Color(0xFFF5E6D3); // primaryBeige
+  const onPrimary = Color(0xFFFFFBF7); // cardBackground
+  const onBackground = Color(0xFF2D3436); // darkText
 
   final baseScheme = ColorScheme.fromSeed(
     seedColor: primary,
-    brightness: Brightness.dark,
+    brightness: Brightness.light,
   );
 
   final colorScheme = baseScheme.copyWith(
     primary: primary,
     onPrimary: onPrimary,
     secondary: secondary,
-    onSecondary: onPrimary,
+    onSecondary: onBackground,
     surface: surface,
     onSurface: onBackground,
   );
@@ -64,8 +65,8 @@ ThemeData _buildTheme() {
     scaffoldBackgroundColor: background,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
-      foregroundColor: colorScheme.onSurface,
+      backgroundColor: background,
+      foregroundColor: onBackground,
       elevation: 0,
       centerTitle: false,
       titleSpacing: 0,
@@ -74,7 +75,7 @@ ThemeData _buildTheme() {
       clipBehavior: Clip.antiAlias,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      color: surface,
+      color: background,
     ),
     chipTheme: ChipThemeData(
       elevation: 0,

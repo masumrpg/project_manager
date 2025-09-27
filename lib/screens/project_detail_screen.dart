@@ -201,7 +201,6 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
 
     // Modern warm color palette - consistent with home screen
     const primaryBeige = Color(0xFFF5E6D3);
-    const secondaryBeige = Color(0xFFE8D5C4);
     const accentOrange = Color(0xFFE07A5F);
     const darkText = Color(0xFF2D3436);
     const lightText = Color(0xFF636E72);
@@ -336,8 +335,6 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       );
     }
 
-    final theme = Theme.of(context);
-
     final notes = List<Note>.from(project.notes ?? const <Note>[])
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     final revisions = List<Revision>.from(
@@ -376,26 +373,28 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       ),
       floatingActionButton: _buildModernFab(context, provider, accentOrange),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Project header
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: EdgeInsets.all(isDesktop ? 32 : 24),
-              decoration: BoxDecoration(
-                color: cardBackground,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: shadowColor.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Project header
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(isDesktop ? 32 : 24),
+                decoration: BoxDecoration(
+                  color: cardBackground,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
-                ],
-              ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: shadowColor.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -434,10 +433,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             ),
             // Tab bar with badge/card style
             Container(
+              width: double.infinity,
               decoration: BoxDecoration(
                 color: primaryBeige,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Container(
                 decoration: BoxDecoration(
                   color: cardBackground,
@@ -489,7 +489,6 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     bottomRight: Radius.circular(24),
                   ),
                 ),
-                margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: EdgeInsets.symmetric(
                   horizontal: isDesktop ? 32 : 16,
                   vertical: isDesktop ? 24 : 16,
@@ -520,9 +519,10 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                  ),
               ),
             ),
-          ],
+              ],
+            ),
+          ),
         ),
-      ),
     );
   }
 
