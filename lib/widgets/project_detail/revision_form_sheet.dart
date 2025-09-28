@@ -168,30 +168,33 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: const Color(0xFFE8D5C4)),
                       ),
-                      child: Column(
-                        children: [
-                          QuillSimpleToolbar(
-                            controller: _changeLogController,
-                            config: const QuillSimpleToolbarConfig(
-                              toolbarSize: 40,
-                              multiRowsDisplay: false,
-                            ),
-                          ),
-                          Container(
-                            constraints: const BoxConstraints(
-                              minHeight: 120,
-                              maxHeight: 200,
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            child: QuillEditor.basic(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15.0),
+                        child: Column(
+                          children: [
+                            QuillSimpleToolbar(
                               controller: _changeLogController,
-                              config: const QuillEditorConfig(
-                                padding: EdgeInsets.zero,
-                                expands: false,
+                              config: const QuillSimpleToolbarConfig(
+                                toolbarSize: 40,
+                                multiRowsDisplay: false,
                               ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              constraints: const BoxConstraints(
+                                minHeight: 120,
+                                maxHeight: 200,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              child: QuillEditor.basic(
+                                controller: _changeLogController,
+                                config: const QuillEditorConfig(
+                                  padding: EdgeInsets.zero,
+                                  expands: false,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

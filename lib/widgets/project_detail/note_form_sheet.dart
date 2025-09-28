@@ -136,57 +136,55 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                 ),
                 const SizedBox(height: 12),
                 
-                // Quill Editor Section
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE8D5C4)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Toolbar
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFFBF7),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
-                          ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Content',
+                      style: TextStyle(
+                        color: Color(0xFF636E72),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE8D5C4)),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15.0),
+                        child: Column(
+                          children: [
+                            QuillSimpleToolbar(
+                              controller: _quillController,
+                              config: const QuillSimpleToolbarConfig(
+                                toolbarSize: 40,
+                                multiRowsDisplay: false,
+                              ),
+                            ),
+                            Container(
+                              constraints: const BoxConstraints(
+                                minHeight: 120,
+                                maxHeight: 200,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              child: QuillEditor.basic(
+                                controller: _quillController,
+                                config: const QuillEditorConfig(
+                                  placeholder: 'Write your note content here...',
+                                  padding: EdgeInsets.zero,
+                                  expands: false,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        child: QuillSimpleToolbar(
-                           controller: _quillController,
-                           config: const QuillSimpleToolbarConfig(
-                             buttonOptions: QuillSimpleToolbarButtonOptions(
-                               bold: QuillToolbarToggleStyleButtonOptions(),
-                               italic: QuillToolbarToggleStyleButtonOptions(),
-                               underLine: QuillToolbarToggleStyleButtonOptions(),
-                               strikeThrough: QuillToolbarToggleStyleButtonOptions(),
-                               listNumbers: QuillToolbarToggleStyleButtonOptions(),
-                               listBullets: QuillToolbarToggleStyleButtonOptions(),
-                               codeBlock: QuillToolbarToggleStyleButtonOptions(),
-                               quote: QuillToolbarToggleStyleButtonOptions(),
-                               clearFormat: QuillToolbarClearFormatButtonOptions(),
-                             ),
-                           ),
-                         ),
                       ),
-                      // Editor
-                      Container(
-                        height: 200,
-                        padding: const EdgeInsets.all(16),
-                        child: QuillEditor.basic(
-                           controller: _quillController,
-                           config: const QuillEditorConfig(
-                             placeholder: 'Write your note content here...',
-                             padding: EdgeInsets.zero,
-                           ),
-                         ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 
                 const SizedBox(height: 12),

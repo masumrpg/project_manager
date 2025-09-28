@@ -137,8 +137,9 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                 // Description with Quill Editor
                 Text(
                   'Description',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  style: TextStyle(
                     color: const Color(0xFF636E72),
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -149,25 +150,34 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: const Color(0xFFE8D5C4)),
                   ),
-                  child: Column(
-                    children: [
-                      QuillSimpleToolbar(
-                         controller: _descriptionQuillController,
-                         config: const QuillSimpleToolbarConfig(
-                           buttonOptions: QuillSimpleToolbarButtonOptions(),
-                         ),
-                       ),
-                      Container(
-                        height: 120,
-                        padding: const EdgeInsets.all(12),
-                        child: QuillEditor.basic(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15.0),
+                    child: Column(
+                      children: [
+                        QuillSimpleToolbar(
                           controller: _descriptionQuillController,
-                          config: const QuillEditorConfig(
-                            padding: EdgeInsets.zero,
+                          config: const QuillSimpleToolbarConfig(
+                            toolbarSize: 40,
+                            multiRowsDisplay: false,
                           ),
                         ),
-                      ),
-                    ],
+                        Container(
+                          constraints: const BoxConstraints(
+                            minHeight: 120,
+                            maxHeight: 200,
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: QuillEditor.basic(
+                            controller: _descriptionQuillController,
+                            config: const QuillEditorConfig(
+                              placeholder: 'Write your description here...',
+                              padding: EdgeInsets.zero,
+                              expands: false,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),

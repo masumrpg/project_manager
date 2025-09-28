@@ -365,32 +365,38 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           ),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: cardBackground.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              tooltip: 'Edit project',
-              onPressed: () =>
-                  _showEditProjectDialog(context, provider, project),
-              icon: Icon(Icons.edit_outlined, color: accentOrange),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: cardBackground.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                tooltip: 'Edit project',
+                onPressed: () =>
+                    _showEditProjectDialog(context, provider, project),
+                icon: Icon(Icons.edit_outlined, color: accentOrange),
+              ),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: cardBackground.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              tooltip: (project.longDescription ?? '').isEmpty
-                  ? 'Tambahkan deskripsi lengkap'
-                  : 'Edit deskripsi lengkap',
-              onPressed: () =>
-                  _openLongDescriptionEditor(context, provider, project),
-              icon: Icon(Icons.notes_outlined, color: accentOrange),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                color: cardBackground.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                tooltip: (project.longDescription ?? '').isEmpty
+                    ? 'Tambahkan deskripsi lengkap'
+                    : 'Edit deskripsi lengkap',
+                onPressed: () =>
+                    _openLongDescriptionEditor(context, provider, project),
+                icon: Icon(Icons.notes_outlined, color: accentOrange),
+              ),
             ),
           ),
         ],
@@ -559,26 +565,35 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 child: Row(
                   children: [
                     Expanded(
-                      child: TabButton(
-                        text: 'Notes',
-                        isSelected: _tabController.index == 0,
-                        onTap: () => _tabController.animateTo(0),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: TabButton(
+                          text: 'Notes',
+                          isSelected: _tabController.index == 0,
+                          onTap: () => _tabController.animateTo(0),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: TabButton(
-                        text: 'Revisions',
-                        isSelected: _tabController.index == 1,
-                        onTap: () => _tabController.animateTo(1),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: TabButton(
+                          text: 'Revisions',
+                          isSelected: _tabController.index == 1,
+                          onTap: () => _tabController.animateTo(1),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: TabButton(
-                        text: 'Todos',
-                        isSelected: _tabController.index == 2,
-                        onTap: () => _tabController.animateTo(2),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: TabButton(
+                          text: 'Todos',
+                          isSelected: _tabController.index == 2,
+                          onTap: () => _tabController.animateTo(2),
+                        ),
                       ),
                     ),
                   ],
