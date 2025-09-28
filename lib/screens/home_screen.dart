@@ -850,11 +850,21 @@ class _ModernHeader extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _MetricCard(
-                  icon: Icons.note_alt_outlined,
-                  label: 'Notes collected',
-                  value: metrics.totalNotes.toString(),
-                  color: HomeScreen._categoryColors[AppCategory.study]!,
+                Row(
+                  children: [
+                    Expanded(
+                      child: _MetricCard(
+                        icon: Icons.note_alt_outlined,
+                        label: 'Notes collected',
+                        value: metrics.totalNotes.toString(),
+                        color:
+                            HomeScreen._categoryColors[AppCategory.study]!,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Placeholder to keep grid alignment and equal widths
+                    const Expanded(child: SizedBox.shrink()),
+                  ],
                 ),
               ],
             ),
