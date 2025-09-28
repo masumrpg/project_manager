@@ -4,11 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/enums/app_category.dart';
-import '../models/enums/content_type.dart';
 import '../models/enums/environment.dart';
-import '../models/enums/note_status.dart';
-import '../models/enums/revision_status.dart';
-import '../models/enums/todo_priority.dart';
 import '../models/enums/todo_status.dart';
 import '../models/note.dart';
 import '../models/project.dart';
@@ -16,6 +12,14 @@ import '../models/revision.dart';
 import '../models/todo.dart';
 import '../repositories/project_repository.dart';
 import '../providers/project_provider.dart';
+import '../widgets/project_detail/note_form_sheet.dart';
+import '../widgets/project_detail/revision_form_sheet.dart';
+import '../widgets/project_detail/todo_form_sheet.dart';
+import '../widgets/project_detail/notes_tab.dart';
+import '../widgets/project_detail/revisions_tab.dart';
+import '../widgets/project_detail/todos_tab.dart';
+import '../widgets/project_detail/error_section.dart';
+import '../widgets/project_detail/tab_button.dart';
 
 class ProjectDetailScreen extends StatelessWidget {
   const ProjectDetailScreen({required this.projectId, super.key});
@@ -265,7 +269,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             ),
           ),
         ),
-        body: _ErrorSection(
+        body: ErrorSection(
           message: provider.error!,
           onRetry: () => provider.loadProject(),
         ),
@@ -438,7 +442,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 child: Row(
                   children: [
                     Expanded(
-                      child: _TabButton(
+                      child: TabButton(
                         text: 'Notes',
                         isSelected: _tabController.index == 0,
                         onTap: () => _tabController.animateTo(0),
@@ -446,7 +450,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _TabButton(
+                      child: TabButton(
                         text: 'Revisions',
                         isSelected: _tabController.index == 1,
                         onTap: () => _tabController.animateTo(1),
@@ -454,7 +458,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _TabButton(
+                      child: TabButton(
                         text: 'Todos',
                         isSelected: _tabController.index == 2,
                         onTap: () => _tabController.animateTo(2),
@@ -481,7 +485,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _NotesTab(
+                    NotesTab(
                       notes: notes,
                       onEdit: (note) =>
                           _showNoteSheet(context, provider, note: note),
@@ -489,7 +493,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                           _confirmDeleteNote(context, provider, note),
                       onAdd: () => _showNoteSheet(context, provider),
                     ),
-                    _RevisionsTab(
+                    RevisionsTab(
                       revisions: revisions,
                       onEdit: (revision) => _showRevisionSheet(
                         context,
@@ -500,7 +504,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                           _confirmDeleteRevision(context, provider, revision),
                       onAdd: () => _showRevisionSheet(context, provider),
                     ),
-                    _TodosTab(
+                    TodosTab(
                       todos: todos,
                       onEdit: (todo) =>
                           _showTodoSheet(context, provider, todo: todo),
@@ -957,10 +961,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return _NoteFormSheet(
-          provider: provider,
+        return NoteFormSheet(
           uuid: _uuid,
           note: note,
+          onCreate: (n) => provider.addNote(n),
+          onUpdate: (n) => provider.updateNote(n),
         );
       },
     );
@@ -1016,10 +1021,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return _RevisionFormSheet(
-          provider: provider,
-          revision: revision,
+        return RevisionFormSheet(
           uuid: _uuid,
+          revision: revision,
+          onCreate: (r) => provider.addRevision(r),
+          onUpdate: (r) => provider.updateRevision(r),
         );
       },
     );
@@ -1077,10 +1083,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return _TodoFormSheet(
-          provider: provider,
+        return TodoFormSheet(
           uuid: _uuid,
           todo: todo,
+          onCreate: (t) => provider.addTodo(t),
+          onUpdate: (t) => provider.updateTodo(t),
         );
       },
     );
@@ -1218,19 +1225,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
   }
 }
 
-class _NotesTab extends StatelessWidget {
-  const _NotesTab({
-    required this.notes,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onAdd,
-  });
-
-  final List<Note> notes;
-  final ValueChanged<Note> onEdit;
-  final ValueChanged<Note> onDelete;
-  final VoidCallback onAdd;
-
+/* BEGIN legacy inline widgets (disabled)
   @override
   Widget build(BuildContext context) {
     if (notes.isEmpty) {
@@ -1312,8 +1307,11 @@ class _NotesTab extends StatelessWidget {
     }
   }
 }
+END legacy inline widgets 
 
-class _RevisionsTab extends StatelessWidget {
+*/
+
+/* class _RevisionsTab extends StatelessWidget {
   const _RevisionsTab({
     required this.revisions,
     required this.onEdit,
@@ -2490,3 +2488,4 @@ class _TabButton extends StatelessWidget {
     );
   }
 }
+*/
