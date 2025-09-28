@@ -40,6 +40,9 @@ dependencies:
   intl: ^0.20.2
   uuid: ^4.5.1
   flutter_markdown: ^0.7.7+1
+  flutter_quill: 11.4.2
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
 
 import 'providers/project_provider.dart';
 import 'repositories/project_repository.dart';
@@ -30,6 +32,16 @@ class ProjectManagerApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Project Manager',
         theme: _buildTheme(),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          FlutterQuillLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('id'),
+        ],
         home: const HomeScreen(),
       ),
     );

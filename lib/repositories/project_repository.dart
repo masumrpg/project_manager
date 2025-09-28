@@ -34,6 +34,19 @@ class ProjectRepository {
     await HiveBoxes.projectsBox.put(project.id, project);
   }
 
+  Future<void> updateProjectLongDescription(
+    String projectId,
+    String longDescription,
+  ) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null) return;
+
+    project
+      ..longDescription = longDescription
+      ..updatedAt = DateTime.now();
+    await project.save();
+  }
+
   Future<void> deleteProject(String id) async {
     final project = HiveBoxes.projectsBox.get(id);
     if (project == null) return;

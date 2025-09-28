@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 import '../models/enums/app_category.dart';
 import '../models/enums/environment.dart';
@@ -12,6 +14,7 @@ import '../models/revision.dart';
 import '../models/todo.dart';
 import '../repositories/project_repository.dart';
 import '../providers/project_provider.dart';
+import 'long_description_editor_screen.dart';
 import '../widgets/project_detail/note_form_sheet.dart';
 import '../widgets/project_detail/revision_form_sheet.dart';
 import '../widgets/project_detail/todo_form_sheet.dart';
@@ -133,6 +136,13 @@ class ProjectDetailProvider extends ChangeNotifier {
 
   Future<void> _refreshProject() async {
     _project = await _repository.getProjectById(projectId);
+  }
+
+  Future<bool> updateLongDescription(String content) async {
+    return _runTask(() async {
+      await _repository.updateProjectLongDescription(projectId, content);
+      await _refreshProject();
+    }, showLoading: false);
   }
 
   Future<bool> _runTask(
@@ -366,6 +376,21 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
               icon: Icon(Icons.edit_outlined, color: accentOrange),
             ),
           ),
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              color: cardBackground.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              tooltip: (project.longDescription ?? '').isEmpty
+                  ? 'Tambahkan deskripsi lengkap'
+                  : 'Edit deskripsi lengkap',
+              onPressed: () =>
+                  _openLongDescriptionEditor(context, provider, project),
+              icon: Icon(Icons.notes_outlined, color: accentOrange),
+            ),
+          ),
         ],
       ),
       floatingActionButton: _buildModernFab(context, provider, accentOrange),
@@ -402,13 +427,52 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    project.description,
-                    style: TextStyle(
-                      fontSize: isDesktop ? 18 : 16,
-                      color: lightText,
+                  if ((project.longDescription ?? '').isNotEmpty) ...[
+                    // Render longDescription with Quill (read-only, limited height)
+                    Builder(
+                      builder: (context) {
+                        Document doc;
+                        try {
+                          doc = Document.fromJson(
+                            (jsonDecode(project.longDescription!)
+                                as List<dynamic>),
+                          );
+                        } catch (_) {
+                          doc = Document()..insert(0, project.longDescription!);
+                        }
+                        final ctrl = QuillController(
+                          document: doc,
+                          selection: const TextSelection.collapsed(offset: 0),
+                        );
+                        return Container(
+                          constraints: BoxConstraints(
+                            maxHeight: isDesktop ? 220 : 160,
+                            minWidth: double.infinity,
+                          ),
+                          padding: const EdgeInsets.only(top: 4),
+                          child: AbsorbPointer(
+                            child: QuillEditor.basic(controller: ctrl),
+                          ),
+                        );
+                      },
                     ),
-                  ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed: () =>
+                            _openLongDescriptionViewer(context, project),
+                        child: const Text('Lihat selengkapnya'),
+                      ),
+                    ),
+                  ] else ...[
+                    Text(
+                      project.description,
+                      style: TextStyle(
+                        fontSize: isDesktop ? 18 : 16,
+                        color: lightText,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -596,6 +660,46 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       default:
         return null;
     }
+  }
+
+  void _openLongDescriptionEditor(
+    BuildContext context,
+    ProjectDetailProvider provider,
+    Project project,
+  ) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LongDescriptionEditorScreen(
+          projectTitle: project.title,
+          initialJson: project.longDescription,
+          onSave: (json) async {
+            final ok = await provider.updateLongDescription(json);
+            if (context.mounted) {
+              _showFeedback(
+                context,
+                success: ok,
+                message: ok
+                    ? 'Long description saved'
+                    : provider.error ?? 'Failed to save',
+              );
+            }
+            return ok;
+          },
+        ),
+      ),
+    );
+  }
+
+  void _openLongDescriptionViewer(BuildContext context, Project project) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LongDescriptionEditorScreen(
+          projectTitle: project.title,
+          initialJson: project.longDescription,
+          readOnly: true,
+        ),
+      ),
+    );
   }
 
   Future<void> _showEditProjectDialog(
@@ -1307,7 +1411,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     }
   }
 }
-END legacy inline widgets 
+END legacy inline widgets
 
 */
 
