@@ -178,282 +178,334 @@ class HomeScreen extends StatelessWidget {
 
     final provider = context.read<ProjectProvider>();
 
-    try {
-      await showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (bottomSheetContext) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return Container(
-                height: MediaQuery.of(context).size.height * 0.85,
-                decoration: BoxDecoration(
-                  color: _cardBackground,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.85,
+              decoration: BoxDecoration(
+                color: _cardBackground,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
                 ),
-                child: Column(
-                  children: [
-                    // Handle bar
-                    Container(
-                      margin: const EdgeInsets.only(top: 12, bottom: 8),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: _lightText.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+              ),
+              child: Column(
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: _lightText.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    // Header
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      child: Row(
-                        children: [
-                          Text(
-                            project == null ? 'Create Project' : 'Edit Project',
-                            style: TextStyle(
-                              color: _darkText,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 24,
+                  ),
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          project == null ? 'Create Project' : 'Edit Project',
+                          style: TextStyle(
+                            color: _darkText,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 24,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () {
+                            titleController.dispose();
+                            descriptionController.dispose();
+                            Navigator.of(bottomSheetContext).pop();
+                          },
+                          icon: Icon(Icons.close, color: _lightText),
+                          style: IconButton.styleFrom(
+                            backgroundColor: _primaryBeige.withValues(
+                              alpha: 0.3,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () => Navigator.of(bottomSheetContext).pop(),
-                            icon: Icon(Icons.close, color: _lightText),
-                            style: IconButton.styleFrom(
-                              backgroundColor: _primaryBeige.withValues(alpha: 0.3),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    // Content
-                    Expanded(
-                      child: Form(
-                        key: formKey,
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              TextFormField(
-                                controller: titleController,
-                                decoration: InputDecoration(
-                                  labelText: 'Title',
-                                  labelStyle: TextStyle(color: _lightText),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(color: _secondaryBeige),
+                  ),
+                  // Content
+                  Expanded(
+                    child: Form(
+                      key: formKey,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            TextFormField(
+                              controller: titleController,
+                              decoration: InputDecoration(
+                                labelText: 'Title',
+                                labelStyle: TextStyle(color: _lightText),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: _secondaryBeige,
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(color: _accentOrange, width: 2),
-                                  ),
-                                  filled: true,
-                                  fillColor: _primaryBeige.withValues(alpha: 0.3),
                                 ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Title is required';
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: _accentOrange,
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: _primaryBeige.withValues(alpha: 0.3),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Title is required';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: descriptionController,
+                              decoration: InputDecoration(
+                                labelText: 'Description',
+                                labelStyle: TextStyle(color: _lightText),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: _secondaryBeige,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: _accentOrange,
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: _primaryBeige.withValues(alpha: 0.3),
+                              ),
+                              maxLines: 3,
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: _primaryBeige.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: _secondaryBeige),
+                              ),
+                              child: DropdownButtonFormField<AppCategory>(
+                                initialValue: selectedCategory,
+                                decoration: InputDecoration(
+                                  labelText: 'Category',
+                                  labelStyle: TextStyle(color: _lightText),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                dropdownColor: _cardBackground,
+                                borderRadius: BorderRadius.circular(16),
+                                items: AppCategory.values
+                                    .map(
+                                      (category) =>
+                                          DropdownMenuItem<AppCategory>(
+                                            value: category,
+                                            child: Text(
+                                              category.label,
+                                              style: TextStyle(
+                                                color: _darkText,
+                                              ),
+                                            ),
+                                          ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      selectedCategory = value;
+                                    });
                                   }
-                                  return null;
                                 },
                               ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: descriptionController,
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: _primaryBeige.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: _secondaryBeige),
+                              ),
+                              child: DropdownButtonFormField<Environment>(
+                                initialValue: selectedEnvironment,
                                 decoration: InputDecoration(
-                                  labelText: 'Description',
+                                  labelText: 'Environment',
                                   labelStyle: TextStyle(color: _lightText),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(color: _secondaryBeige),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(color: _accentOrange, width: 2),
-                                  ),
-                                  filled: true,
-                                  fillColor: _primaryBeige.withValues(alpha: 0.3),
                                 ),
-                                maxLines: 3,
-                              ),
-                              const SizedBox(height: 16),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: _primaryBeige.withValues(alpha: 0.3),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: _secondaryBeige),
-                                ),
-                                child: DropdownButtonFormField<AppCategory>(
-                                  initialValue: selectedCategory,
-                                  decoration: InputDecoration(
-                                    labelText: 'Category',
-                                    labelStyle: TextStyle(color: _lightText),
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  ),
-                                  dropdownColor: _cardBackground,
-                                  borderRadius: BorderRadius.circular(16),
-                                  items: AppCategory.values
-                                      .map(
-                                        (category) => DropdownMenuItem<AppCategory>(
-                                          value: category,
-                                          child: Text(category.label, style: TextStyle(color: _darkText)),
+                                dropdownColor: _cardBackground,
+                                borderRadius: BorderRadius.circular(16),
+                                items: Environment.values
+                                    .map(
+                                      (env) => DropdownMenuItem<Environment>(
+                                        value: env,
+                                        child: Text(
+                                          env.label,
+                                          style: TextStyle(color: _darkText),
                                         ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      setState(() {
-                                        selectedCategory = value;
-                                      });
-                                    }
-                                  },
-                                ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      selectedEnvironment = value;
+                                    });
+                                  }
+                                },
                               ),
-                              const SizedBox(height: 16),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: _primaryBeige.withValues(alpha: 0.3),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: _secondaryBeige),
-                                ),
-                                child: DropdownButtonFormField<Environment>(
-                                  initialValue: selectedEnvironment,
-                                  decoration: InputDecoration(
-                                    labelText: 'Environment',
-                                    labelStyle: TextStyle(color: _lightText),
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  ),
-                                  dropdownColor: _cardBackground,
-                                  borderRadius: BorderRadius.circular(16),
-                                  items: Environment.values
-                                      .map(
-                                        (env) => DropdownMenuItem<Environment>(
-                                          value: env,
-                                          child: Text(env.label, style: TextStyle(color: _darkText)),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      setState(() {
-                                        selectedEnvironment = value;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                              const SizedBox(height: 32),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 32),
+                          ],
                         ),
                       ),
                     ),
-                    // Bottom actions
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: _cardBackground,
-                        border: Border(
-                          top: BorderSide(color: _secondaryBeige.withValues(alpha: 0.5)),
+                  ),
+                  // Bottom actions
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: _cardBackground,
+                      border: Border(
+                        top: BorderSide(
+                          color: _secondaryBeige.withValues(alpha: 0.5),
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextButton(
-                              onPressed: () => Navigator.of(bottomSheetContext).pop(),
-                              style: TextButton.styleFrom(
-                                foregroundColor: _lightText,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: BorderSide(color: _secondaryBeige),
-                                ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () {
+                              titleController.dispose();
+                              descriptionController.dispose();
+                              Navigator.of(bottomSheetContext).pop();
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: _lightText,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: BorderSide(color: _secondaryBeige),
                               ),
-                              child: const Text('Cancel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: () async {
-                                if (!formKey.currentState!.validate()) return;
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () async {
+                              if (!formKey.currentState!.validate()) return;
 
-                                final now = DateTime.now();
-                                final success = project == null
-                                    ? await provider.createProject(
-                                        Project(
-                                          id: _uuid.v4(),
-                                          title: titleController.text.trim(),
-                                          description: descriptionController.text.trim(),
-                                          category: selectedCategory,
-                                          environment: selectedEnvironment,
-                                          createdAt: now,
-                                          updatedAt: now,
-                                        ),
-                                      )
-                                    : await provider.updateProject(
-                                        project.copyWith(
-                                          title: titleController.text.trim(),
-                                          description: descriptionController.text.trim(),
-                                          category: selectedCategory,
-                                          environment: selectedEnvironment,
-                                          updatedAt: now,
-                                        ),
-                                      );
+                              final now = DateTime.now();
+                              final success = project == null
+                                  ? await provider.createProject(
+                                      Project(
+                                        id: _uuid.v4(),
+                                        title: titleController.text.trim(),
+                                        description: descriptionController.text
+                                            .trim(),
+                                        category: selectedCategory,
+                                        environment: selectedEnvironment,
+                                        createdAt: now,
+                                        updatedAt: now,
+                                      ),
+                                    )
+                                  : await provider.updateProject(
+                                      project.copyWith(
+                                        title: titleController.text.trim(),
+                                        description: descriptionController.text
+                                            .trim(),
+                                        category: selectedCategory,
+                                        environment: selectedEnvironment,
+                                        updatedAt: now,
+                                      ),
+                                    );
 
-                                if (!bottomSheetContext.mounted) return;
-                                Navigator.of(bottomSheetContext).pop();
+                              titleController.dispose();
+                              descriptionController.dispose();
 
-                                if (!context.mounted) return;
-                                _showOperationResult(
-                                  context,
-                                  success: success,
-                                  message: success
-                                      ? project == null
+                              if (!bottomSheetContext.mounted) return;
+                              Navigator.of(bottomSheetContext).pop();
+
+                              if (!context.mounted) return;
+                              _showOperationResult(
+                                context,
+                                success: success,
+                                message: success
+                                    ? project == null
                                           ? 'Project "${titleController.text.trim()}" created'
                                           : 'Project "${titleController.text.trim()}" updated'
-                                      : provider.error ?? 'Operation failed',
-                                );
-                              },
-                              style: FilledButton.styleFrom(
-                                backgroundColor: _accentOrange,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    : provider.error ?? 'Operation failed',
+                              );
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _accentOrange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
                               ),
-                              child: Text(
-                                project == null ? 'Create Project' : 'Update Project',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                            child: Text(
+                              project == null
+                                  ? 'Create Project'
+                                  : 'Update Project',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      );
-    } finally {
-      // Dispose controllers safely
-      titleController.dispose();
-      descriptionController.dispose();
-    }
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _confirmDelete(BuildContext context, Project project) async {

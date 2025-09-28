@@ -170,9 +170,7 @@ class ProjectRepository {
 
     if (target == null) return;
 
-    target
-      ..status = status
-      ..updatedAt = DateTime.now();
+    target.status = status;
     await target.save();
 
     project.updatedAt = DateTime.now();

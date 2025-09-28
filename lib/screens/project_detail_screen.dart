@@ -955,6 +955,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     final titleController = TextEditingController(text: note?.title ?? '');
     final contentController = TextEditingController(text: note?.content ?? '');
     var selectedType = note?.contentType ?? ContentType.text;
+    var selectedStatus = note?.status ?? NoteStatus.active;
 
     final success = await showModalBottomSheet<bool>(
       context: context,
@@ -975,10 +976,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             padding: const EdgeInsets.all(24),
             child: Form(
               key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   // Handle bar
                   Container(
                     margin: const EdgeInsets.only(top: 12, bottom: 8),
@@ -1074,6 +1076,40 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
+                    child: DropdownButtonFormField<NoteStatus>(
+                      value: selectedStatus,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      dropdownColor: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      items: NoteStatus.values
+                          .map(
+                            (status) => DropdownMenuItem(
+                              value: status,
+                              child: Text(status.label),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          selectedStatus = value;
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
                     child: DropdownButtonFormField<ContentType>(
                       initialValue: selectedType,
                       decoration: const InputDecoration(
@@ -1101,6 +1137,40 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                       },
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: DropdownButtonFormField<RevisionStatus>(
+                      value: RevisionStatus.draft,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      dropdownColor: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      items: RevisionStatus.values
+                          .map(
+                            (status) => DropdownMenuItem(
+                              value: status,
+                              child: Text(status.label),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                         if (value != null) {
+                           // Status will be updated when form is submitted
+                         }
+                       },
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -1122,7 +1192,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     title: titleController.text.trim(),
                                     content: contentController.text.trim(),
                                     contentType: selectedType,
-                                    status: NoteStatus.active,
+                                    status: selectedStatus,
                                     createdAt: now,
                                     updatedAt: now,
                                   ),
@@ -1131,7 +1201,9 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                   note
                                     ..title = titleController.text.trim()
                                     ..content = contentController.text.trim()
-                                    ..contentType = selectedType,
+                                    ..contentType = selectedType
+                                    ..status = selectedStatus
+                                    ..updatedAt = now,
                                 );
 
                           if (!sheetContext.mounted) return;
@@ -1142,6 +1214,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ],
                   ),
                 ],
+                ),
               ),
             ),
           ),
@@ -1208,6 +1281,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     final changeLogController = TextEditingController(
       text: revision?.changes ?? '',
     );
+    
+    final initialStatus = revision?.status ?? RevisionStatus.draft;
 
     final success = await showModalBottomSheet<bool>(
       context: context,
@@ -1369,7 +1444,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     description: descriptionController.text
                                         .trim(),
                                     changes: changeLogController.text.trim(),
-                                    status: RevisionStatus.draft,
+                                    status: initialStatus,
                                     createdAt: DateTime.now(),
                                   ),
                                 )
@@ -1378,7 +1453,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     ..version = versionController.text.trim()
                                     ..description = descriptionController.text
                                         .trim()
-                                    ..changes = changeLogController.text.trim(),
+                                    ..changes = changeLogController.text.trim()
+                                    ..status = initialStatus,
                                 );
 
                           if (!sheetContext.mounted) return;
