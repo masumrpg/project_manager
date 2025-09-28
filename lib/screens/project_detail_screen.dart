@@ -373,8 +373,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
               decoration: BoxDecoration(
                 color: cardBackground,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(isDesktop ? 32 : 24),
-                  bottomRight: Radius.circular(isDesktop ? 32 : 24),
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -423,19 +423,15 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             ),
             // Tab bar with badge/card style
             Container(
+              padding: EdgeInsets.fromLTRB(
+                isDesktop ? 32 : 24,
+                8,
+                isDesktop ? 32 : 24,
+                0,
+              ),
               width: double.infinity,
               decoration: BoxDecoration(color: primaryBeige),
               child: Container(
-                decoration: BoxDecoration(
-                  color: cardBackground,
-                  boxShadow: [
-                    BoxShadow(
-                      color: shadowColor.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
                 padding: const EdgeInsets.all(8),
                 child: Row(
                   children: [
