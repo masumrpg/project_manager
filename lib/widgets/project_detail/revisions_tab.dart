@@ -40,60 +40,7 @@ class RevisionsTab extends StatelessWidget {
           elevation: 0,
           color: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: SizedBox(
-              width: 28,
-              child: Icon(
-                Icons.history_toggle_off,
-                size: 28,
-                color: _getStatusColor(revision.status),
-              ),
-            ),
-            title: Text('Version ${revision.version}', style: Theme.of(context).textTheme.titleMedium),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (revision.description.isNotEmpty) ...[
-                    Text(revision.description, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 6),
-                  ],
-                  if (revision.changes.isNotEmpty) ...[
-                    Text(
-                      _getPlainTextContent(revision.changes),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                  ],
-                  Text(
-                    DateFormat('dd MMM yyyy, HH:mm').format(revision.createdAt.toLocal()),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
-                  ),
-                ],
-              ),
-            ),
-            trailing: Wrap(
-              spacing: 8,
-              children: [
-                IconButton(
-                  tooltip: 'Edit revision',
-                  onPressed: () => onEdit(revision),
-                  icon: const Icon(Icons.edit_outlined),
-                ),
-                IconButton(
-                  tooltip: 'Delete revision',
-                  onPressed: () => onDelete(revision),
-                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
-                ),
-              ],
-            ),
+          child: InkWell(
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -101,6 +48,73 @@ class RevisionsTab extends StatelessWidget {
                 ),
               );
             },
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Leading Icon
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Icon(
+                      Icons.history_toggle_off,
+                      size: 32,
+                      color: _getStatusColor(revision.status),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Title and Subtitle
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Version ${revision.version}', style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 4),
+                        if (revision.description.isNotEmpty) ...[
+                          Text(revision.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+                          const SizedBox(height: 6),
+                        ],
+                        if (revision.changes.isNotEmpty) ...[
+                          Text(
+                            _getPlainTextContent(revision.changes),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).hintColor,
+                                ),
+                          ),
+                          const SizedBox(height: 6),
+                        ],
+                        Text(
+                          DateFormat('dd MMM yyyy, HH:mm').format(revision.createdAt.toLocal()),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Trailing Icons
+                  Wrap(
+                    spacing: 0,
+                    children: [
+                      IconButton(
+                        tooltip: 'Edit revision',
+                        onPressed: () => onEdit(revision),
+                        icon: const Icon(Icons.edit_outlined),
+                        iconSize: 20,
+                      ),
+                      IconButton(
+                        tooltip: 'Delete revision',
+                        onPressed: () => onDelete(revision),
+                        icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },

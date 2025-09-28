@@ -27,7 +27,7 @@ class NotesTab extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.subject_outlined, size: 64),
+            Icon(Icons.subject_outlined, size: 64, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
             Text('No notes yet', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
@@ -46,51 +46,7 @@ class NotesTab extends StatelessWidget {
           elevation: 0,
           color: const Color(0xFFFFFBF7),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: SizedBox(
-              width: 28,
-              child: Icon(Icons.subject_outlined, size: 28),
-            ),
-            title: Text(note.title, style: Theme.of(context).textTheme.titleMedium),
-            subtitle: Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxHeight: 60,
-                    minHeight: 20,
-                  ),
-                  child: IgnorePointer(
-                    child: QuillEditor.basic(
-                      controller: QuillController(
-                        document: _parseNoteContent(note.content),
-                        selection: const TextSelection.collapsed(offset: 0),
-                        readOnly: true,
-                      ),
-                      config: const QuillEditorConfig(
-                        padding: EdgeInsets.zero,
-                        scrollable: false,
-                        expands: false,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            trailing: Wrap(
-              spacing: 8,
-              children: [
-                IconButton(
-                  tooltip: 'Edit note',
-                  onPressed: () => onEdit(note),
-                  icon: const Icon(Icons.edit_outlined),
-                ),
-                IconButton(
-                  tooltip: 'Delete note',
-                  onPressed: () => onDelete(note),
-                  icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
-                ),
-              ],
-            ),
+          child: InkWell(
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -98,6 +54,56 @@ class NotesTab extends StatelessWidget {
                 ),
               );
             },
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Leading Icon
+                  Icon(Icons.subject_outlined, size: 32, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 16),
+                  // Title and Subtitle
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(note.title, style: Theme.of(context).textTheme.titleMedium),
+                        if (note.description?.isNotEmpty == true)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              note.description!,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Trailing Icons
+                  Wrap(
+                    spacing: 0,
+                    children: [
+                      IconButton(
+                        tooltip: 'Edit note',
+                        onPressed: () => onEdit(note),
+                        icon: const Icon(Icons.edit_outlined),
+                        iconSize: 20,
+                      ),
+                      IconButton(
+                        tooltip: 'Delete note',
+                        onPressed: () => onDelete(note),
+                        icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },

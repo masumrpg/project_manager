@@ -115,7 +115,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                   controller: _versionController,
                   decoration: InputDecoration(
                     labelText: 'Version',
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                     ),
@@ -134,7 +134,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                   controller: _descriptionController,
                   decoration: InputDecoration(
                     labelText: 'Description',
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                     ),
@@ -200,28 +200,30 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: DropdownButtonFormField<RevisionStatus>(
-                    initialValue: _selectedStatus,
-                    decoration: const InputDecoration(
-                      labelText: 'Status',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                DropdownButtonFormField<RevisionStatus>(
+                  initialValue: _selectedStatus,
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                     ),
-                    dropdownColor: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    items: RevisionStatus.values
-                        .map((status) => DropdownMenuItem(value: status, child: Text(status.label)))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) setState(() => _selectedStatus = value);
-                    },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
                   ),
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  items: RevisionStatus.values
+                      .map((status) => DropdownMenuItem(value: status, child: Text(status.label)))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) setState(() => _selectedStatus = value);
+                  },
                 ),
                 const SizedBox(height: 20),
                 Row(

@@ -9,6 +9,7 @@ class Note extends HiveObject {
   Note({
     required this.id,
     required this.title,
+    this.description,
     required this.content,
     this.status = NoteStatus.active,
     required this.createdAt,
@@ -24,6 +25,9 @@ class Note extends HiveObject {
   @HiveField(2)
   String content;
 
+  @HiveField(3)
+  String? description;
+
   @HiveField(4)
   DateTime createdAt;
 
@@ -35,6 +39,7 @@ class Note extends HiveObject {
 
   Note copyWith({
     String? title,
+    String? description,
     String? content,
     NoteStatus? status,
     DateTime? updatedAt,
@@ -42,6 +47,7 @@ class Note extends HiveObject {
     return Note(
       id: id,
       title: title ?? this.title,
+      description: description ?? this.description,
       content: content ?? this.content,
       status: status ?? this.status,
       createdAt: createdAt,

@@ -119,7 +119,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: 'Title',
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                     ),
@@ -184,50 +184,54 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: DropdownButtonFormField<TodoPriority>(
-                          initialValue: _selectedPriority,
-                          decoration: const InputDecoration(
-                            labelText: 'Priority',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: DropdownButtonFormField<TodoPriority>(
+                        initialValue: _selectedPriority,
+                        decoration: InputDecoration(
+                          labelText: 'Priority',
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                           ),
-                          dropdownColor: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          items: TodoPriority.values
-                              .map((priority) => DropdownMenuItem(value: priority, child: Text(priority.label)))
-                              .toList(),
-                          onChanged: (value) { if (value != null) setState(() => _selectedPriority = value); },
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                          ),
+                          fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                          filled: true,
+                          labelStyle: const TextStyle(color: Color(0xFF636E72)),
                         ),
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        items: TodoPriority.values
+                            .map((priority) => DropdownMenuItem(value: priority, child: Text(priority.label)))
+                            .toList(),
+                        onChanged: (value) { if (value != null) setState(() => _selectedPriority = value); },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: DropdownButtonFormField<TodoStatus>(
-                          initialValue: _selectedStatus,
-                          decoration: const InputDecoration(
-                            labelText: 'Status',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: DropdownButtonFormField<TodoStatus>(
+                        initialValue: _selectedStatus,
+                        decoration: InputDecoration(
+                          labelText: 'Status',
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                           ),
-                          dropdownColor: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          items: TodoStatus.values
-                              .map((status) => DropdownMenuItem(value: status, child: Text(status.label)))
-                              .toList(),
-                          onChanged: (value) { if (value != null) setState(() => _selectedStatus = value); },
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                          ),
+                          fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                          filled: true,
+                          labelStyle: const TextStyle(color: Color(0xFF636E72)),
                         ),
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        items: TodoStatus.values
+                            .map((status) => DropdownMenuItem(value: status, child: Text(status.label)))
+                            .toList(),
+                        onChanged: (value) { if (value != null) setState(() => _selectedStatus = value); },
                       ),
                     ),
                   ],

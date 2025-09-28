@@ -27,6 +27,7 @@ class NoteFormSheet extends StatefulWidget {
 class _NoteFormSheetState extends State<NoteFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
   late final QuillController _quillController;
   late NoteStatus _selectedStatus;
 
@@ -34,6 +35,8 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.note?.description ?? '');
     
     // Initialize Quill controller with existing content or empty document
     Document document;
@@ -61,6 +64,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
   @override
   void dispose() {
     _titleController.dispose();
+    _descriptionController.dispose();
     _quillController.dispose();
     super.dispose();
   }
@@ -112,7 +116,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: 'Title',
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                     ),
@@ -133,6 +137,25 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Description (optional)',
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 12),
                 
@@ -188,34 +211,35 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                 ),
                 
                 const SizedBox(height: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: DropdownButtonFormField<NoteStatus>(
-                    initialValue: _selectedStatus,
-                    decoration: const InputDecoration(
-                      labelText: 'Status',
-                      border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                DropdownButtonFormField<NoteStatus>(
+                  initialValue: _selectedStatus,
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                     ),
-                    dropdownColor: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    items: NoteStatus.values
-                        .map(
-                          (status) => DropdownMenuItem(
-                            value: status,
-                            child: Text(status.label),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) setState(() => _selectedStatus = value);
-                    },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
                   ),
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  items: NoteStatus.values
+                      .map(
+                        (status) => DropdownMenuItem(
+                          value: status,
+                          child: Text(status.label),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) setState(() => _selectedStatus = value);
+                  },
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -254,6 +278,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                                 Note(
                                   id: widget.uuid.v4(),
                                   title: _titleController.text.trim(),
+                                  description: _descriptionController.text.trim(),
                                   content: contentJson,
                                   status: _selectedStatus,
                                   createdAt: now,
@@ -264,6 +289,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                                 ? await widget.onUpdate(
                                     widget.note!
                                       ..title = _titleController.text.trim()
+                                      ..description = _descriptionController.text.trim()
                                       ..content = contentJson
                                       ..status = _selectedStatus
                                       ..updatedAt = now,

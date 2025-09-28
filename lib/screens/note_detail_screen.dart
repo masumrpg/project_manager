@@ -111,6 +111,42 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                 ],
               ),
             ),
+
+            if (widget.note.description?.isNotEmpty == true) ...[
+              const SizedBox(height: 20),
+              // Description Section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE8D5C4)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Description',
+                      style: TextStyle(
+                        color: const Color(0xFF636E72).withValues(alpha: 0.8),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.note.description!,
+                      style: const TextStyle(
+                        color: Color(0xFF2D3436),
+                        fontSize: 16,
+                        height: 1.5, // for better readability
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             
             const SizedBox(height: 20),
             
