@@ -73,9 +73,7 @@ class ProjectRepository {
     if (project == null) return;
 
     await HiveBoxes.notesBox.put(note.id, note);
-    if (project.notes == null) {
-      project.notes = HiveList(HiveBoxes.notesBox);
-    }
+    project.notes ??= HiveList(HiveBoxes.notesBox);
     project.notes?.add(note);
     project.updatedAt = DateTime.now();
     await project.save();
@@ -117,9 +115,7 @@ class ProjectRepository {
     if (project == null) return;
 
     await HiveBoxes.revisionsBox.put(revision.id, revision);
-    if (project.revisions == null) {
-      project.revisions = HiveList(HiveBoxes.revisionsBox);
-    }
+    project.revisions ??= HiveList(HiveBoxes.revisionsBox);
     project.revisions?.add(revision);
     project.updatedAt = DateTime.now();
     await project.save();
@@ -163,9 +159,7 @@ class ProjectRepository {
     if (project == null) return;
 
     await HiveBoxes.todosBox.put(todo.id, todo);
-    if (project.todos == null) {
-      project.todos = HiveList(HiveBoxes.todosBox);
-    }
+    project.todos ??= HiveList(HiveBoxes.todosBox);
     project.todos?.add(todo);
     project.updatedAt = DateTime.now();
     await project.save();
