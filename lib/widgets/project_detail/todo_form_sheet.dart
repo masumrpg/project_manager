@@ -30,7 +30,8 @@ class TodoFormSheet extends StatefulWidget {
 class _TodoFormSheetState extends State<TodoFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
-  late final QuillController _descriptionQuillController;
+  late final TextEditingController _descriptionController;
+  late final QuillController _contentQuillController;
   DateTime? _dueDate;
   late TodoPriority _selectedPriority;
   late TodoStatus _selectedStatus;
@@ -39,27 +40,30 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.todo?.title ?? '');
-    
-    // Initialize Quill controller with existing description content
+    _descriptionController = TextEditingController(
+      text: widget.todo?.description ?? '',
+    );
+
+    // Initialize Quill controller for the new 'content' field
     Document document;
-    final todoDescription = widget.todo?.description;
-    if (todoDescription?.isNotEmpty == true) {
+    final todoContent = widget.todo?.content;
+    if (todoContent?.isNotEmpty == true) {
       try {
         // Try to parse as JSON (Quill document)
-        final jsonData = jsonDecode(todoDescription!);
+        final jsonData = jsonDecode(todoContent!);
         document = Document.fromJson(jsonData);
       } catch (e) {
         // If parsing fails, treat as plain text
-        document = Document()..insert(0, todoDescription!);
+        document = Document()..insert(0, todoContent!);
       }
     } else {
       document = Document();
     }
-    _descriptionQuillController = QuillController(
+    _contentQuillController = QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    
+
     _dueDate = widget.todo?.dueDate;
     _selectedPriority = widget.todo?.priority ?? TodoPriority.medium;
     _selectedStatus = widget.todo?.status ?? TodoStatus.pending;
@@ -68,7 +72,8 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionQuillController.dispose();
+    _descriptionController.dispose();
+    _contentQuillController.dispose();
     super.dispose();
   }
 
@@ -97,13 +102,15 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF636E72).withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF636E72).withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
                 Text(
@@ -118,7 +125,18 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'Title',
+                    label: RichText(
+                      text: const TextSpan(
+                        text: 'Title',
+                        style: TextStyle(color: Color(0xFF636E72)),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -134,51 +152,79 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                   validator: (value) => (value == null || value.trim().isEmpty) ? 'Title is required' : null,
                 ),
                 const SizedBox(height: 12),
-                // Description with Quill Editor
-                Text(
-                  'Description',
-                  style: TextStyle(
-                    color: const Color(0xFF636E72),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE8D5C4)),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: Column(
-                      children: [
-                        QuillSimpleToolbar(
-                          controller: _descriptionQuillController,
-                          config: const QuillSimpleToolbarConfig(
-                            toolbarSize: 40,
-                            multiRowsDisplay: false,
-                          ),
-                        ),
-                        Container(
-                          constraints: const BoxConstraints(
-                            minHeight: 120,
-                            maxHeight: 200,
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          child: QuillEditor.basic(
-                            controller: _descriptionQuillController,
-                            config: const QuillEditorConfig(
-                              placeholder: 'Write your description here...',
-                              padding: EdgeInsets.zero,
-                              expands: false,
-                            ),
-                          ),
-                        ),
-                      ],
+                // Description with TextFormField
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
                   ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                // Content with Quill Editor
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Content',
+                      style: TextStyle(
+                        color: const Color(0xFF636E72),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE8D5C4)),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15.0),
+                        child: Column(
+                          children: [
+                            QuillSimpleToolbar(
+                              controller: _contentQuillController,
+                              config: const QuillSimpleToolbarConfig(
+                                toolbarSize: 40,
+                                multiRowsDisplay: false,
+                              ),
+                            ),
+                            Container(
+                              constraints: const BoxConstraints(
+                                minHeight: 120,
+                                maxHeight: 200,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              child: QuillEditor.basic(
+                                controller: _contentQuillController,
+                                config: const QuillEditorConfig(
+                                  placeholder: 'Add rich content here...',
+                                  padding: EdgeInsets.zero,
+                                  expands: false,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -256,7 +302,9 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                         },
                         icon: const Icon(Icons.event),
                         label: Text(
-                          _dueDate == null ? 'Due date (optional)' : DateFormat('dd MMM yyyy').format(_dueDate!),
+                          _dueDate == null
+                              ? 'Due date'
+                              : DateFormat('dd MMM yyyy').format(_dueDate!),
                         ),
                       ),
                     ),
@@ -285,16 +333,25 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                         if (formState == null || !formState.validate()) return;
                         final navigator = Navigator.of(context);
                         final now = DateTime.now();
-                        
-                        // Get description content from Quill editor
-                        final descriptionContent = jsonEncode(_descriptionQuillController.document.toDelta().toJson());
-                        
+
+                        final descriptionText = _descriptionController.text
+                            .trim();
+                        final contentJson =
+                            _contentQuillController.document.isEmpty()
+                            ? null
+                            : jsonEncode(
+                                _contentQuillController.document
+                                    .toDelta()
+                                    .toJson(),
+                              );
+
                         final didSucceed = widget.todo == null
                             ? await widget.onCreate(
                                 Todo(
                                   id: widget.uuid.v4(),
                                   title: _titleController.text.trim(),
-                                  description: descriptionContent,
+                                  description: descriptionText,
+                                  content: contentJson,
                                   priority: _selectedPriority,
                                   status: _selectedStatus,
                                   dueDate: _dueDate,
@@ -302,19 +359,20 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                   completedAt: _selectedStatus == TodoStatus.completed ? now : null,
                                 ),
                               )
-                            : widget.todo != null
-                                ? await widget.onUpdate(
-                                    widget.todo!
-                                      ..title = _titleController.text.trim()
-                                      ..description = descriptionContent
-                                      ..priority = _selectedPriority
-                                      ..status = _selectedStatus
-                                      ..dueDate = _dueDate
-                                      ..completedAt = _selectedStatus == TodoStatus.completed
-                                          ? (widget.todo?.completedAt ?? DateTime.now())
-                                          : null,
-                                  )
-                                : false;
+                            : await widget.onUpdate(
+                                widget.todo!
+                                  ..title = _titleController.text.trim()
+                                  ..description = descriptionText
+                                  ..content = contentJson
+                                  ..priority = _selectedPriority
+                                  ..status = _selectedStatus
+                                  ..dueDate = _dueDate
+                                  ..completedAt =
+                                      _selectedStatus == TodoStatus.completed
+                                      ? (widget.todo?.completedAt ??
+                                            DateTime.now())
+                                      : null,
+                              );
                         if (!mounted) return;
                         navigator.pop(didSucceed);
                       },

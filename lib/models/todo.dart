@@ -11,6 +11,7 @@ class Todo extends HiveObject {
     required this.id,
     required this.title,
     required this.description,
+    this.content,
     required this.priority,
     required this.status,
     this.dueDate,
@@ -41,4 +42,7 @@ class Todo extends HiveObject {
 
   @HiveField(7)
   DateTime? completedAt;
+
+  @HiveField(8)
+  String? content;
 }

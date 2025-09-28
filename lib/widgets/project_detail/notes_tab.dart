@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
-import 'dart:convert';
 
 import '../../models/note.dart';
 import '../../screens/note_detail_screen.dart';
@@ -112,19 +110,5 @@ class NotesTab extends StatelessWidget {
     );
   }
 
-  Document _parseNoteContent(String content) {
-    if (content.isEmpty) {
-      return Document();
-    }
-    
-    try {
-      // Try to parse as JSON (Quill format)
-      final json = jsonDecode(content);
-      return Document.fromJson(json);
-    } catch (e) {
-      // If parsing fails, treat as plain text
-      return Document()..insert(0, content);
-    }
-  }
 }
 

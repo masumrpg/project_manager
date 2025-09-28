@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -75,17 +73,7 @@ class RevisionsTab extends StatelessWidget {
                           Text(revision.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
                           const SizedBox(height: 6),
                         ],
-                        if (revision.changes.isNotEmpty) ...[
-                          Text(
-                            _getPlainTextContent(revision.changes),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).hintColor,
-                                ),
-                          ),
-                          const SizedBox(height: 6),
-                        ],
+
                         Text(
                           DateFormat('dd MMM yyyy, HH:mm').format(revision.createdAt.toLocal()),
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).hintColor),
@@ -121,32 +109,6 @@ class RevisionsTab extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemCount: revisions.length,
     );
-  }
-
-  String _getPlainTextContent(String content) {
-    if (content.isEmpty) return '';
-    
-    try {
-      // Try to parse as JSON (Quill document)
-      final jsonData = jsonDecode(content);
-      if (jsonData is Map && jsonData.containsKey('ops')) {
-        final ops = jsonData['ops'] as List;
-        final buffer = StringBuffer();
-        for (final op in ops) {
-          if (op is Map && op.containsKey('insert')) {
-            final insert = op['insert'];
-            if (insert is String) {
-              buffer.write(insert);
-            }
-          }
-        }
-        return buffer.toString().trim();
-      }
-    } catch (e) {
-      // If parsing fails, return as plain text
-    }
-    
-    return content;
   }
 
   Color _getStatusColor(status) {

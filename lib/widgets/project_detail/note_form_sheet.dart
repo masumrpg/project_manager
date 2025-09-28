@@ -37,7 +37,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
     _titleController = TextEditingController(text: widget.note?.title ?? '');
     _descriptionController =
         TextEditingController(text: widget.note?.description ?? '');
-    
+
     // Initialize Quill controller with existing content or empty document
     Document document;
     final noteContent = widget.note?.content;
@@ -57,7 +57,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    
+
     _selectedStatus = widget.note?.status ?? NoteStatus.active;
   }
 
@@ -94,13 +94,15 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF636E72).withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF636E72).withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
                 Text(
@@ -115,7 +117,18 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'Title',
+                    label: RichText(
+                      text: const TextSpan(
+                        text: 'Title',
+                        style: TextStyle(color: Color(0xFF636E72)),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -142,7 +155,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Description (optional)',
+                    labelText: 'Description',
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -158,16 +171,24 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: 12),
-                
+
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Content',
-                      style: TextStyle(
-                        color: Color(0xFF636E72),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                    RichText(
+                      text: const TextSpan(
+                        text: 'Content',
+                        style: TextStyle(
+                          color: Color(0xFF636E72),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -209,7 +230,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
                 DropdownButtonFormField<NoteStatus>(
                   initialValue: _selectedStatus,
@@ -269,10 +290,10 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
 
                         final navigator = Navigator.of(context);
                         final now = DateTime.now();
-                        
+
                         // Convert Quill document to JSON string
                         final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
-                        
+
                         final didSucceed = widget.note == null
                             ? await widget.onCreate(
                                 Note(

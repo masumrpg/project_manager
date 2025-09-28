@@ -88,6 +88,7 @@ class TodosTab extends StatelessWidget {
                           todo.title, 
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             decoration: todo.status == TodoStatus.completed ? TextDecoration.lineThrough : null,
+                            decorationColor: todo.status == TodoStatus.completed ? const Color(0xFF636E72) : null,
                             color: todo.status == TodoStatus.completed ? const Color(0xFF636E72) : null,
                           ),
                         ),
@@ -100,6 +101,7 @@ class TodosTab extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               decoration: todo.status == TodoStatus.completed ? TextDecoration.lineThrough : null,
                               color: todo.status == TodoStatus.completed ? const Color(0xFF636E72) : null,
+                              decorationColor: todo.status == TodoStatus.completed ? const Color(0xFF636E72) : null,
                             ),
                           ),
                         ],

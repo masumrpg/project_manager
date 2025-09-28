@@ -197,13 +197,15 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 children: [
                   // Handle bar
-                  Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: _lightText.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 12, bottom: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: _lightText.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
                   // Header
@@ -254,9 +256,17 @@ class HomeScreen extends StatelessWidget {
                             TextFormField(
                               controller: titleController,
                               decoration: InputDecoration(
-                                labelText: 'Title',
+                                label: RichText(
+                                  text: TextSpan(
+                                    text: 'Title',
+                                    style: TextStyle(color: _lightText),
+                                    children: const [
+                                      TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+                                    ],
+                                  ),
+                                ),
                                 labelStyle: TextStyle(color: _lightText),
-                                border: OutlineInputBorder(
+                                enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16),
                                   borderSide: BorderSide(
                                     color: _secondaryBeige,
@@ -285,7 +295,7 @@ class HomeScreen extends StatelessWidget {
                               decoration: InputDecoration(
                                 labelText: 'Description',
                                 labelStyle: TextStyle(color: _lightText),
-                                border: OutlineInputBorder(
+                                enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16),
                                   borderSide: BorderSide(
                                     color: _secondaryBeige,
@@ -304,87 +314,83 @@ class HomeScreen extends StatelessWidget {
                               maxLines: 3,
                             ),
                             const SizedBox(height: 16),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: _primaryBeige.withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: _secondaryBeige),
-                              ),
-                              child: DropdownButtonFormField<AppCategory>(
-                                initialValue: selectedCategory,
-                                decoration: InputDecoration(
-                                  labelText: 'Category',
-                                  labelStyle: TextStyle(color: _lightText),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
+                            DropdownButtonFormField<AppCategory>(
+                              initialValue: selectedCategory,
+                              decoration: InputDecoration(
+                                labelText: 'Category',
+                                labelStyle: TextStyle(color: _lightText),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(color: _secondaryBeige),
                                 ),
-                                dropdownColor: _cardBackground,
-                                borderRadius: BorderRadius.circular(16),
-                                items: AppCategory.values
-                                    .map(
-                                      (category) =>
-                                          DropdownMenuItem<AppCategory>(
-                                            value: category,
-                                            child: Text(
-                                              category.label,
-                                              style: TextStyle(
-                                                color: _darkText,
-                                              ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(color: _accentOrange, width: 2),
+                                ),
+                                filled: true,
+                                fillColor: _primaryBeige.withValues(alpha: 0.3),
+                              ),
+                              dropdownColor: _cardBackground,
+                              borderRadius: BorderRadius.circular(16),
+                              items: AppCategory.values
+                                  .map(
+                                    (category) =>
+                                        DropdownMenuItem<AppCategory>(
+                                          value: category,
+                                          child: Text(
+                                            category.label,
+                                            style: TextStyle(
+                                              color: _darkText,
                                             ),
                                           ),
-                                    )
-                                    .toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
-                                      selectedCategory = value;
-                                    });
-                                  }
-                                },
-                              ),
+                                        ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    selectedCategory = value;
+                                  });
+                                }
+                              },
                             ),
                             const SizedBox(height: 16),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: _primaryBeige.withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: _secondaryBeige),
-                              ),
-                              child: DropdownButtonFormField<Environment>(
-                                initialValue: selectedEnvironment,
-                                decoration: InputDecoration(
-                                  labelText: 'Environment',
-                                  labelStyle: TextStyle(color: _lightText),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
+                            DropdownButtonFormField<Environment>(
+                              initialValue: selectedEnvironment,
+                              decoration: InputDecoration(
+                                labelText: 'Environment',
+                                labelStyle: TextStyle(color: _lightText),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(color: _secondaryBeige),
                                 ),
-                                dropdownColor: _cardBackground,
-                                borderRadius: BorderRadius.circular(16),
-                                items: Environment.values
-                                    .map(
-                                      (env) => DropdownMenuItem<Environment>(
-                                        value: env,
-                                        child: Text(
-                                          env.label,
-                                          style: TextStyle(color: _darkText),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
-                                      selectedEnvironment = value;
-                                    });
-                                  }
-                                },
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(color: _accentOrange, width: 2),
+                                ),
+                                filled: true,
+                                fillColor: _primaryBeige.withValues(alpha: 0.3),
                               ),
+                              dropdownColor: _cardBackground,
+                              borderRadius: BorderRadius.circular(16),
+                              items: Environment.values
+                                  .map(
+                                    (env) => DropdownMenuItem<Environment>(
+                                      value: env,
+                                      child: Text(
+                                        env.label,
+                                        style: TextStyle(color: _darkText),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    selectedEnvironment = value;
+                                  });
+                                }
+                              },
                             ),
                             const SizedBox(height: 32),
                           ],

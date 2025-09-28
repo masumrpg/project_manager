@@ -93,13 +93,15 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF636E72).withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF636E72).withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
                 const Text(
@@ -114,7 +116,15 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                 TextFormField(
                   controller: _versionController,
                   decoration: InputDecoration(
-                    labelText: 'Version',
+                    label: RichText(
+                      text: const TextSpan(
+                        text: 'Version',
+                        style: TextStyle(color: Color(0xFF636E72)),
+                        children: [
+                          TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -153,12 +163,19 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Changes',
-                      style: TextStyle(
-                        color: const Color(0xFF636E72),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                    RichText(
+                      text: const TextSpan(
+                        text: 'Changes',
+                        style: TextStyle(
+                          color: Color(0xFF636E72),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: [
+                          TextSpan(
+                              text: ' *',
+                              style: TextStyle(color: Colors.red)),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
