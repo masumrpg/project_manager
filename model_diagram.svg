@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; fill: #2c3e50; }
+      .class-title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #34495e; }
+      .field { font-family: Arial, sans-serif; font-size: 12px; fill: #7f8c8d; }
+      .enum-title { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #8e44ad; }
+      .enum-value { font-family: Arial, sans-serif; font-size: 11px; fill: #9b59b6; }
+      .relationship { stroke: #3498db; stroke-width: 2; fill: none; }
+      .composition { stroke: #e74c3c; stroke-width: 2; fill: none; }
+      .inheritance { stroke: #f39c12; stroke-width: 2; fill: none; stroke-dasharray: 5,5; }
+    </style>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" class="title">Project Manager - Model Diagram</text>
+  
+  <!-- Project Model -->
+  <rect x="50" y="80" width="300" height="280" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="2" rx="10"/>
+  <text x="200" y="105" text-anchor="middle" class="class-title">Project</text>
+  <line x1="60" y1="115" x2="340" y2="115" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="70" y="135" class="field">+ id: String</text>
+  <text x="70" y="150" class="field">+ title: String</text>
+  <text x="70" y="165" class="field">+ description: String</text>
+  <text x="70" y="180" class="field">+ longDescription: String?</text>
+  <text x="70" y="195" class="field">+ category: AppCategory</text>
+  <text x="70" y="210" class="field">+ environment: Environment</text>
+  <text x="70" y="225" class="field">+ createdAt: DateTime</text>
+  <text x="70" y="240" class="field">+ updatedAt: DateTime</text>
+  <text x="70" y="255" class="field">+ notes: HiveList&lt;Note&gt;?</text>
+  <text x="70" y="270" class="field">+ todos: HiveList&lt;Todo&gt;?</text>
+  <text x="70" y="285" class="field">+ revisions: HiveList&lt;Revision&gt;?</text>
+  <line x1="60" y1="295" x2="340" y2="295" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="70" y="315" class="field">+ copyWith(): Project</text>
+  <text x="70" y="330" class="field">extends HiveObject</text>
+  
+  <!-- Note Model -->
+  <rect x="450" y="80" width="250" height="200" fill="#e8f5e8" stroke="#27ae60" stroke-width="2" rx="10"/>
+  <text x="575" y="105" text-anchor="middle" class="class-title">Note</text>
+  <line x1="460" y1="115" x2="690" y2="115" stroke="#27ae60" stroke-width="1"/>
+  <text x="470" y="135" class="field">+ id: String</text>
+  <text x="470" y="150" class="field">+ title: String</text>
+  <text x="470" y="165" class="field">+ content: String</text>
+  <text x="470" y="180" class="field">+ status: NoteStatus</text>
+  <text x="470" y="195" class="field">+ createdAt: DateTime</text>
+  <text x="470" y="210" class="field">+ updatedAt: DateTime</text>
+  <line x1="460" y1="220" x2="690" y2="220" stroke="#27ae60" stroke-width="1"/>
+  <text x="470" y="240" class="field">+ copyWith(): Note</text>
+  <text x="470" y="255" class="field">extends HiveObject</text>
+  
+  <!-- Todo Model -->
+  <rect x="750" y="80" width="250" height="220" fill="#fff3cd" stroke="#f39c12" stroke-width="2" rx="10"/>
+  <text x="875" y="105" text-anchor="middle" class="class-title">Todo</text>
+  <line x1="760" y1="115" x2="990" y2="115" stroke="#f39c12" stroke-width="1"/>
+  <text x="770" y="135" class="field">+ id: String</text>
+  <text x="770" y="150" class="field">+ title: String</text>
+  <text x="770" y="165" class="field">+ description: String</text>
+  <text x="770" y="180" class="field">+ priority: TodoPriority</text>
+  <text x="770" y="195" class="field">+ status: TodoStatus</text>
+  <text x="770" y="210" class="field">+ dueDate: DateTime?</text>
+  <text x="770" y="225" class="field">+ createdAt: DateTime</text>
+  <text x="770" y="240" class="field">+ completedAt: DateTime?</text>
+  <line x1="760" y1="250" x2="990" y2="250" stroke="#f39c12" stroke-width="1"/>
+  <text x="770" y="270" class="field">extends HiveObject</text>
+  
+  <!-- Revision Model -->
+  <rect x="450" y="320" width="250" height="180" fill="#f8d7da" stroke="#dc3545" stroke-width="2" rx="10"/>
+  <text x="575" y="345" text-anchor="middle" class="class-title">Revision</text>
+  <line x1="460" y1="355" x2="690" y2="355" stroke="#dc3545" stroke-width="1"/>
+  <text x="470" y="375" class="field">+ id: String</text>
+  <text x="470" y="390" class="field">+ version: String</text>
+  <text x="470" y="405" class="field">+ description: String</text>
+  <text x="470" y="420" class="field">+ changes: String</text>
+  <text x="470" y="435" class="field">+ status: RevisionStatus</text>
+  <text x="470" y="450" class="field">+ createdAt: DateTime</text>
+  <line x1="460" y1="460" x2="690" y2="460" stroke="#dc3545" stroke-width="1"/>
+  <text x="470" y="480" class="field">extends HiveObject</text>
+  
+  <!-- Enums -->
+  <!-- AppCategory Enum -->
+  <rect x="50" y="400" width="150" height="120" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2" rx="5"/>
+  <text x="125" y="420" text-anchor="middle" class="enum-title">AppCategory</text>
+  <line x1="60" y1="430" x2="190" y2="430" stroke="#17a2b8" stroke-width="1"/>
+  <text x="70" y="445" class="enum-value">mobile</text>
+  <text x="70" y="460" class="enum-value">web</text>
+  <text x="70" y="475" class="enum-value">desktop</text>
+  <text x="70" y="490" class="enum-value">backend</text>
+  <text x="70" y="505" class="enum-value">other</text>
+  
+  <!-- Environment Enum -->
+  <rect x="220" y="400" width="150" height="120" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2" rx="5"/>
+  <text x="295" y="420" text-anchor="middle" class="enum-title">Environment</text>
+  <line x1="230" y1="430" x2="360" y2="430" stroke="#17a2b8" stroke-width="1"/>
+  <text x="240" y="445" class="enum-value">development</text>
+  <text x="240" y="460" class="enum-value">staging</text>
+  <text x="240" y="475" class="enum-value">production</text>
+  
+  <!-- NoteStatus Enum -->
+  <rect x="750" y="320" width="150" height="100" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2" rx="5"/>
+  <text x="825" y="340" text-anchor="middle" class="enum-title">NoteStatus</text>
+  <line x1="760" y1="350" x2="890" y2="350" stroke="#17a2b8" stroke-width="1"/>
+  <text x="770" y="365" class="enum-value">active</text>
+  <text x="770" y="380" class="enum-value">archived</text>
+  <text x="770" y="395" class="enum-value">deleted</text>
+  
+  <!-- TodoStatus Enum -->
+  <rect x="920" y="320" width="150" height="120" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2" rx="5"/>
+  <text x="995" y="340" text-anchor="middle" class="enum-title">TodoStatus</text>
+  <line x1="930" y1="350" x2="1060" y2="350" stroke="#17a2b8" stroke-width="1"/>
+  <text x="940" y="365" class="enum-value">pending</text>
+  <text x="940" y="380" class="enum-value">inProgress</text>
+  <text x="940" y="395" class="enum-value">completed</text>
+  <text x="940" y="410" class="enum-value">cancelled</text>
+  
+  <!-- TodoPriority Enum -->
+  <rect x="750" y="450" width="150" height="100" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2" rx="5"/>
+  <text x="825" y="470" text-anchor="middle" class="enum-title">TodoPriority</text>
+  <line x1="760" y1="480" x2="890" y2="480" stroke="#17a2b8" stroke-width="1"/>
+  <text x="770" y="495" class="enum-value">low</text>
+  <text x="770" y="510" class="enum-value">medium</text>
+  <text x="770" y="525" class="enum-value">high</text>
+  
+  <!-- RevisionStatus Enum -->
+  <rect x="920" y="450" width="150" height="120" fill="#d1ecf1" stroke="#17a2b8" stroke-width="2" rx="5"/>
+  <text x="995" y="470" text-anchor="middle" class="enum-title">RevisionStatus</text>
+  <line x1="930" y1="480" x2="1060" y2="480" stroke="#17a2b8" stroke-width="1"/>
+  <text x="940" y="495" class="enum-value">pending</text>
+  <text x="940" y="510" class="enum-value">approved</text>
+  <text x="940" y="525" class="enum-value">rejected</text>
+  <text x="940" y="540" class="enum-value">implemented</text>
+  
+  <!-- Relationships -->
+  <!-- Project to Note (1:N) -->
+  <path d="M 350 255 Q 400 255 450 180" class="composition" marker-end="url(#arrowhead)"/>
+  <text x="380" y="210" class="field" font-size="10">1:N</text>
+  
+  <!-- Project to Todo (1:N) -->
+  <path d="M 350 270 Q 550 270 750 180" class="composition" marker-end="url(#arrowhead)"/>
+  <text x="550" y="240" class="field" font-size="10">1:N</text>
+  
+  <!-- Project to Revision (1:N) -->
+  <path d="M 350 285 Q 400 350 450 400" class="composition" marker-end="url(#arrowhead)"/>
+  <text x="380" y="340" class="field" font-size="10">1:N</text>
+  
+  <!-- Project to AppCategory -->
+  <path d="M 200 360 L 125 400" class="relationship" stroke-dasharray="3,3"/>
+  
+  <!-- Project to Environment -->
+  <path d="M 200 360 L 295 400" class="relationship" stroke-dasharray="3,3"/>
+  
+  <!-- Note to NoteStatus -->
+  <path d="M 700 180 Q 725 250 750 360" class="relationship" stroke-dasharray="3,3"/>
+  
+  <!-- Todo to TodoStatus -->
+  <path d="M 875 300 L 995 350" class="relationship" stroke-dasharray="3,3"/>
+  
+  <!-- Todo to TodoPriority -->
+  <path d="M 875 300 Q 825 375 825 450" class="relationship" stroke-dasharray="3,3"/>
+  
+  <!-- Revision to RevisionStatus -->
+  <path d="M 700 400 Q 810 425 920 510" class="relationship" stroke-dasharray="3,3"/>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e74c3c"/>
+    </marker>
+  </defs>
+  
+  <!-- Legend -->
+  <rect x="50" y="580" width="300" height="180" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="5"/>
+  <text x="200" y="600" text-anchor="middle" class="class-title">Legend</text>
+  <line x1="60" y1="610" x2="340" y2="610" stroke="#dee2e6" stroke-width="1"/>
+  
+  <line x1="70" y1="630" x2="100" y2="630" class="composition"/>
+  <text x="110" y="635" class="field">Composition (1:N relationship)</text>
+  
+  <line x1="70" y1="650" x2="100" y2="650" class="relationship" stroke-dasharray="3,3"/>
+  <text x="110" y="655" class="field">Association (uses enum)</text>
+  
+  <rect x="70" y="670" width="15" height="15" fill="#ecf0f1" stroke="#bdc3c7"/>
+  <text x="95" y="682" class="field">Main Model Class</text>
+  
+  <rect x="70" y="695" width="15" height="15" fill="#d1ecf1" stroke="#17a2b8"/>
+  <text x="95" y="707" class="field">Enum Type</text>
+  
+  <text x="70" y="730" class="field">• All models extend HiveObject for persistence</text>
+  <text x="70" y="745" class="field">• Project is the root aggregate containing other entities</text>
+</svg>
