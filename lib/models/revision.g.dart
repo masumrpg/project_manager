@@ -21,6 +21,7 @@ class RevisionAdapter extends TypeAdapter<Revision> {
       version: fields[1] as String,
       description: fields[2] as String,
       changes: fields[3] as String,
+      status: fields[5] as RevisionStatus,
       createdAt: fields[4] as DateTime,
     );
   }
@@ -28,7 +29,7 @@ class RevisionAdapter extends TypeAdapter<Revision> {
   @override
   void write(BinaryWriter writer, Revision obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class RevisionAdapter extends TypeAdapter<Revision> {
       ..writeByte(3)
       ..write(obj.changes)
       ..writeByte(4)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(5)
+      ..write(obj.status);
   }
 
   @override

@@ -8,6 +8,7 @@ import '../models/enums/environment.dart';
 import '../models/enums/todo_status.dart';
 import '../models/project.dart';
 import '../providers/project_provider.dart';
+import '../services/hive_boxes.dart';
 import 'project_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -535,6 +536,86 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  static Future<void> _showClearDatabaseDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: _cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red.shade400),
+            const SizedBox(width: 12),
+            const Text('Clear Database'),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to clear all data? This will delete all projects, notes, revisions, and todos. This action cannot be undone.',
+          style: TextStyle(color: _lightText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            style: TextButton.styleFrom(foregroundColor: _lightText),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: const Text('Clear All Data'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        // Clear all Hive data
+        await HiveBoxes.clearAllData();
+
+        // Reinitialize
+        await HiveBoxes.init();
+
+        // Reload projects
+        if (context.mounted) {
+          context.read<ProjectProvider>().loadProjects();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Database cleared successfully',
+                style: TextStyle(color: Colors.white),
+              ),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.green,
+              margin: EdgeInsets.all(16),
+            ),
+          );
+        }
+      } catch (error) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Failed to clear database: $error',
+                style: const TextStyle(color: Colors.white),
+              ),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.red,
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+        }
+      }
+    }
+  }
 }
 
 // Modern Header Component
@@ -604,6 +685,42 @@ class _ModernHeader extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
+                    PopupMenuButton<String>(
+                      icon: const Icon(
+                        Icons.more_vert,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      color: HomeScreen._cardBackground,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'clear_database',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_forever,
+                                color: Colors.red.shade400,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Clear Database',
+                                style: TextStyle(color: Colors.red.shade400),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      onSelected: (value) {
+                        if (value == 'clear_database') {
+                          HomeScreen._showClearDatabaseDialog(context);
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 8),
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: Colors.white.withValues(alpha: 0.2),

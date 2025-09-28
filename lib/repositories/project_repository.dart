@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import '../models/enums/note_status.dart';
+import '../models/enums/revision_status.dart';
 import '../models/enums/todo_status.dart';
 import '../models/note.dart';
 import '../models/project.dart';
@@ -146,6 +148,58 @@ class ProjectRepository {
     await HiveBoxes.todosBox.put(todo.id, todo);
     project.todos ??= HiveList(HiveBoxes.todosBox);
     project.todos!.add(todo);
+    project.updatedAt = DateTime.now();
+    await project.save();
+  }
+
+  Future<void> updateNoteStatus(
+    String projectId,
+    String noteId,
+    NoteStatus status,
+  ) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null || project.notes == null) return;
+
+    Note? target;
+    for (final note in project.notes!) {
+      if (note.id == noteId) {
+        target = note;
+        break;
+      }
+    }
+
+    if (target == null) return;
+
+    target
+      ..status = status
+      ..updatedAt = DateTime.now();
+    await target.save();
+
+    project.updatedAt = DateTime.now();
+    await project.save();
+  }
+
+  Future<void> updateRevisionStatus(
+    String projectId,
+    String revisionId,
+    RevisionStatus status,
+  ) async {
+    final project = HiveBoxes.projectsBox.get(projectId);
+    if (project == null || project.revisions == null) return;
+
+    Revision? target;
+    for (final revision in project.revisions!) {
+      if (revision.id == revisionId) {
+        target = revision;
+        break;
+      }
+    }
+
+    if (target == null) return;
+
+    target.status = status;
+    await target.save();
+
     project.updatedAt = DateTime.now();
     await project.save();
   }

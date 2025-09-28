@@ -24,16 +24,17 @@ class ProjectAdapter extends TypeAdapter<Project> {
       environment: fields[4] as Environment,
       createdAt: fields[5] as DateTime,
       updatedAt: fields[6] as DateTime,
-      notes: (fields[7] as HiveList?)?.castHiveList(),
-      revisions: (fields[8] as HiveList?)?.castHiveList(),
-      todos: (fields[9] as HiveList?)?.castHiveList(),
+      longDescription: fields[7] as String?,
+      notes: (fields[8] as HiveList?)?.castHiveList(),
+      revisions: (fields[9] as HiveList?)?.castHiveList(),
+      todos: (fields[10] as HiveList?)?.castHiveList(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Project obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -49,10 +50,12 @@ class ProjectAdapter extends TypeAdapter<Project> {
       ..writeByte(6)
       ..write(obj.updatedAt)
       ..writeByte(7)
-      ..write(obj.notes)
+      ..write(obj.longDescription)
       ..writeByte(8)
-      ..write(obj.revisions)
+      ..write(obj.notes)
       ..writeByte(9)
+      ..write(obj.revisions)
+      ..writeByte(10)
       ..write(obj.todos);
   }
 

@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import 'enums/revision_status.dart';
+
 part 'revision.g.dart';
 
 @HiveType(typeId: 12)
@@ -9,6 +11,7 @@ class Revision extends HiveObject {
     required this.version,
     required this.description,
     required this.changes,
+    this.status = RevisionStatus.draft,
     required this.createdAt,
   });
 
@@ -26,4 +29,7 @@ class Revision extends HiveObject {
 
   @HiveField(4)
   DateTime createdAt;
+
+  @HiveField(5)
+  RevisionStatus status;
 }

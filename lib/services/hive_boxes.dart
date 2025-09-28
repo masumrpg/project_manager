@@ -4,6 +4,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/enums/app_category.dart';
 import '../models/enums/content_type.dart';
 import '../models/enums/environment.dart';
+import '../models/enums/note_status.dart';
+import '../models/enums/revision_status.dart';
 import '../models/enums/todo_priority.dart';
 import '../models/enums/todo_status.dart';
 import '../models/note.dart';
@@ -41,6 +43,29 @@ class HiveBoxes {
     }
   }
 
+  /// Clear all Hive data and reset the database
+  static Future<void> clearAllData() async {
+    try {
+      // Close all boxes first
+      await Hive.close();
+
+      // Delete all boxes from disk
+      await Hive.deleteBoxFromDisk(_projectsBoxName);
+      await Hive.deleteBoxFromDisk(_notesBoxName);
+      await Hive.deleteBoxFromDisk(_revisionsBoxName);
+      await Hive.deleteBoxFromDisk(_todosBoxName);
+
+      // Reset initialization flag
+      _initialized = false;
+
+      debugPrint('All Hive data cleared successfully');
+    } catch (error, stackTrace) {
+      debugPrint('Failed to clear Hive data: $error');
+      debugPrint('$stackTrace');
+      rethrow;
+    }
+  }
+
   static void _registerAdapters() {
     if (!Hive.isAdapterRegistered(AppCategoryAdapter().typeId)) {
       Hive.registerAdapter(AppCategoryAdapter());
@@ -50,6 +75,12 @@ class HiveBoxes {
     }
     if (!Hive.isAdapterRegistered(ContentTypeAdapter().typeId)) {
       Hive.registerAdapter(ContentTypeAdapter());
+    }
+    if (!Hive.isAdapterRegistered(NoteStatusAdapter().typeId)) {
+      Hive.registerAdapter(NoteStatusAdapter());
+    }
+    if (!Hive.isAdapterRegistered(RevisionStatusAdapter().typeId)) {
+      Hive.registerAdapter(RevisionStatusAdapter());
     }
     if (!Hive.isAdapterRegistered(TodoPriorityAdapter().typeId)) {
       Hive.registerAdapter(TodoPriorityAdapter());

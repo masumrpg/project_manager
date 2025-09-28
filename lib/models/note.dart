@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 
 import 'enums/content_type.dart';
+import 'enums/note_status.dart';
 
 part 'note.g.dart';
 
@@ -11,6 +12,7 @@ class Note extends HiveObject {
     required this.title,
     required this.content,
     required this.contentType,
+    this.status = NoteStatus.active,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -33,10 +35,14 @@ class Note extends HiveObject {
   @HiveField(5)
   DateTime updatedAt;
 
+  @HiveField(6)
+  NoteStatus status;
+
   Note copyWith({
     String? title,
     String? content,
     ContentType? contentType,
+    NoteStatus? status,
     DateTime? updatedAt,
   }) {
     return Note(
@@ -44,6 +50,7 @@ class Note extends HiveObject {
       title: title ?? this.title,
       content: content ?? this.content,
       contentType: contentType ?? this.contentType,
+      status: status ?? this.status,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../models/enums/app_category.dart';
 import '../models/enums/content_type.dart';
 import '../models/enums/environment.dart';
+import '../models/enums/note_status.dart';
+import '../models/enums/revision_status.dart';
 import '../models/enums/todo_priority.dart';
 import '../models/enums/todo_status.dart';
 import '../models/note.dart';
@@ -1120,6 +1122,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     title: titleController.text.trim(),
                                     content: contentController.text.trim(),
                                     contentType: selectedType,
+                                    status: NoteStatus.active,
                                     createdAt: now,
                                     updatedAt: now,
                                   ),
@@ -1366,6 +1369,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                     description: descriptionController.text
                                         .trim(),
                                     changes: changeLogController.text.trim(),
+                                    status: RevisionStatus.draft,
                                     createdAt: DateTime.now(),
                                   ),
                                 )
