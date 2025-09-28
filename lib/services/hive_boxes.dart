@@ -27,7 +27,7 @@ class HiveBoxes {
     if (_initialized) return;
 
     try {
-      await Hive.initFlutter();
+      await Hive.initFlutter('project_manager');
       _registerAdapters();
       await Future.wait([
         Hive.openBox<Project>(_projectsBoxName),
