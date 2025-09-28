@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
-import '../../../models/enums/revision_status.dart';
-import '../../../models/revision.dart';
+import '../../models/enums/revision_status.dart';
+import '../../models/revision.dart';
 
 class RevisionFormSheet extends StatefulWidget {
   const RevisionFormSheet({
@@ -26,7 +28,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _versionController;
   late final TextEditingController _descriptionController;
-  late final TextEditingController _changeLogController;
+  late final QuillController _changeLogController;
   late RevisionStatus _selectedStatus;
 
   @override
@@ -34,7 +36,27 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
     super.initState();
     _versionController = TextEditingController(text: widget.revision?.version ?? '');
     _descriptionController = TextEditingController(text: widget.revision?.description ?? '');
-    _changeLogController = TextEditingController(text: widget.revision?.changes ?? '');
+    
+    // Initialize Quill controller for changes
+    Document document;
+    if (widget.revision?.changes != null && widget.revision!.changes.isNotEmpty) {
+      try {
+        // Try to parse as JSON (Quill format)
+        final json = jsonDecode(widget.revision!.changes);
+        document = Document.fromJson(json);
+      } catch (e) {
+        // If parsing fails, treat as plain text
+        document = Document()..insert(0, widget.revision!.changes);
+      }
+    } else {
+      document = Document();
+    }
+    
+    _changeLogController = QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    
     _selectedStatus = widget.revision?.status ?? RevisionStatus.pending;
   }
 
@@ -127,25 +149,52 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _changeLogController,
-                  decoration: InputDecoration(
-                    labelText: 'Changes',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                // Changes field with Quill editor
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Changes',
+                      style: TextStyle(
+                        color: const Color(0xFF636E72),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE8D5C4)),
+                      ),
+                      child: Column(
+                        children: [
+                          QuillSimpleToolbar(
+                            controller: _changeLogController,
+                            config: const QuillSimpleToolbarConfig(
+                              toolbarSize: 40,
+                              multiRowsDisplay: false,
+                            ),
+                          ),
+                          Container(
+                            constraints: const BoxConstraints(
+                              minHeight: 120,
+                              maxHeight: 200,
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: QuillEditor.basic(
+                              controller: _changeLogController,
+                              config: const QuillEditorConfig(
+                                padding: EdgeInsets.zero,
+                                expands: false,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
-                  ),
-                  minLines: 4,
-                  maxLines: 8,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'Changes is required' : null,
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -182,16 +231,28 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: () async {
+                        // Validate changes field manually since it's not a TextFormField
+                        final changesText = _changeLogController.document.toPlainText().trim();
+                        if (changesText.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Changes is required')),
+                          );
+                          return;
+                        }
+                        
                         final formState = _formKey.currentState;
                         if (formState == null || !formState.validate()) return;
+                        
                         final navigator = Navigator.of(context);
+                        final changesJson = jsonEncode(_changeLogController.document.toDelta().toJson());
+                        
                         final didSucceed = widget.revision == null
                             ? await widget.onCreate(
                                 Revision(
                                   id: widget.uuid.v4(),
                                   version: _versionController.text.trim(),
                                   description: _descriptionController.text.trim(),
-                                  changes: _changeLogController.text.trim(),
+                                  changes: changesJson,
                                   status: _selectedStatus,
                                   createdAt: DateTime.now(),
                                 ),
@@ -201,7 +262,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                     widget.revision!
                                       ..version = _versionController.text.trim()
                                       ..description = _descriptionController.text.trim()
-                                      ..changes = _changeLogController.text.trim()
+                                      ..changes = changesJson
                                       ..status = _selectedStatus,
                                   )
                                 : false;

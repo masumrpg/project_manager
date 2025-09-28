@@ -55,17 +55,23 @@ class NotesTab extends StatelessWidget {
             title: Text(note.title, style: Theme.of(context).textTheme.titleMedium),
             subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: SizedBox(
-                  height: 60,
-                  child: QuillEditor.basic(
-                    controller: QuillController(
-                      document: _parseNoteContent(note.content),
-                      selection: const TextSelection.collapsed(offset: 0),
-                      readOnly: true,
-                    ),
-                    config: const QuillEditorConfig(
-                      padding: EdgeInsets.zero,
-                      scrollable: false,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 60,
+                    minHeight: 20,
+                  ),
+                  child: IgnorePointer(
+                    child: QuillEditor.basic(
+                      controller: QuillController(
+                        document: _parseNoteContent(note.content),
+                        selection: const TextSelection.collapsed(offset: 0),
+                        readOnly: true,
+                      ),
+                      config: const QuillEditorConfig(
+                        padding: EdgeInsets.zero,
+                        scrollable: false,
+                        expands: false,
+                      ),
                     ),
                   ),
                 ),

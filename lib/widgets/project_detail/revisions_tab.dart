@@ -42,15 +42,12 @@ class RevisionsTab extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
-            leading: Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Icon(
-                  Icons.history_toggle_off,
-                  size: 28,
-                  color: _getStatusColor(revision.status),
-                ),
+            leading: SizedBox(
+              width: 28,
+              child: Icon(
+                Icons.history_toggle_off,
+                size: 28,
+                color: _getStatusColor(revision.status),
               ),
             ),
             title: Text('Version ${revision.version}', style: Theme.of(context).textTheme.titleMedium),
