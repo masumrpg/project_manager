@@ -951,280 +951,19 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     ProjectDetailProvider provider, {
     Note? note,
   }) async {
-    final formKey = GlobalKey<FormState>();
-    final titleController = TextEditingController(text: note?.title ?? '');
-    final contentController = TextEditingController(text: note?.content ?? '');
-    var selectedType = note?.contentType ?? ContentType.text;
-    var selectedStatus = note?.status ?? NoteStatus.active;
-
     final success = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
-          decoration: const BoxDecoration(
-            color: Color(0xFFFFFBF7), // cardBackground
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  // Handle bar
-                  Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(
-                        0xFF636E72,
-                      ).withValues(alpha: 0.3), // lightText
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Text(
-                    note == null ? 'Add Note' : 'Edit Note',
-                    style: const TextStyle(
-                      color: Color(0xFF2D3436), // darkText
-                      fontWeight: FontWeight.w600,
-                      fontSize: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE8D5C4),
-                        ), // secondaryBeige
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE07A5F),
-                          width: 2,
-                        ), // accentOrange
-                      ),
-                      fillColor: const Color(
-                        0xFFF5E6D3,
-                      ).withValues(alpha: 0.3), // primaryBeige
-                      filled: true,
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF636E72),
-                      ), // lightText
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Title is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: contentController,
-                    decoration: InputDecoration(
-                      labelText: 'Content',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE8D5C4),
-                        ), // secondaryBeige
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE07A5F),
-                          width: 2,
-                        ), // accentOrange
-                      ),
-                      fillColor: const Color(
-                        0xFFF5E6D3,
-                      ).withValues(alpha: 0.3), // primaryBeige
-                      filled: true,
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF636E72),
-                      ), // lightText
-                    ),
-                    minLines: 4,
-                    maxLines: 8,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Content is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: DropdownButtonFormField<NoteStatus>(
-                      value: selectedStatus,
-                      decoration: const InputDecoration(
-                        labelText: 'Status',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      dropdownColor: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      items: NoteStatus.values
-                          .map(
-                            (status) => DropdownMenuItem(
-                              value: status,
-                              child: Text(status.label),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          selectedStatus = value;
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: DropdownButtonFormField<ContentType>(
-                      initialValue: selectedType,
-                      decoration: const InputDecoration(
-                        labelText: 'Content Type',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      dropdownColor: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      items: ContentType.values
-                          .map(
-                            (type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type.label),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          selectedType = value;
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: DropdownButtonFormField<RevisionStatus>(
-                      value: RevisionStatus.draft,
-                      decoration: const InputDecoration(
-                        labelText: 'Status',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      dropdownColor: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      items: RevisionStatus.values
-                          .map(
-                            (status) => DropdownMenuItem(
-                              value: status,
-                              child: Text(status.label),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                         if (value != null) {
-                           // Status will be updated when form is submitted
-                         }
-                       },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton(
-                        onPressed: () async {
-                          if (!formKey.currentState!.validate()) return;
-
-                          final now = DateTime.now();
-                          final didSucceed = note == null
-                              ? await provider.addNote(
-                                  Note(
-                                    id: _uuid.v4(),
-                                    title: titleController.text.trim(),
-                                    content: contentController.text.trim(),
-                                    contentType: selectedType,
-                                    status: selectedStatus,
-                                    createdAt: now,
-                                    updatedAt: now,
-                                  ),
-                                )
-                              : await provider.updateNote(
-                                  note
-                                    ..title = titleController.text.trim()
-                                    ..content = contentController.text.trim()
-                                    ..contentType = selectedType
-                                    ..status = selectedStatus
-                                    ..updatedAt = now,
-                                );
-
-                          if (!sheetContext.mounted) return;
-                          Navigator.of(sheetContext).pop(didSucceed);
-                        },
-                        child: Text(note == null ? 'Create' : 'Save'),
-                      ),
-                    ],
-                  ),
-                ],
-                ),
-              ),
-            ),
-          ),
+        return _NoteFormSheet(
+          provider: provider,
+          uuid: _uuid,
+          note: note,
         );
       },
     );
-
-    titleController.dispose();
-    contentController.dispose();
-
     if (!context.mounted) return;
 
     if (success == true) {
@@ -1271,210 +1010,19 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     ProjectDetailProvider provider, {
     Revision? revision,
   }) async {
-    final formKey = GlobalKey<FormState>();
-    final versionController = TextEditingController(
-      text: revision?.version ?? '',
-    );
-    final descriptionController = TextEditingController(
-      text: revision?.description ?? '',
-    );
-    final changeLogController = TextEditingController(
-      text: revision?.changes ?? '',
-    );
-    
-    final initialStatus = revision?.status ?? RevisionStatus.draft;
-
     final success = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
-          decoration: const BoxDecoration(
-            color: Color(0xFFFFFBF7), // cardBackground
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Handle bar
-                  Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(
-                        0xFF636E72,
-                      ).withValues(alpha: 0.3), // lightText
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Text(
-                    revision == null ? 'Add Revision' : 'Edit Revision',
-                    style: const TextStyle(
-                      color: Color(0xFF2D3436), // darkText
-                      fontWeight: FontWeight.w600,
-                      fontSize: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: versionController,
-                    decoration: InputDecoration(
-                      labelText: 'Version',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE8D5C4),
-                        ), // secondaryBeige
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE07A5F),
-                          width: 2,
-                        ), // accentOrange
-                      ),
-                      fillColor: const Color(
-                        0xFFF5E6D3,
-                      ).withValues(alpha: 0.3), // primaryBeige
-                      filled: true,
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF636E72),
-                      ), // lightText
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Version is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE8D5C4),
-                        ), // secondaryBeige
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE07A5F),
-                          width: 2,
-                        ), // accentOrange
-                      ),
-                      fillColor: const Color(
-                        0xFFF5E6D3,
-                      ).withValues(alpha: 0.3), // primaryBeige
-                      filled: true,
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF636E72),
-                      ), // lightText
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: changeLogController,
-                    decoration: InputDecoration(
-                      labelText: 'Changes',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE8D5C4),
-                        ), // secondaryBeige
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE07A5F),
-                          width: 2,
-                        ), // accentOrange
-                      ),
-                      fillColor: const Color(
-                        0xFFF5E6D3,
-                      ).withValues(alpha: 0.3), // primaryBeige
-                      filled: true,
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF636E72),
-                      ), // lightText
-                    ),
-                    minLines: 4,
-                    maxLines: 8,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Changes is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton(
-                        onPressed: () async {
-                          if (!formKey.currentState!.validate()) return;
-
-                          final didSucceed = revision == null
-                              ? await provider.addRevision(
-                                  Revision(
-                                    id: _uuid.v4(),
-                                    version: versionController.text.trim(),
-                                    description: descriptionController.text
-                                        .trim(),
-                                    changes: changeLogController.text.trim(),
-                                    status: initialStatus,
-                                    createdAt: DateTime.now(),
-                                  ),
-                                )
-                              : await provider.updateRevision(
-                                  revision
-                                    ..version = versionController.text.trim()
-                                    ..description = descriptionController.text
-                                        .trim()
-                                    ..changes = changeLogController.text.trim()
-                                    ..status = initialStatus,
-                                );
-
-                          if (!sheetContext.mounted) return;
-                          Navigator.of(sheetContext).pop(didSucceed);
-                        },
-                        child: Text(revision == null ? 'Create' : 'Save'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return _RevisionFormSheet(
+          provider: provider,
+          revision: revision,
+          uuid: _uuid,
         );
       },
     );
-
-    versionController.dispose();
-    descriptionController.dispose();
-    changeLogController.dispose();
 
     if (!context.mounted) return;
 
@@ -1522,297 +1070,20 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     ProjectDetailProvider provider, {
     Todo? todo,
   }) async {
-    final formKey = GlobalKey<FormState>();
-    final titleController = TextEditingController(text: todo?.title ?? '');
-    final descriptionController = TextEditingController(
-      text: todo?.description ?? '',
-    );
-    DateTime? dueDate = todo?.dueDate;
-    var selectedPriority = todo?.priority ?? TodoPriority.medium;
-    var selectedStatus = todo?.status ?? TodoStatus.pending;
-
+    // New path: use stateful form widget to avoid controller lifecycle issues
     final success = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.85,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFFBF7), // cardBackground
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Handle bar
-                      Container(
-                        margin: const EdgeInsets.only(top: 12, bottom: 8),
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF636E72,
-                          ).withValues(alpha: 0.3), // lightText
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      Text(
-                        todo == null ? 'Add Todo' : 'Edit Todo',
-                        style: const TextStyle(
-                          color: Color(0xFF2D3436), // darkText
-                          fontWeight: FontWeight.w600,
-                          fontSize: 24,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          labelText: 'Title',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE8D5C4),
-                            ), // secondaryBeige
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE07A5F),
-                              width: 2,
-                            ), // accentOrange
-                          ),
-                          fillColor: const Color(
-                            0xFFF5E6D3,
-                          ).withValues(alpha: 0.3), // primaryBeige
-                          filled: true,
-                          labelStyle: const TextStyle(
-                            color: Color(0xFF636E72),
-                          ), // lightText
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Title is required';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: descriptionController,
-                        decoration: InputDecoration(
-                          labelText: 'Description',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE8D5C4),
-                            ), // secondaryBeige
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE07A5F),
-                              width: 2,
-                            ), // accentOrange
-                          ),
-                          fillColor: const Color(
-                            0xFFF5E6D3,
-                          ).withValues(alpha: 0.3), // primaryBeige
-                          filled: true,
-                          labelStyle: const TextStyle(
-                            color: Color(0xFF636E72),
-                          ), // lightText
-                        ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: DropdownButtonFormField<TodoPriority>(
-                          initialValue: selectedPriority,
-                          decoration: const InputDecoration(
-                            labelText: 'Priority',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                          dropdownColor: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          items: TodoPriority.values
-                              .map(
-                                (priority) => DropdownMenuItem(
-                                  value: priority,
-                                  child: Text(priority.label),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) selectedPriority = value;
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const SizedBox(height: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: DropdownButtonFormField<TodoStatus>(
-                          initialValue: selectedStatus,
-                          decoration: const InputDecoration(
-                            labelText: 'Status',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                          dropdownColor: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          items: TodoStatus.values
-                              .map(
-                                (status) => DropdownMenuItem(
-                                  value: status,
-                                  child: Text(status.label),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) selectedStatus = value;
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () async {
-                                final picked = await showDatePicker(
-                                  context: sheetContext,
-                                  initialDate: dueDate ?? DateTime.now(),
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime(2100),
-                                );
-                                if (picked != null) {
-                                  setSheetState(() {
-                                    dueDate = picked;
-                                  });
-                                }
-                              },
-                              icon: const Icon(Icons.event_outlined),
-                              label: Text(
-                                dueDate == null
-                                    ? 'Due date (optional)'
-                                    : DateFormat(
-                                        'dd MMM yyyy',
-                                      ).format(dueDate!),
-                              ),
-                            ),
-                          ),
-                          if (dueDate != null) ...[
-                            const SizedBox(width: 8),
-                            IconButton(
-                              tooltip: 'Clear due date',
-                              onPressed: () {
-                                setSheetState(() {
-                                  dueDate = null;
-                                });
-                              },
-                              icon: const Icon(Icons.close),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.of(sheetContext).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          const SizedBox(width: 12),
-                          FilledButton(
-                            onPressed: () async {
-                              if (!formKey.currentState!.validate()) return;
-
-                              final now = DateTime.now();
-                              final didSucceed = todo == null
-                                  ? await provider.addTodo(
-                                      Todo(
-                                        id: _uuid.v4(),
-                                        title: titleController.text.trim(),
-                                        description: descriptionController.text
-                                            .trim(),
-                                        priority: selectedPriority,
-                                        status: selectedStatus,
-                                        dueDate: dueDate,
-                                        createdAt: now,
-                                        completedAt:
-                                            selectedStatus ==
-                                                TodoStatus.completed
-                                            ? now
-                                            : null,
-                                      ),
-                                    )
-                                  : await provider.updateTodo(
-                                      todo
-                                        ..title = titleController.text.trim()
-                                        ..description = descriptionController
-                                            .text
-                                            .trim()
-                                        ..priority = selectedPriority
-                                        ..status = selectedStatus
-                                        ..dueDate = dueDate
-                                        ..completedAt =
-                                            selectedStatus ==
-                                                TodoStatus.completed
-                                            ? (todo.completedAt ??
-                                                  DateTime.now())
-                                            : null,
-                                    );
-
-                              if (!sheetContext.mounted) return;
-                              Navigator.of(sheetContext).pop(didSucceed);
-                            },
-                            child: Text(todo == null ? 'Create' : 'Save'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
+        return _TodoFormSheet(
+          provider: provider,
+          uuid: _uuid,
+          todo: todo,
         );
       },
     );
-
-    titleController.dispose();
-    descriptionController.dispose();
 
     if (!context.mounted) return;
 
@@ -1829,6 +1100,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
         message: provider.error ?? 'Failed to save todo',
       );
     }
+    return;
   }
 
   Future<void> _confirmDeleteTodo(
@@ -1926,18 +1198,23 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     required bool success,
     required String message,
   }) {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: success
-            ? const Color(0xFF2E7D32)
-            : const Color(0xFFC62828),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) return;
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: success
+              ? const Color(0xFF2E7D32)
+              : const Color(0xFFC62828),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    });
   }
 }
 
@@ -2295,6 +1572,802 @@ class _TodosTab extends StatelessWidget {
       case TodoPriority.critical:
         return Icons.priority_high;
     }
+  }
+}
+
+class _NoteFormSheet extends StatefulWidget {
+  const _NoteFormSheet({
+    required this.provider,
+    required this.uuid,
+    this.note,
+  });
+
+  final ProjectDetailProvider provider;
+  final Uuid uuid;
+  final Note? note;
+
+  @override
+  State<_NoteFormSheet> createState() => _NoteFormSheetState();
+}
+
+class _NoteFormSheetState extends State<_NoteFormSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
+  late ContentType _selectedType;
+  late NoteStatus _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.note?.title ?? '');
+    _contentController = TextEditingController(text: widget.note?.content ?? '');
+    _selectedType = widget.note?.contentType ?? ContentType.text;
+    _selectedStatus = widget.note?.status ?? NoteStatus.active;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFFBF7),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 24 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF636E72).withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  widget.note == null ? 'Add Note' : 'Edit Note',
+                  style: const TextStyle(
+                    color: Color(0xFF2D3436),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Title is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _contentController,
+                  decoration: InputDecoration(
+                    labelText: 'Content',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  minLines: 4,
+                  maxLines: 8,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Content is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButtonFormField<NoteStatus>(
+                    value: _selectedStatus,
+                    decoration: const InputDecoration(
+                      labelText: 'Status',
+                      border: InputBorder.none,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    dropdownColor: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    items: NoteStatus.values
+                        .map(
+                          (status) => DropdownMenuItem(
+                            value: status,
+                            child: Text(status.label),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) setState(() => _selectedStatus = value);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButtonFormField<ContentType>(
+                    initialValue: _selectedType,
+                    decoration: const InputDecoration(
+                      labelText: 'Content Type',
+                      border: InputBorder.none,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    dropdownColor: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    items: ContentType.values
+                        .map(
+                          (type) => DropdownMenuItem(
+                            value: type,
+                            child: Text(type.label),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) setState(() => _selectedType = value);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) return;
+
+                        final now = DateTime.now();
+                        final didSucceed = widget.note == null
+                            ? await widget.provider.addNote(
+                                Note(
+                                  id: widget.uuid.v4(),
+                                  title: _titleController.text.trim(),
+                                  content: _contentController.text.trim(),
+                                  contentType: _selectedType,
+                                  status: _selectedStatus,
+                                  createdAt: now,
+                                  updatedAt: now,
+                                ),
+                              )
+                            : await widget.provider.updateNote(
+                                widget.note!
+                                  ..title = _titleController.text.trim()
+                                  ..content = _contentController.text.trim()
+                                  ..contentType = _selectedType
+                                  ..status = _selectedStatus
+                                  ..updatedAt = now,
+                              );
+
+                        if (!mounted) return;
+                        Navigator.of(context).pop(didSucceed);
+                      },
+                      child: Text(widget.note == null ? 'Create' : 'Save'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RevisionFormSheet extends StatefulWidget {
+  const _RevisionFormSheet({
+    required this.provider,
+    required this.uuid,
+    this.revision,
+  });
+
+  final ProjectDetailProvider provider;
+  final Uuid uuid;
+  final Revision? revision;
+
+  @override
+  State<_RevisionFormSheet> createState() => _RevisionFormSheetState();
+}
+
+class _TodoFormSheet extends StatefulWidget {
+  const _TodoFormSheet({
+    required this.provider,
+    required this.uuid,
+    this.todo,
+  });
+
+  final ProjectDetailProvider provider;
+  final Uuid uuid;
+  final Todo? todo;
+
+  @override
+  State<_TodoFormSheet> createState() => _TodoFormSheetState();
+}
+
+class _TodoFormSheetState extends State<_TodoFormSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
+  DateTime? _dueDate;
+  late TodoPriority _selectedPriority;
+  late TodoStatus _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.todo?.title ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.todo?.description ?? '');
+    _dueDate = widget.todo?.dueDate;
+    _selectedPriority = widget.todo?.priority ?? TodoPriority.medium;
+    _selectedStatus = widget.todo?.status ?? TodoStatus.pending;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFFBF7),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 24 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF636E72).withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  widget.todo == null ? 'Add Todo' : 'Edit Todo',
+                  style: const TextStyle(
+                    color: Color(0xFF2D3436),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Title is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  minLines: 3,
+                  maxLines: 6,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: DropdownButtonFormField<TodoPriority>(
+                          value: _selectedPriority,
+                          decoration: const InputDecoration(
+                            labelText: 'Priority',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          items: TodoPriority.values
+                              .map(
+                                (priority) => DropdownMenuItem(
+                                  value: priority,
+                                  child: Text(priority.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _selectedPriority = value);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: DropdownButtonFormField<TodoStatus>(
+                          value: _selectedStatus,
+                          decoration: const InputDecoration(
+                            labelText: 'Status',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          items: TodoStatus.values
+                              .map(
+                                (status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) setState(() => _selectedStatus = value);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: _dueDate ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              _dueDate = DateTime(picked.year, picked.month, picked.day);
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.event),
+                        label: Text(
+                          _dueDate == null
+                              ? 'Due date (optional)'
+                              : DateFormat('dd MMM yyyy').format(_dueDate!),
+                        ),
+                      ),
+                    ),
+                    if (_dueDate != null) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        tooltip: 'Clear due date',
+                        onPressed: () {
+                          setState(() => _dueDate = null);
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) return;
+
+                        final now = DateTime.now();
+                        final didSucceed = widget.todo == null
+                            ? await widget.provider.addTodo(
+                                Todo(
+                                  id: widget.uuid.v4(),
+                                  title: _titleController.text.trim(),
+                                  description: _descriptionController.text.trim(),
+                                  priority: _selectedPriority,
+                                  status: _selectedStatus,
+                                  dueDate: _dueDate,
+                                  createdAt: now,
+                                  completedAt: _selectedStatus == TodoStatus.completed
+                                      ? now
+                                      : null,
+                                ),
+                              )
+                            : await widget.provider.updateTodo(
+                                widget.todo!
+                                  ..title = _titleController.text.trim()
+                                  ..description = _descriptionController.text.trim()
+                                  ..priority = _selectedPriority
+                                  ..status = _selectedStatus
+                                  ..dueDate = _dueDate
+                                  ..completedAt = _selectedStatus == TodoStatus.completed
+                                      ? (widget.todo!.completedAt ?? DateTime.now())
+                                      : null,
+                              );
+
+                        if (!mounted) return;
+                        Navigator.of(context).pop(didSucceed);
+                      },
+                      child: Text(widget.todo == null ? 'Create' : 'Save'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RevisionFormSheetState extends State<_RevisionFormSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _versionController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _changeLogController;
+  late RevisionStatus _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _versionController =
+        TextEditingController(text: widget.revision?.version ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.revision?.description ?? '');
+    _changeLogController =
+        TextEditingController(text: widget.revision?.changes ?? '');
+    _selectedStatus = widget.revision?.status ?? RevisionStatus.draft;
+  }
+
+  @override
+  void dispose() {
+    _versionController.dispose();
+    _descriptionController.dispose();
+    _changeLogController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFFBF7),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 24 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF636E72).withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  widget.revision == null ? 'Add Revision' : 'Edit Revision',
+                  style: const TextStyle(
+                    color: Color(0xFF2D3436),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _versionController,
+                  decoration: InputDecoration(
+                    labelText: 'Version',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor:
+                        const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Version is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor:
+                        const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _changeLogController,
+                  decoration: InputDecoration(
+                    labelText: 'Changes',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE07A5F),
+                        width: 2,
+                      ),
+                    ),
+                    fillColor:
+                        const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    filled: true,
+                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                  ),
+                  minLines: 4,
+                  maxLines: 8,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Changes is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButtonFormField<RevisionStatus>(
+                    initialValue: _selectedStatus,
+                    decoration: const InputDecoration(
+                      labelText: 'Status',
+                      border: InputBorder.none,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    dropdownColor: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    items: RevisionStatus.values
+                        .map(
+                          (status) => DropdownMenuItem(
+                            value: status,
+                            child: Text(status.label),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedStatus = value);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) return;
+
+                        final didSucceed = widget.revision == null
+                            ? await widget.provider.addRevision(
+                                Revision(
+                                  id: widget.uuid.v4(),
+                                  version: _versionController.text.trim(),
+                                  description:
+                                      _descriptionController.text.trim(),
+                                  changes: _changeLogController.text.trim(),
+                                  status: _selectedStatus,
+                                  createdAt: DateTime.now(),
+                                ),
+                              )
+                            : await widget.provider.updateRevision(
+                                widget.revision!
+                                  ..version = _versionController.text.trim()
+                                  ..description =
+                                      _descriptionController.text.trim()
+                                  ..changes = _changeLogController.text.trim()
+                                  ..status = _selectedStatus,
+                              );
+
+                        if (!mounted) return;
+                        Navigator.of(context).pop(didSucceed);
+                      },
+                      child: Text(widget.revision == null ? 'Create' : 'Save'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
