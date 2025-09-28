@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'dart:convert';
 
 import '../../models/note.dart';
 import '../../screens/note_detail_screen.dart';
@@ -52,9 +54,22 @@ class NotesTab extends StatelessWidget {
             ),
             title: Text(note.title, style: Theme.of(context).textTheme.titleMedium),
             subtitle: Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(_getPlainTextContent(note.content), maxLines: 3, overflow: TextOverflow.ellipsis),
-            ),
+                padding: const EdgeInsets.only(top: 6),
+                child: SizedBox(
+                  height: 60,
+                  child: QuillEditor.basic(
+                    controller: QuillController(
+                      document: _parseNoteContent(note.content),
+                      selection: const TextSelection.collapsed(offset: 0),
+                      readOnly: true,
+                    ),
+                    config: const QuillEditorConfig(
+                      padding: EdgeInsets.zero,
+                      scrollable: false,
+                    ),
+                  ),
+                ),
+              ),
             trailing: Wrap(
               spacing: 8,
               children: [
@@ -85,14 +100,18 @@ class NotesTab extends StatelessWidget {
     );
   }
 
-  String _getPlainTextContent(String content) {
+  Document _parseNoteContent(String content) {
+    if (content.isEmpty) {
+      return Document();
+    }
+    
     try {
-      // Try to parse as JSON and extract plain text
-      // This is a simple approach - in a real app you might want to use Quill's toPlainText method
-      return content.length > 100 ? '${content.substring(0, 100)}...' : content;
+      // Try to parse as JSON (Quill format)
+      final json = jsonDecode(content);
+      return Document.fromJson(json);
     } catch (e) {
-      // If it's not JSON, treat as plain text
-      return content.length > 100 ? '${content.substring(0, 100)}...' : content;
+      // If parsing fails, treat as plain text
+      return Document()..insert(0, content);
     }
   }
 }
