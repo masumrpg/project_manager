@@ -9,6 +9,7 @@ class LongDescriptionEditorScreen extends StatefulWidget {
     this.onSave,
     this.initialJson,
     this.readOnly = false,
+    this.onEdit,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class LongDescriptionEditorScreen extends StatefulWidget {
   final String? initialJson;
   final bool readOnly;
   final Future<bool> Function(String json)? onSave;
+  final VoidCallback? onEdit;
 
   @override
   State<LongDescriptionEditorScreen> createState() => _LongDescriptionEditorScreenState();
@@ -75,6 +77,12 @@ class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScree
               tooltip: 'Simpan',
               onPressed: _save,
               icon: const Icon(Icons.save_outlined),
+            ),
+          if (widget.readOnly && widget.onEdit != null)
+            IconButton(
+              tooltip: 'Edit',
+              onPressed: widget.onEdit,
+              icon: const Icon(Icons.edit_outlined),
             ),
         ],
       ),

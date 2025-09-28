@@ -194,6 +194,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final Uuid _uuid = const Uuid();
+  // Toggle header long description preview expand/collapse
+  bool _isLongDescExpanded = false;
 
   @override
   void initState() {
@@ -444,25 +446,76 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                           document: doc,
                           selection: const TextSelection.collapsed(offset: 0),
                         );
-                        return Container(
-                          constraints: BoxConstraints(
-                            maxHeight: isDesktop ? 220 : 160,
-                            minWidth: double.infinity,
-                          ),
-                          padding: const EdgeInsets.only(top: 4),
-                          child: AbsorbPointer(
-                            child: QuillEditor.basic(controller: ctrl),
-                          ),
+                        final maxH = _isLongDescExpanded
+                            ? (isDesktop ? 480.0 : 360.0)
+                            : (isDesktop ? 220.0 : 160.0);
+                        return Stack(
+                          children: [
+                            Container(
+                              constraints: BoxConstraints(
+                                maxHeight: maxH,
+                                minWidth: double.infinity,
+                              ),
+                              padding: const EdgeInsets.only(top: 4),
+                              child: ClipRect(
+                                child: AbsorbPointer(
+                                  child: Scrollbar(
+                                    child:
+                                        QuillEditor.basic(controller: ctrl),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Fade hint to indicate more content
+                            if (!_isLongDescExpanded)
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          cardBackground
+                                              .withValues(alpha: 0.0),
+                                          cardBackground
+                                              .withValues(alpha: 0.9),
+                                          cardBackground,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         );
                       },
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        onPressed: () =>
-                            _openLongDescriptionViewer(context, project),
-                        child: const Text('Lihat selengkapnya'),
-                      ),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isLongDescExpanded = !_isLongDescExpanded;
+                            });
+                          },
+                          child: Text(
+                            _isLongDescExpanded
+                                ? 'Lihat ringkas'
+                                : 'Lihat semua',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () =>
+                              _openLongDescriptionViewer(context, project),
+                          child: const Text('Buka layar penuh'),
+                        ),
+                      ],
                     ),
                   ] else ...[
                     Text(
@@ -691,12 +744,36 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
   }
 
   void _openLongDescriptionViewer(BuildContext context, Project project) {
+    final provider = context.read<ProjectDetailProvider>();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => LongDescriptionEditorScreen(
           projectTitle: project.title,
           initialJson: project.longDescription,
           readOnly: true,
+          onEdit: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => LongDescriptionEditorScreen(
+                  projectTitle: project.title,
+                  initialJson: project.longDescription,
+                  onSave: (json) async {
+                    final ok = await provider.updateLongDescription(json);
+                    if (context.mounted) {
+                      _showFeedback(
+                        context,
+                        success: ok,
+                        message: ok
+                            ? 'Long description saved'
+                            : provider.error ?? 'Failed to save',
+                      );
+                    }
+                    return ok;
+                  },
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
