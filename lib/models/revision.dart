@@ -11,7 +11,7 @@ class Revision extends HiveObject {
     required this.version,
     required this.description,
     required this.changes,
-    this.status = RevisionStatus.draft,
+    this.status = RevisionStatus.pending,
     required this.createdAt,
   });
 

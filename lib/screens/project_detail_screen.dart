@@ -1059,7 +1059,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                             Expanded(
                               child: FilledButton(
                                 onPressed: () async {
-                                  if (!formKey.currentState!.validate()) {
+                                  final formState = formKey.currentState;
+                                  if (formState == null || !formState.validate()) {
                                     return;
                                   }
 
@@ -1961,7 +1962,8 @@ class _NoteFormSheetState extends State<_NoteFormSheet> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
+                        final formState = _formKey.currentState;
+                        if (formState == null || !formState.validate()) return;
 
                         final now = DateTime.now();
                         final didSucceed = widget.note == null
@@ -1976,14 +1978,16 @@ class _NoteFormSheetState extends State<_NoteFormSheet> {
                                   updatedAt: now,
                                 ),
                               )
-                            : await widget.provider.updateNote(
-                                widget.note!
-                                  ..title = _titleController.text.trim()
-                                  ..content = _contentController.text.trim()
-                                  ..contentType = _selectedType
-                                  ..status = _selectedStatus
-                                  ..updatedAt = now,
-                              );
+                            : widget.note != null
+                                ? await widget.provider.updateNote(
+                                    widget.note!
+                                      ..title = _titleController.text.trim()
+                                      ..content = _contentController.text.trim()
+                                      ..contentType = _selectedType
+                                      ..status = _selectedStatus
+                                      ..updatedAt = now,
+                                  )
+                                : false;
 
                         if (!mounted) return;
                         Navigator.of(context).pop(didSucceed);
@@ -2272,7 +2276,8 @@ class _TodoFormSheetState extends State<_TodoFormSheet> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
+                        final formState = _formKey.currentState;
+                        if (formState == null || !formState.validate()) return;
 
                         final now = DateTime.now();
                         final didSucceed = widget.todo == null
@@ -2290,17 +2295,19 @@ class _TodoFormSheetState extends State<_TodoFormSheet> {
                                       : null,
                                 ),
                               )
-                            : await widget.provider.updateTodo(
-                                widget.todo!
-                                  ..title = _titleController.text.trim()
-                                  ..description = _descriptionController.text.trim()
-                                  ..priority = _selectedPriority
-                                  ..status = _selectedStatus
-                                  ..dueDate = _dueDate
-                                  ..completedAt = _selectedStatus == TodoStatus.completed
-                                      ? (widget.todo!.completedAt ?? DateTime.now())
-                                      : null,
-                              );
+                            : widget.todo != null
+                                ? await widget.provider.updateTodo(
+                                    widget.todo!
+                                      ..title = _titleController.text.trim()
+                                      ..description = _descriptionController.text.trim()
+                                      ..priority = _selectedPriority
+                                      ..status = _selectedStatus
+                                      ..dueDate = _dueDate
+                                      ..completedAt = _selectedStatus == TodoStatus.completed
+                                          ? (widget.todo!.completedAt ?? DateTime.now())
+                                          : null,
+                                  )
+                                : false;
 
                         if (!mounted) return;
                         Navigator.of(context).pop(didSucceed);
@@ -2511,7 +2518,8 @@ class _RevisionFormSheetState extends State<_RevisionFormSheet> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
+                        final formState = _formKey.currentState;
+                        if (formState == null || !formState.validate()) return;
 
                         final didSucceed = widget.revision == null
                             ? await widget.provider.addRevision(
@@ -2525,14 +2533,16 @@ class _RevisionFormSheetState extends State<_RevisionFormSheet> {
                                   createdAt: DateTime.now(),
                                 ),
                               )
-                            : await widget.provider.updateRevision(
-                                widget.revision!
-                                  ..version = _versionController.text.trim()
-                                  ..description =
-                                      _descriptionController.text.trim()
-                                  ..changes = _changeLogController.text.trim()
-                                  ..status = _selectedStatus,
-                              );
+                            : widget.revision != null
+                                ? await widget.provider.updateRevision(
+                                    widget.revision!
+                                      ..version = _versionController.text.trim()
+                                      ..description =
+                                          _descriptionController.text.trim()
+                                      ..changes = _changeLogController.text.trim()
+                                      ..status = _selectedStatus,
+                                  )
+                                : false;
 
                         if (!mounted) return;
                         Navigator.of(context).pop(didSucceed);

@@ -1,0 +1,435 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:intl/intl.dart';
+
+import '../models/enums/todo_priority.dart';
+import '../models/enums/todo_status.dart';
+import '../models/todo.dart';
+
+class TodoDetailScreen extends StatefulWidget {
+  const TodoDetailScreen({
+    required this.todo,
+    required this.onStatusChange,
+    super.key,
+  });
+
+  final Todo todo;
+  final void Function(Todo, TodoStatus) onStatusChange;
+
+  @override
+  State<TodoDetailScreen> createState() => _TodoDetailScreenState();
+}
+
+class _TodoDetailScreenState extends State<TodoDetailScreen> {
+  late final QuillController _descriptionQuillController;
+  late TodoStatus _currentStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStatus = widget.todo.status;
+    
+    // Initialize Quill controller with existing description content
+    Document document;
+    if (widget.todo.description.isNotEmpty) {
+      try {
+        // Try to parse as JSON (Quill document)
+        final jsonData = jsonDecode(widget.todo.description);
+        document = Document.fromJson(jsonData);
+      } catch (e) {
+        // If parsing fails, treat as plain text
+        document = Document()..insert(0, widget.todo.description);
+      }
+    } else {
+      document = Document();
+    }
+    _descriptionQuillController = QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+  }
+
+  @override
+  void dispose() {
+    _descriptionQuillController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFBF7),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFFFBF7),
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
+        ),
+        title: Text(
+          'Todo Details',
+          style: const TextStyle(
+            color: Color(0xFF2D3436),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _getStatusColor(_currentStatus),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              _currentStatus.label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title and Priority
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Title',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: const Color(0xFF636E72),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.todo.title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: const Color(0xFF2D3436),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Priority',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: const Color(0xFF636E72),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor(widget.todo.priority).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: _getPriorityColor(widget.todo.priority).withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _getPriorityIcon(widget.todo.priority),
+                            size: 16,
+                            color: _getPriorityColor(widget.todo.priority),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            widget.todo.priority.label,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: _getPriorityColor(widget.todo.priority),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Description
+            if (widget.todo.description.isNotEmpty) ...[
+              Text(
+                'Description',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: const Color(0xFF2D3436),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(minHeight: 150),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE8D5C4)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: QuillEditor.basic(
+                    controller: _descriptionQuillController,
+                    config: const QuillEditorConfig(
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+            
+            // Due Date
+            if (widget.todo.dueDate != null) ...[
+              Text(
+                'Due Date',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: const Color(0xFF2D3436),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE8D5C4)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.event,
+                      color: _isOverdue(widget.todo.dueDate!) ? const Color(0xFFD63031) : const Color(0xFF636E72),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (widget.todo.dueDate != null) ...[
+                          Text(
+                            DateFormat('EEEE, dd MMMM yyyy').format(widget.todo.dueDate!.toLocal()),
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (widget.todo.dueDate != null && _isOverdue(widget.todo.dueDate!)) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Overdue',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: const Color(0xFFD63031),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ] else ...[
+                          Text(
+                            'No due date set',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF636E72),
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+            
+            // Status with Checkbox
+            Text(
+              'Status',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: const Color(0xFF2D3436),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _getStatusColor(_currentStatus).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: _getStatusColor(_currentStatus).withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: _currentStatus == TodoStatus.completed,
+                    onChanged: (bool? value) {
+                      final newStatus = value == true ? TodoStatus.completed : TodoStatus.pending;
+                      setState(() {
+                        _currentStatus = newStatus;
+                      });
+                      widget.onStatusChange(widget.todo, newStatus);
+                    },
+                    activeColor: const Color(0xFF00B894),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _currentStatus == TodoStatus.completed ? 'Completed' : 'Mark as completed',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: _getStatusColor(_currentStatus),
+                        fontWeight: FontWeight.w500,
+                        decoration: _currentStatus == TodoStatus.completed ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(_currentStatus),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Timestamps
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Created',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: const Color(0xFF636E72),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy').format(widget.todo.createdAt.toLocal()),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF2D3436),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        DateFormat('HH:mm').format(widget.todo.createdAt.toLocal()),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFF636E72),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (widget.todo.completedAt != null) ...[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Completed',
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: const Color(0xFF636E72),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (widget.todo.completedAt != null) ...[
+                          Text(
+                            DateFormat('dd MMM yyyy').format(widget.todo.completedAt!.toLocal()),
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            DateFormat('HH:mm').format(widget.todo.completedAt!.toLocal()),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: const Color(0xFF636E72),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _isOverdue(DateTime dueDate) {
+    return dueDate.isBefore(DateTime.now()) && _currentStatus != TodoStatus.completed;
+  }
+
+  Color _getStatusColor(TodoStatus status) {
+    switch (status) {
+      case TodoStatus.pending:
+        return const Color(0xFF74B9FF);
+      case TodoStatus.inProgress:
+        return const Color(0xFFE17055);
+      case TodoStatus.completed:
+        return const Color(0xFF00B894);
+      case TodoStatus.cancelled:
+        return const Color(0xFFD63031);
+      case TodoStatus.onHold:
+        return const Color(0xFFFDCB6E);
+    }
+  }
+
+  Color _getPriorityColor(TodoPriority priority) {
+    switch (priority) {
+      case TodoPriority.low:
+        return const Color(0xFF00B894);
+      case TodoPriority.medium:
+        return const Color(0xFFE17055);
+      case TodoPriority.high:
+        return const Color(0xFFD63031);
+      case TodoPriority.critical:
+        return const Color(0xFF6C5CE7);
+    }
+  }
+
+  IconData _getPriorityIcon(TodoPriority priority) {
+    switch (priority) {
+      case TodoPriority.low:
+        return Icons.keyboard_arrow_down;
+      case TodoPriority.medium:
+        return Icons.remove;
+      case TodoPriority.high:
+        return Icons.keyboard_arrow_up;
+      case TodoPriority.critical:
+        return Icons.priority_high;
+    }
+  }
+}

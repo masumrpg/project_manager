@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
-import '../../../models/enums/content_type.dart';
 import '../../../models/enums/note_status.dart';
 import '../../../models/note.dart';
 
@@ -26,23 +27,41 @@ class NoteFormSheet extends StatefulWidget {
 class _NoteFormSheetState extends State<NoteFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
-  late final TextEditingController _contentController;
-  late ContentType _selectedType;
+  late final QuillController _quillController;
   late NoteStatus _selectedStatus;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
-    _contentController = TextEditingController(text: widget.note?.content ?? '');
-    _selectedType = widget.note?.contentType ?? ContentType.text;
+    
+    // Initialize Quill controller with existing content or empty document
+    Document document;
+    final noteContent = widget.note?.content;
+    if (noteContent != null && noteContent.isNotEmpty) {
+      try {
+        // Try to parse as JSON (Quill format)
+        final json = jsonDecode(noteContent);
+        document = Document.fromJson(json);
+      } catch (e) {
+        // If parsing fails, treat as plain text
+        document = Document()..insert(0, noteContent);
+      }
+    } else {
+      document = Document();
+    }
+    _quillController = QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    
     _selectedStatus = widget.note?.status ?? NoteStatus.active;
   }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _contentController.dispose();
+    _quillController.dispose();
     super.dispose();
   }
 
@@ -116,34 +135,60 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                   },
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _contentController,
-                  decoration: InputDecoration(
-                    labelText: 'Content',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFE07A5F),
-                        width: 2,
-                      ),
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                
+                // Quill Editor Section
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE8D5C4)),
                   ),
-                  minLines: 4,
-                  maxLines: 8,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Content is required';
-                    }
-                    return null;
-                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Toolbar
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFFBF7),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                        ),
+                        child: QuillSimpleToolbar(
+                           controller: _quillController,
+                           config: const QuillSimpleToolbarConfig(
+                             buttonOptions: QuillSimpleToolbarButtonOptions(
+                               bold: QuillToolbarToggleStyleButtonOptions(),
+                               italic: QuillToolbarToggleStyleButtonOptions(),
+                               underLine: QuillToolbarToggleStyleButtonOptions(),
+                               strikeThrough: QuillToolbarToggleStyleButtonOptions(),
+                               listNumbers: QuillToolbarToggleStyleButtonOptions(),
+                               listBullets: QuillToolbarToggleStyleButtonOptions(),
+                               codeBlock: QuillToolbarToggleStyleButtonOptions(),
+                               quote: QuillToolbarToggleStyleButtonOptions(),
+                               clearFormat: QuillToolbarClearFormatButtonOptions(),
+                             ),
+                           ),
+                         ),
+                      ),
+                      // Editor
+                      Container(
+                        height: 200,
+                        padding: const EdgeInsets.all(16),
+                        child: QuillEditor.basic(
+                           controller: _quillController,
+                           config: const QuillEditorConfig(
+                             placeholder: 'Write your note content here...',
+                             padding: EdgeInsets.zero,
+                           ),
+                         ),
+                      ),
+                    ],
+                  ),
                 ),
+                
                 const SizedBox(height: 12),
                 Container(
                   decoration: BoxDecoration(
@@ -174,36 +219,6 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: DropdownButtonFormField<ContentType>(
-                    initialValue: _selectedType,
-                    decoration: const InputDecoration(
-                      labelText: 'Content Type',
-                      border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                    dropdownColor: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    items: ContentType.values
-                        .map(
-                          (type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type.label),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) setState(() => _selectedType = value);
-                    },
-                  ),
-                ),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -215,30 +230,47 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
+                        final formState = _formKey.currentState;
+                        if (formState == null || !formState.validate()) return;
+
+                        // Validate that content is not empty
+                        final plainText = _quillController.document.toPlainText().trim();
+                        if (plainText.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Content is required'),
+                              backgroundColor: Color(0xFFE07A5F),
+                            ),
+                          );
+                          return;
+                        }
 
                         final navigator = Navigator.of(context);
                         final now = DateTime.now();
+                        
+                        // Convert Quill document to JSON string
+                        final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
+                        
                         final didSucceed = widget.note == null
                             ? await widget.onCreate(
                                 Note(
                                   id: widget.uuid.v4(),
                                   title: _titleController.text.trim(),
-                                  content: _contentController.text.trim(),
-                                  contentType: _selectedType,
+                                  content: contentJson,
                                   status: _selectedStatus,
                                   createdAt: now,
                                   updatedAt: now,
                                 ),
                               )
-                            : await widget.onUpdate(
-                                widget.note!
-                                  ..title = _titleController.text.trim()
-                                  ..content = _contentController.text.trim()
-                                  ..contentType = _selectedType
-                                  ..status = _selectedStatus
-                                  ..updatedAt = now,
-                              );
+                            : widget.note != null
+                                ? await widget.onUpdate(
+                                    widget.note!
+                                      ..title = _titleController.text.trim()
+                                      ..content = contentJson
+                                      ..status = _selectedStatus
+                                      ..updatedAt = now,
+                                  )
+                                : false;
 
                         if (!mounted) return;
                         navigator.pop(didSucceed);

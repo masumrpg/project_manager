@@ -433,16 +433,19 @@ class HomeScreen extends StatelessWidget {
                         Expanded(
                           child: FilledButton(
                             onPressed: () async {
-                              if (!formKey.currentState!.validate()) return;
+                              final formState = formKey.currentState;
+                              if (formState == null || !formState.validate()) return;
 
+                              final titleText = titleController.text.trim();
+                              final descriptionText = descriptionController.text.trim();
+                              
                               final now = DateTime.now();
                               final success = project == null
                                   ? await provider.createProject(
                                       Project(
                                         id: _uuid.v4(),
-                                        title: titleController.text.trim(),
-                                        description: descriptionController.text
-                                            .trim(),
+                                        title: titleText,
+                                        description: descriptionText,
                                         category: selectedCategory,
                                         environment: selectedEnvironment,
                                         createdAt: now,
@@ -451,9 +454,8 @@ class HomeScreen extends StatelessWidget {
                                     )
                                   : await provider.updateProject(
                                       project.copyWith(
-                                        title: titleController.text.trim(),
-                                        description: descriptionController.text
-                                            .trim(),
+                                        title: titleText,
+                                        description: descriptionText,
                                         category: selectedCategory,
                                         environment: selectedEnvironment,
                                         updatedAt: now,
@@ -472,8 +474,8 @@ class HomeScreen extends StatelessWidget {
                                 success: success,
                                 message: success
                                     ? project == null
-                                          ? 'Project "${titleController.text.trim()}" created'
-                                          : 'Project "${titleController.text.trim()}" updated'
+                                          ? 'Project "$titleText" created'
+                                          : 'Project "$titleText" updated'
                                     : provider.error ?? 'Operation failed',
                               );
                             },
@@ -1157,20 +1159,13 @@ class _ModernProjectCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(color: HomeScreen._secondaryBeige),
                     ),
-                    onSelected: (value) {
+                    onSelected: (value) async {
+                      if (!context.mounted) return;
+                      
                       if (value == 'edit') {
-                        // Call the HomeScreen's method directly
-                        final homeScreen = context.findAncestorWidgetOfExactType<HomeScreen>();
-                        if (homeScreen != null) {
-                          homeScreen._showProjectDialog(context, project: project);
-                        }
-                      }
-                      if (value == 'delete') {
-                        // Call the HomeScreen's method directly
-                        final homeScreen = context.findAncestorWidgetOfExactType<HomeScreen>();
-                        if (homeScreen != null) {
-                          homeScreen._confirmDelete(context, project);
-                        }
+                        onEdit();
+                      } else if (value == 'delete') {
+                        onDelete();
                       }
                     },
                     itemBuilder: (context) => [

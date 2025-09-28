@@ -5,26 +5,30 @@ part 'revision_status.g.dart';
 @HiveType(typeId: 6)
 enum RevisionStatus {
   @HiveField(0)
-  draft,
+  pending,
   @HiveField(1)
-  published,
+  inProgress,
   @HiveField(2)
-  deprecated,
+  completed,
   @HiveField(3)
-  archived,
+  cancelled,
+  @HiveField(4)
+  onHold,
 }
 
 extension RevisionStatusX on RevisionStatus {
   String get label {
     switch (this) {
-      case RevisionStatus.draft:
-        return 'Draft';
-      case RevisionStatus.published:
-        return 'Published';
-      case RevisionStatus.deprecated:
-        return 'Deprecated';
-      case RevisionStatus.archived:
-        return 'Archived';
+      case RevisionStatus.pending:
+        return 'Pending';
+      case RevisionStatus.inProgress:
+        return 'In Progress';
+      case RevisionStatus.completed:
+        return 'Completed';
+      case RevisionStatus.cancelled:
+        return 'Cancelled';
+      case RevisionStatus.onHold:
+        return 'On Hold';
     }
   }
 }

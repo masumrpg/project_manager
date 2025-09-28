@@ -35,7 +35,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
     _versionController = TextEditingController(text: widget.revision?.version ?? '');
     _descriptionController = TextEditingController(text: widget.revision?.description ?? '');
     _changeLogController = TextEditingController(text: widget.revision?.changes ?? '');
-    _selectedStatus = widget.revision?.status ?? RevisionStatus.draft;
+    _selectedStatus = widget.revision?.status ?? RevisionStatus.pending;
   }
 
   @override
@@ -182,7 +182,8 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
+                        final formState = _formKey.currentState;
+                        if (formState == null || !formState.validate()) return;
                         final navigator = Navigator.of(context);
                         final didSucceed = widget.revision == null
                             ? await widget.onCreate(
@@ -195,13 +196,15 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                   createdAt: DateTime.now(),
                                 ),
                               )
-                            : await widget.onUpdate(
-                                widget.revision!
-                                  ..version = _versionController.text.trim()
-                                  ..description = _descriptionController.text.trim()
-                                  ..changes = _changeLogController.text.trim()
-                                  ..status = _selectedStatus,
-                              );
+                            : widget.revision != null
+                                ? await widget.onUpdate(
+                                    widget.revision!
+                                      ..version = _versionController.text.trim()
+                                      ..description = _descriptionController.text.trim()
+                                      ..changes = _changeLogController.text.trim()
+                                      ..status = _selectedStatus,
+                                  )
+                                : false;
                         if (!mounted) return;
                         navigator.pop(didSucceed);
                       },

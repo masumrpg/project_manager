@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -27,7 +30,7 @@ class TodoFormSheet extends StatefulWidget {
 class _TodoFormSheetState extends State<TodoFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
-  late final TextEditingController _descriptionController;
+  late final QuillController _descriptionQuillController;
   DateTime? _dueDate;
   late TodoPriority _selectedPriority;
   late TodoStatus _selectedStatus;
@@ -36,7 +39,27 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.todo?.title ?? '');
-    _descriptionController = TextEditingController(text: widget.todo?.description ?? '');
+    
+    // Initialize Quill controller with existing description content
+    Document document;
+    final todoDescription = widget.todo?.description;
+    if (todoDescription?.isNotEmpty == true) {
+      try {
+        // Try to parse as JSON (Quill document)
+        final jsonData = jsonDecode(todoDescription!);
+        document = Document.fromJson(jsonData);
+      } catch (e) {
+        // If parsing fails, treat as plain text
+        document = Document()..insert(0, todoDescription!);
+      }
+    } else {
+      document = Document();
+    }
+    _descriptionQuillController = QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    
     _dueDate = widget.todo?.dueDate;
     _selectedPriority = widget.todo?.priority ?? TodoPriority.medium;
     _selectedStatus = widget.todo?.status ?? TodoStatus.pending;
@@ -45,7 +68,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
+    _descriptionQuillController.dispose();
     super.dispose();
   }
 
@@ -111,24 +134,41 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                   validator: (value) => (value == null || value.trim().isEmpty) ? 'Title is required' : null,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                // Description with Quill Editor
+                Text(
+                  'Description',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: const Color(0xFF636E72),
+                    fontWeight: FontWeight.w500,
                   ),
-                  minLines: 3,
-                  maxLines: 6,
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE8D5C4)),
+                  ),
+                  child: Column(
+                    children: [
+                      QuillSimpleToolbar(
+                         controller: _descriptionQuillController,
+                         config: const QuillSimpleToolbarConfig(
+                           buttonOptions: QuillSimpleToolbarButtonOptions(),
+                         ),
+                       ),
+                      Container(
+                        height: 120,
+                        padding: const EdgeInsets.all(12),
+                        child: QuillEditor.basic(
+                          controller: _descriptionQuillController,
+                          config: const QuillEditorConfig(
+                            padding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -227,15 +267,20 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                     const SizedBox(width: 12),
                     FilledButton(
                       onPressed: () async {
-                        if (!_formKey.currentState!.validate()) return;
+                        final formState = _formKey.currentState;
+                        if (formState == null || !formState.validate()) return;
                         final navigator = Navigator.of(context);
                         final now = DateTime.now();
+                        
+                        // Get description content from Quill editor
+                        final descriptionContent = jsonEncode(_descriptionQuillController.document.toDelta().toJson());
+                        
                         final didSucceed = widget.todo == null
                             ? await widget.onCreate(
                                 Todo(
                                   id: widget.uuid.v4(),
                                   title: _titleController.text.trim(),
-                                  description: _descriptionController.text.trim(),
+                                  description: descriptionContent,
                                   priority: _selectedPriority,
                                   status: _selectedStatus,
                                   dueDate: _dueDate,
@@ -243,17 +288,19 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                   completedAt: _selectedStatus == TodoStatus.completed ? now : null,
                                 ),
                               )
-                            : await widget.onUpdate(
-                                widget.todo!
-                                  ..title = _titleController.text.trim()
-                                  ..description = _descriptionController.text.trim()
-                                  ..priority = _selectedPriority
-                                  ..status = _selectedStatus
-                                  ..dueDate = _dueDate
-                                  ..completedAt = _selectedStatus == TodoStatus.completed
-                                      ? (widget.todo!.completedAt ?? DateTime.now())
-                                      : null,
-                              );
+                            : widget.todo != null
+                                ? await widget.onUpdate(
+                                    widget.todo!
+                                      ..title = _titleController.text.trim()
+                                      ..description = descriptionContent
+                                      ..priority = _selectedPriority
+                                      ..status = _selectedStatus
+                                      ..dueDate = _dueDate
+                                      ..completedAt = _selectedStatus == TodoStatus.completed
+                                          ? (widget.todo?.completedAt ?? DateTime.now())
+                                          : null,
+                                  )
+                                : false;
                         if (!mounted) return;
                         navigator.pop(didSucceed);
                       },

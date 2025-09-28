@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../models/enums/content_type.dart';
 import '../../models/note.dart';
+import '../../screens/note_detail_screen.dart';
 
 class NotesTab extends StatelessWidget {
   const NotesTab({
@@ -46,11 +46,14 @@ class NotesTab extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
-            leading: Icon(_iconForContent(note.contentType), size: 28),
+            leading: SizedBox(
+              width: 28,
+              child: Icon(Icons.subject_outlined, size: 28),
+            ),
             title: Text(note.title, style: Theme.of(context).textTheme.titleMedium),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Text(note.content, maxLines: 3, overflow: TextOverflow.ellipsis),
+              child: Text(_getPlainTextContent(note.content), maxLines: 3, overflow: TextOverflow.ellipsis),
             ),
             trailing: Wrap(
               spacing: 8,
@@ -67,7 +70,13 @@ class NotesTab extends StatelessWidget {
                 ),
               ],
             ),
-            onTap: () => onEdit(note),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => NoteDetailScreen(note: note),
+                ),
+              );
+            },
           ),
         );
       },
@@ -76,20 +85,14 @@ class NotesTab extends StatelessWidget {
     );
   }
 
-  IconData _iconForContent(ContentType type) {
-    switch (type) {
-      case ContentType.text:
-        return Icons.subject_outlined;
-      case ContentType.markdown:
-        return Icons.article_outlined;
-      case ContentType.code:
-        return Icons.code;
-      case ContentType.image:
-        return Icons.image_outlined;
-      case ContentType.link:
-        return Icons.link_outlined;
-      case ContentType.document:
-        return Icons.description_outlined;
+  String _getPlainTextContent(String content) {
+    try {
+      // Try to parse as JSON and extract plain text
+      // This is a simple approach - in a real app you might want to use Quill's toPlainText method
+      return content.length > 100 ? '${content.substring(0, 100)}...' : content;
+    } catch (e) {
+      // If it's not JSON, treat as plain text
+      return content.length > 100 ? '${content.substring(0, 100)}...' : content;
     }
   }
 }

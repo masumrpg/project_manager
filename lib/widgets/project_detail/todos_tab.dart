@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../models/enums/todo_priority.dart';
 import '../../../models/enums/todo_status.dart';
 import '../../../models/todo.dart';
+import '../../screens/todo_detail_screen.dart';
 
 class TodosTab extends StatelessWidget {
   const TodosTab({
@@ -50,19 +53,38 @@ class TodosTab extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
-            leading: CircleAvatar(
-              radius: 18,
-              backgroundColor: _badgeColor(todo.priority).withValues(alpha: 0.1),
-              foregroundColor: _badgeColor(todo.priority),
-              child: Icon(_priorityIcon(todo.priority)),
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: _getStatusColor(todo.status).withValues(alpha: 0.1),
+                  foregroundColor: _getStatusColor(todo.status),
+                  child: Icon(_priorityIcon(todo.priority)),
+                ),
+              ],
             ),
-            title: Text(todo.title, style: Theme.of(context).textTheme.titleMedium),
+            title: Text(
+              todo.title, 
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                decoration: todo.status == TodoStatus.completed ? TextDecoration.lineThrough : null,
+                color: todo.status == TodoStatus.completed ? const Color(0xFF636E72) : null,
+              ),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (todo.description.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(todo.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(
+                    _getPlainTextContent(todo.description), 
+                    maxLines: 2, 
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      decoration: todo.status == TodoStatus.completed ? TextDecoration.lineThrough : null,
+                      color: todo.status == TodoStatus.completed ? const Color(0xFF636E72) : null,
+                    ),
+                  ),
                 ],
                 const SizedBox(height: 6),
                 Wrap(
@@ -79,32 +101,69 @@ class TodosTab extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.event, size: 14),
+                          Icon(
+                            Icons.event, 
+                            size: 14,
+                            color: _isOverdue(todo.dueDate!) && todo.status != TodoStatus.completed 
+                                ? const Color(0xFFD63031) 
+                                : null,
+                          ),
                           const SizedBox(width: 4),
-                          Text(DateFormat('dd MMM yyyy').format(todo.dueDate!)),
+                          Text(
+                            DateFormat('dd MMM yyyy').format(todo.dueDate!),
+                            style: TextStyle(
+                              color: _isOverdue(todo.dueDate!) && todo.status != TodoStatus.completed 
+                                  ? const Color(0xFFD63031) 
+                                  : null,
+                            ),
+                          ),
                         ],
                       ),
-                    PopupMenuButton<TodoStatus>(
-                      tooltip: 'Change status',
-                      itemBuilder: (context) => TodoStatus.values
-                          .map((status) => PopupMenuItem(
-                                value: status,
-                                child: Text(status.label),
-                              ))
-                          .toList(),
-                      onSelected: (status) => onStatusChange(todo, status),
-                      child: Chip(
-                        label: Text(todo.status.label),
-                        avatar: const Icon(Icons.swap_horiz, size: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(todo.status).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _getStatusColor(todo.status).withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(todo.status),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            todo.status.label,
+                            style: TextStyle(
+                              color: _getStatusColor(todo.status),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            trailing: Wrap(
-              spacing: 8,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                Checkbox(
+                  value: todo.status == TodoStatus.completed,
+                  onChanged: (bool? value) {
+                    final newStatus = value == true ? TodoStatus.completed : TodoStatus.pending;
+                    onStatusChange(todo, newStatus);
+                  },
+                  activeColor: const Color(0xFF00B894),
+                ),
                 IconButton(
                   tooltip: 'Edit todo',
                   onPressed: () => onEdit(todo),
@@ -117,13 +176,65 @@ class TodosTab extends StatelessWidget {
                 ),
               ],
             ),
-            onTap: () => onEdit(todo),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => TodoDetailScreen(
+                    todo: todo,
+                    onStatusChange: onStatusChange,
+                  ),
+                ),
+              );
+            },
           ),
         );
       },
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemCount: todos.length,
     );
+  }
+
+  String _getPlainTextContent(String content) {
+    if (content.isEmpty) return '';
+    
+    try {
+      // Try to parse as JSON (Quill document)
+      final jsonData = jsonDecode(content);
+      if (jsonData is List) {
+        final buffer = StringBuffer();
+        for (final op in jsonData) {
+          if (op is Map && op.containsKey('insert')) {
+            final insert = op['insert'];
+            if (insert is String) {
+              buffer.write(insert);
+            }
+          }
+        }
+        return buffer.toString().trim();
+      }
+    } catch (e) {
+      // If parsing fails, return as plain text
+    }
+    return content;
+  }
+
+  bool _isOverdue(DateTime dueDate) {
+    return dueDate.isBefore(DateTime.now());
+  }
+
+  Color _getStatusColor(TodoStatus status) {
+    switch (status) {
+      case TodoStatus.pending:
+        return const Color(0xFF74B9FF);
+      case TodoStatus.inProgress:
+        return const Color(0xFFE17055);
+      case TodoStatus.completed:
+        return const Color(0xFF00B894);
+      case TodoStatus.cancelled:
+        return const Color(0xFFD63031);
+      case TodoStatus.onHold:
+        return const Color(0xFFFDCB6E);
+    }
   }
 
   Color _badgeColor(TodoPriority priority) {

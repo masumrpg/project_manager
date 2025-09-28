@@ -14,32 +14,37 @@ class RevisionStatusAdapter extends TypeAdapter<RevisionStatus> {
   RevisionStatus read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return RevisionStatus.draft;
+        return RevisionStatus.pending;
       case 1:
-        return RevisionStatus.published;
+        return RevisionStatus.inProgress;
       case 2:
-        return RevisionStatus.deprecated;
+        return RevisionStatus.completed;
       case 3:
-        return RevisionStatus.archived;
+        return RevisionStatus.cancelled;
+      case 4:
+        return RevisionStatus.onHold;
       default:
-        return RevisionStatus.draft;
+        return RevisionStatus.pending;
     }
   }
 
   @override
   void write(BinaryWriter writer, RevisionStatus obj) {
     switch (obj) {
-      case RevisionStatus.draft:
+      case RevisionStatus.pending:
         writer.writeByte(0);
         break;
-      case RevisionStatus.published:
+      case RevisionStatus.inProgress:
         writer.writeByte(1);
         break;
-      case RevisionStatus.deprecated:
+      case RevisionStatus.completed:
         writer.writeByte(2);
         break;
-      case RevisionStatus.archived:
+      case RevisionStatus.cancelled:
         writer.writeByte(3);
+        break;
+      case RevisionStatus.onHold:
+        writer.writeByte(4);
         break;
     }
   }

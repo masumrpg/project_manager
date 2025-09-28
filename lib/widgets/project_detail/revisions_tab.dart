@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/revision.dart';
+import '../../screens/revision_detail_screen.dart';
 import 'empty_state.dart';
 
 class RevisionsTab extends StatelessWidget {
@@ -39,7 +42,17 @@ class RevisionsTab extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
-            leading: const Icon(Icons.history_toggle_off, size: 28),
+            leading: Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(
+                  Icons.history_toggle_off,
+                  size: 28,
+                  color: _getStatusColor(revision.status),
+                ),
+              ),
+            ),
             title: Text('Version ${revision.version}', style: Theme.of(context).textTheme.titleMedium),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 6),
@@ -53,7 +66,7 @@ class RevisionsTab extends StatelessWidget {
                   ],
                   if (revision.changes.isNotEmpty) ...[
                     Text(
-                      revision.changes,
+                      _getPlainTextContent(revision.changes),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -84,13 +97,62 @@ class RevisionsTab extends StatelessWidget {
                 ),
               ],
             ),
-            onTap: () => onEdit(revision),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => RevisionDetailScreen(revision: revision),
+                ),
+              );
+            },
           ),
         );
       },
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemCount: revisions.length,
     );
+  }
+
+  String _getPlainTextContent(String content) {
+    if (content.isEmpty) return '';
+    
+    try {
+      // Try to parse as JSON (Quill document)
+      final jsonData = jsonDecode(content);
+      if (jsonData is Map && jsonData.containsKey('ops')) {
+        final ops = jsonData['ops'] as List;
+        final buffer = StringBuffer();
+        for (final op in ops) {
+          if (op is Map && op.containsKey('insert')) {
+            final insert = op['insert'];
+            if (insert is String) {
+              buffer.write(insert);
+            }
+          }
+        }
+        return buffer.toString().trim();
+      }
+    } catch (e) {
+      // If parsing fails, return as plain text
+    }
+    
+    return content;
+  }
+
+  Color _getStatusColor(status) {
+    switch (status.toString()) {
+      case 'RevisionStatus.pending':
+        return const Color(0xFF74B9FF);
+      case 'RevisionStatus.inProgress':
+        return const Color(0xFFE17055);
+      case 'RevisionStatus.completed':
+        return const Color(0xFF00B894);
+      case 'RevisionStatus.cancelled':
+        return const Color(0xFFD63031);
+      case 'RevisionStatus.onHold':
+        return const Color(0xFFFDCB6E);
+      default:
+        return const Color(0xFF636E72);
+    }
   }
 }
 
