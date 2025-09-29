@@ -472,31 +472,30 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                                   ),
                                 ),
                               ),
-                              // Fade hint to indicate more content
-                              if (!_isLongDescExpanded)
-                                Positioned(
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 0,
-                                  child: IgnorePointer(
-                                    child: Container(
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            cardBackground
-                                                .withValues(alpha: 0.0),
-                                            cardBackground
-                                                .withValues(alpha: 0.9),
-                                            cardBackground,
-                                          ],
-                                        ),
+                              // Fade hint to indicate more content (always show for visual consistency)
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          cardBackground
+                                              .withValues(alpha: 0.0),
+                                          cardBackground
+                                              .withValues(alpha: 0.9),
+                                          cardBackground,
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
+                              ),
                             ],
                           );
                         },
@@ -652,6 +651,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                   ),
                 ),
               ),
+              // Add bottom padding to prevent content cutoff
+              SizedBox(height: isDesktop ? 100 : 80),
             ],
           ),
         ),
