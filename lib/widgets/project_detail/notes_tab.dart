@@ -21,18 +21,23 @@ class NotesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (notes.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.subject_outlined, size: 64, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
-            Text('No notes yet', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text('Add meeting notes, findings, or decisions.'),
-            const SizedBox(height: 20),
-            FilledButton.icon(onPressed: onAdd, icon: const Icon(Icons.add), label: const Text('Add Note')),
-          ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.subject_outlined, size: 64, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(height: 16),
+                Text('No notes yet', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                Text('Add meeting notes, findings, or decisions.'),
+                const SizedBox(height: 20),
+                FilledButton.icon(onPressed: onAdd, icon: const Icon(Icons.add), label: const Text('Add Note')),
+              ],
+            ),
+          ),
         ),
       );
     }

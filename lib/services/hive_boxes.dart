@@ -12,6 +12,7 @@ import '../models/note.dart';
 import '../models/project.dart';
 import '../models/revision.dart';
 import '../models/todo.dart';
+import '../models/user.dart';
 
 class HiveBoxes {
   HiveBoxes._();
@@ -20,6 +21,7 @@ class HiveBoxes {
   static const String _notesBoxName = 'notes_box';
   static const String _revisionsBoxName = 'revisions_box';
   static const String _todosBoxName = 'todos_box';
+  static const String _userBoxName = 'user_box';
 
   static bool _initialized = false;
 
@@ -34,6 +36,7 @@ class HiveBoxes {
         Hive.openBox<Note>(_notesBoxName),
         Hive.openBox<Revision>(_revisionsBoxName),
         Hive.openBox<Todo>(_todosBoxName),
+        Hive.openBox<User>(_userBoxName),
       ]);
       _initialized = true;
     } catch (error, stackTrace) {
@@ -54,6 +57,7 @@ class HiveBoxes {
       await Hive.deleteBoxFromDisk(_notesBoxName);
       await Hive.deleteBoxFromDisk(_revisionsBoxName);
       await Hive.deleteBoxFromDisk(_todosBoxName);
+      await Hive.deleteBoxFromDisk(_userBoxName);
 
       // Reset initialization flag
       _initialized = false;
@@ -100,6 +104,9 @@ class HiveBoxes {
     if (!Hive.isAdapterRegistered(TodoAdapter().typeId)) {
       Hive.registerAdapter(TodoAdapter());
     }
+    if (!Hive.isAdapterRegistered(UserAdapter().typeId)) {
+      Hive.registerAdapter(UserAdapter());
+    }
   }
 
   static Box<Project> get projectsBox => Hive.box<Project>(_projectsBoxName);
@@ -107,4 +114,5 @@ class HiveBoxes {
   static Box<Revision> get revisionsBox =>
       Hive.box<Revision>(_revisionsBoxName);
   static Box<Todo> get todosBox => Hive.box<Todo>(_todosBoxName);
+  static Box<User> get userBox => Hive.box<User>(_userBoxName);
 }

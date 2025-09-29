@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:project_manager/widgets/project_detail/project_edit_sheet.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
-import '../models/enums/app_category.dart';
-import '../models/enums/environment.dart';
 import '../models/enums/todo_status.dart';
 import '../models/note.dart';
 import '../models/project.dart';
@@ -375,8 +374,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
               ),
               child: IconButton(
                 tooltip: 'Edit project',
-                onPressed: () =>
-                    _showEditProjectDialog(context, provider, project),
+                onPressed: () => _showEditProjectDialog(context, project),
                 icon: Icon(Icons.edit_outlined, color: accentOrange),
               ),
             ),
@@ -457,17 +455,20 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                             : (isDesktop ? 220.0 : 160.0);
                         return Stack(
                           children: [
-                            Container(
-                              constraints: BoxConstraints(
-                                maxHeight: maxH,
-                                minWidth: double.infinity,
-                              ),
-                              padding: const EdgeInsets.only(top: 4),
-                              child: ClipRect(
-                                child: AbsorbPointer(
-                                  child: Scrollbar(
-                                    child:
-                                        QuillEditor.basic(controller: ctrl),
+                            Flexible(
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxHeight: maxH,
+                                  minWidth: double.infinity,
+                                ),
+                                padding: const EdgeInsets.only(top: 4),
+                                child: ClipRect(
+                                  child: AbsorbPointer(
+                                    child: Scrollbar(
+                                      child: QuillEditor.basic(
+                                        controller: ctrl,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -796,360 +797,34 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
 
   Future<void> _showEditProjectDialog(
     BuildContext context,
-    ProjectDetailProvider detailProvider,
     Project project,
   ) async {
-    final projectProvider = context.read<ProjectProvider>();
-    final formKey = GlobalKey<FormState>();
-    final titleController = TextEditingController(text: project.title);
-    final descriptionController = TextEditingController(
-      text: project.description,
+    final success = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        // The new sheet is self-contained and receives the providers it needs.
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(
+              value: context.read<ProjectProvider>(),
+            ),
+            ChangeNotifierProvider.value(
+              value: context.read<ProjectDetailProvider>(),
+            ),
+          ],
+          child: ProjectEditSheet(project: project),
+        );
+      },
     );
-    var selectedCategory = project.category;
-    var selectedEnvironment = project.environment;
 
-    try {
-      await showModalBottomSheet<bool>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (bottomSheetContext) {
-          return StatefulBuilder(
-            builder: (sheetContext, setModalState) {
-              final viewInsets = MediaQuery.of(bottomSheetContext).viewInsets;
-              final sheetHeight = MediaQuery.of(context).size.height * 0.85;
-
-              return Padding(
-                padding: EdgeInsets.only(bottom: viewInsets.bottom),
-                child: Container(
-                  height: sheetHeight,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFBF7), // cardBackground
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 12, bottom: 8),
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFF636E72,
-                          ).withValues(alpha: 0.3), // lightText
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 16,
-                        ),
-                        child: Row(
-                          children: [
-                            const Text(
-                              'Edit Project',
-                              style: TextStyle(
-                                color: Color(0xFF2D3436), // darkText
-                                fontWeight: FontWeight.w600,
-                                fontSize: 24,
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () =>
-                                  Navigator.of(bottomSheetContext).pop(false),
-                              icon: const Icon(Icons.close),
-                              style: IconButton.styleFrom(
-                                backgroundColor: const Color(
-                                  0xFFF5E6D3,
-                                ).withValues(alpha: 0.3), // primaryBeige
-                                foregroundColor: const Color(
-                                  0xFF636E72,
-                                ), // lightText
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Form(
-                          key: formKey,
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                TextFormField(
-                                  controller: titleController,
-                                  decoration: InputDecoration(
-                                    label: RichText(
-                                      text: const TextSpan(
-                                        text: 'Title',
-                                        style: TextStyle(color: Color(0xFF636E72)),
-                                        children: [
-                                          TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
-                                        ],
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFFE8D5C4),
-                                      ), // secondaryBeige
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFFE07A5F),
-                                        width: 2,
-                                      ), // accentOrange
-                                    ),
-                                    fillColor: const Color(
-                                      0xFFF5E6D3,
-                                    ).withValues(alpha: 0.3), // primaryBeige
-                                    filled: true,
-                                    labelStyle: const TextStyle(
-                                      color: Color(0xFF636E72),
-                                    ), // lightText
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'Title is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: descriptionController,
-                                  decoration: InputDecoration(
-                                    label: RichText(
-                                      text: const TextSpan(
-                                        text: 'Description',
-                                        style: TextStyle(color: Color(0xFF636E72)),
-                                        children: [
-                                          TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
-                                        ],
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFFE8D5C4),
-                                      ), // secondaryBeige
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFFE07A5F),
-                                        width: 2,
-                                      ), // accentOrange
-                                    ),
-                                    fillColor: const Color(
-                                      0xFFF5E6D3,
-                                    ).withValues(alpha: 0.3), // primaryBeige
-                                    filled: true,
-                                    labelStyle: const TextStyle(
-                                      color: Color(0xFF636E72),
-                                    ), // lightText
-                                  ),
-                                  maxLines: 3,
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'Description is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                DropdownButtonFormField<AppCategory>(
-                                  initialValue: selectedCategory,
-                                  decoration: InputDecoration(
-                                    labelText: 'Category',
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
-                                    ),
-                                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                                    filled: true,
-                                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
-                                  ),
-                                  dropdownColor: const Color(
-                                    0xFFFFFBF7,
-                                  ), // cardBackground
-                                  borderRadius: BorderRadius.circular(16),
-                                  items: AppCategory.values
-                                      .map(
-                                        (value) =>
-                                            DropdownMenuItem<AppCategory>(
-                                              value: value,
-                                              child: Text(
-                                                value.label,
-                                                style: const TextStyle(
-                                                  color: Color(0xFF2D3436),
-                                                ), // darkText
-                                              ),
-                                            ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      setModalState(() {
-                                        selectedCategory = value;
-                                      });
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                DropdownButtonFormField<Environment>(
-                                  initialValue: selectedEnvironment,
-                                  decoration: InputDecoration(
-                                    labelText: 'Environment',
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
-                                    ),
-                                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                                    filled: true,
-                                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
-                                  ),
-                                  dropdownColor: const Color(
-                                    0xFFFFFBF7,
-                                  ), // cardBackground
-                                  borderRadius: BorderRadius.circular(16),
-                                  items: Environment.values
-                                      .map(
-                                        (value) =>
-                                            DropdownMenuItem<Environment>(
-                                              value: value,
-                                              child: Text(
-                                                value.label,
-                                                style: const TextStyle(
-                                                  color: Color(0xFF2D3436),
-                                                ), // darkText
-                                              ),
-                                            ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      setModalState(() {
-                                        selectedEnvironment = value;
-                                      });
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextButton(
-                                onPressed: () =>
-                                    Navigator.of(bottomSheetContext).pop(false),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: const Color(
-                                    0xFF636E72,
-                                  ), // lightText
-                                ),
-                                child: const Text('Cancel'),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: FilledButton(
-                                onPressed: () async {
-                                  final formState = formKey.currentState;
-                                  if (formState == null || !formState.validate()) {
-                                    return;
-                                  }
-
-                                  final now = DateTime.now();
-                                  project
-                                    ..title = titleController.text.trim()
-                                    ..description = descriptionController.text
-                                        .trim()
-                                    ..category = selectedCategory
-                                    ..environment = selectedEnvironment
-                                    ..updatedAt = now;
-
-                                  final success = await projectProvider
-                                      .updateProject(project);
-
-                                  if (success) {
-                                    await detailProvider.loadProject(
-                                      showLoading: false,
-                                    );
-                                    if (!context.mounted ||
-                                        !bottomSheetContext.mounted) {
-                                      return;
-                                    }
-                                    Navigator.of(bottomSheetContext).pop(true);
-                                    _showFeedback(
-                                      context,
-                                      success: true,
-                                      message: 'Project updated successfully',
-                                    );
-                                  } else {
-                                    if (!context.mounted) {
-                                      return;
-                                    }
-                                    _showFeedback(
-                                      context,
-                                      success: false,
-                                      message:
-                                          projectProvider.error ??
-                                          'Failed to update project',
-                                    );
-                                  }
-                                },
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(
-                                    0xFFE07A5F,
-                                  ), // accentOrange
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
-                                child: const Text('Save'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+    if (success == true && context.mounted) {
+      _showFeedback(
+        context,
+        success: true,
+        message: 'Project updated successfully',
       );
-    } finally {
-      titleController.dispose();
-      descriptionController.dispose();
     }
   }
 
@@ -1415,11 +1090,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(message, style: const TextStyle(color: Colors.white)),
           behavior: SnackBarBehavior.floating,
           backgroundColor: success
-              ? const Color(0xFF2E7D32)
-              : const Color(0xFFC62828),
+              ? const Color(0xFF2E7D32) // A slightly darker green
+              : const Color(0xFFC62828), // A slightly darker red
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
