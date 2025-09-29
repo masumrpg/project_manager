@@ -26,7 +26,7 @@ class DesktopProjectGrid extends StatelessWidget {
         crossAxisCount: 3,
         crossAxisSpacing: 20,
         mainAxisSpacing: 20,
-        childAspectRatio: 1.2,
+        childAspectRatio: 1.4, // Adjusted to fit content naturally without empty spaces
       ),
       itemCount: projects.length,
       itemBuilder: (context, index) {

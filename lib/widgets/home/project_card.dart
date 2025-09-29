@@ -58,6 +58,7 @@ class _ModernProjectCardState extends State<ModernProjectCard>
     final isCompact = screenWidth < 600;
 
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) {
         setState(() => _isHovered = true);
         _animationController.forward();
@@ -74,8 +75,9 @@ class _ModernProjectCardState extends State<ModernProjectCard>
             child: GestureDetector(
               onTap: widget.onTap,
               child: Container(
+                width: double.infinity,
                 constraints: BoxConstraints(
-                  minHeight: isCompact ? 160 : 180,
+                  minHeight: isCompact ? 140 : 160,
                 ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
