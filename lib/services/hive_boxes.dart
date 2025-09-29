@@ -31,6 +31,10 @@ class HiveBoxes {
     try {
       await Hive.initFlutter('project_manager');
       _registerAdapters();
+      
+      // Ensure all adapters are registered before opening boxes
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       await Future.wait([
         Hive.openBox<Project>(_projectsBoxName),
         Hive.openBox<Note>(_notesBoxName),
@@ -39,6 +43,7 @@ class HiveBoxes {
         Hive.openBox<User>(_userBoxName),
       ]);
       _initialized = true;
+      debugPrint('Hive initialized successfully');
     } catch (error, stackTrace) {
       debugPrint('Failed to initialize Hive: $error');
       debugPrint('$stackTrace');
@@ -71,42 +76,58 @@ class HiveBoxes {
   }
 
   static void _registerAdapters() {
+    debugPrint('Registering Hive adapters...');
+    
     if (!Hive.isAdapterRegistered(AppCategoryAdapter().typeId)) {
       Hive.registerAdapter(AppCategoryAdapter());
+      debugPrint('Registered AppCategoryAdapter');
     }
     if (!Hive.isAdapterRegistered(EnvironmentAdapter().typeId)) {
       Hive.registerAdapter(EnvironmentAdapter());
+      debugPrint('Registered EnvironmentAdapter');
     }
     if (!Hive.isAdapterRegistered(ContentTypeAdapter().typeId)) {
       Hive.registerAdapter(ContentTypeAdapter());
+      debugPrint('Registered ContentTypeAdapter');
     }
     if (!Hive.isAdapterRegistered(NoteStatusAdapter().typeId)) {
       Hive.registerAdapter(NoteStatusAdapter());
+      debugPrint('Registered NoteStatusAdapter');
     }
     if (!Hive.isAdapterRegistered(RevisionStatusAdapter().typeId)) {
       Hive.registerAdapter(RevisionStatusAdapter());
+      debugPrint('Registered RevisionStatusAdapter');
     }
     if (!Hive.isAdapterRegistered(TodoPriorityAdapter().typeId)) {
       Hive.registerAdapter(TodoPriorityAdapter());
+      debugPrint('Registered TodoPriorityAdapter');
     }
     if (!Hive.isAdapterRegistered(TodoStatusAdapter().typeId)) {
       Hive.registerAdapter(TodoStatusAdapter());
+      debugPrint('Registered TodoStatusAdapter');
     }
     if (!Hive.isAdapterRegistered(ProjectAdapter().typeId)) {
       Hive.registerAdapter(ProjectAdapter());
+      debugPrint('Registered ProjectAdapter');
     }
     if (!Hive.isAdapterRegistered(NoteAdapter().typeId)) {
       Hive.registerAdapter(NoteAdapter());
+      debugPrint('Registered NoteAdapter');
     }
     if (!Hive.isAdapterRegistered(RevisionAdapter().typeId)) {
       Hive.registerAdapter(RevisionAdapter());
+      debugPrint('Registered RevisionAdapter');
     }
     if (!Hive.isAdapterRegistered(TodoAdapter().typeId)) {
       Hive.registerAdapter(TodoAdapter());
+      debugPrint('Registered TodoAdapter');
     }
     if (!Hive.isAdapterRegistered(UserAdapter().typeId)) {
       Hive.registerAdapter(UserAdapter());
+      debugPrint('Registered UserAdapter');
     }
+    
+    debugPrint('All Hive adapters registered successfully');
   }
 
   static Box<Project> get projectsBox => Hive.box<Project>(_projectsBoxName);

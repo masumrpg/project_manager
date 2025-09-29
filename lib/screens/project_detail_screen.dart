@@ -455,7 +455,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                             : (isDesktop ? 220.0 : 160.0);
                         return Stack(
                           children: [
-                            Flexible(
+                            Expanded(
                               child: Container(
                                 constraints: BoxConstraints(
                                   maxHeight: maxH,
