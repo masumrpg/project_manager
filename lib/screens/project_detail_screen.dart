@@ -504,18 +504,6 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                     ),
                     Row(
                       children: [
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _isLongDescExpanded = !_isLongDescExpanded;
-                            });
-                          },
-                          child: Text(
-                            _isLongDescExpanded
-                                ? 'Lihat ringkas'
-                                : 'Lihat semua',
-                          ),
-                        ),
                         const SizedBox(width: 8),
                         TextButton(
                           onPressed: () =>
