@@ -516,9 +516,11 @@ class HomeScreen extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       await HiveBoxes.clearAllData();
-      await context.read<ProjectProvider>().loadProjects();
       if (context.mounted) {
-        _showOperationResult(context, 'Database cleared successfully!');
+        await context.read<ProjectProvider>().loadProjects();
+        if (context.mounted) {
+          _showOperationResult(context, 'Database cleared successfully!');
+        }
       }
     }
   }
