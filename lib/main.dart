@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
 
+import 'package:project_manager/screens/splash_screen.dart';
 import 'providers/project_provider.dart';
 import 'repositories/project_repository.dart';
-import 'screens/home_screen.dart';
 import 'services/hive_boxes.dart';
 
 Future<void> main() async {
@@ -42,7 +42,7 @@ class ProjectManagerApp extends StatelessWidget {
           Locale('en'),
           Locale('id'),
         ],
-        home: const HomeScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
