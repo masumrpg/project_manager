@@ -139,8 +139,8 @@ class _ModernProjectCardState extends State<ModernProjectCard>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Header with icon and menu
-                            _buildHeader(categoryColor, isCompact),
+                            // Header with icon, title, and menu
+                            _buildHeader(theme, categoryColor, isCompact),
                             
                             SizedBox(height: isCompact ? 12 : 16),
                             
@@ -167,8 +167,9 @@ class _ModernProjectCardState extends State<ModernProjectCard>
     );
   }
 
-  Widget _buildHeader(Color categoryColor, bool isCompact) {
+  Widget _buildHeader(ThemeData theme, Color categoryColor, bool isCompact) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Enhanced category icon with better styling
         Container(
@@ -192,7 +193,22 @@ class _ModernProjectCardState extends State<ModernProjectCard>
             size: isCompact ? 20 : 24,
           ),
         ),
-        const Spacer(),
+        SizedBox(width: isCompact ? 12 : 16),
+        Expanded(
+          child: Text(
+            widget.project.title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: HomeConstants.darkText,
+              fontWeight: FontWeight.w700,
+              fontSize: isCompact ? 16 : 18,
+              letterSpacing: -0.3,
+              height: 1.2,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        SizedBox(width: isCompact ? 8 : 12),
         // Enhanced popup menu with better styling
         Container(
           decoration: BoxDecoration(
@@ -266,36 +282,15 @@ class _ModernProjectCardState extends State<ModernProjectCard>
   }
 
   Widget _buildContent(ThemeData theme, bool isCompact) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Enhanced title with better typography
-        Text(
-          widget.project.title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: HomeConstants.darkText,
-            fontWeight: FontWeight.w700,
-            fontSize: isCompact ? 16 : 18,
-            letterSpacing: -0.3,
-            height: 1.2,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        SizedBox(height: isCompact ? 6 : 8),
-        // Enhanced description with better readability
-        Text(
-          widget.project.description,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: HomeConstants.lightText,
-            fontSize: isCompact ? 13 : 14,
-            height: 1.4,
-          ),
-          maxLines: isCompact ? 2 : 3,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+    return Text(
+      widget.project.description,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: HomeConstants.lightText,
+        fontSize: isCompact ? 13 : 14,
+        height: 1.4,
+      ),
+      maxLines: isCompact ? 2 : 3,
+      overflow: TextOverflow.ellipsis,
     );
   }
 

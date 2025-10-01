@@ -64,9 +64,14 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   if (projects.isEmpty)
-                    const SliverFillRemaining(
+                    SliverFillRemaining(
                       hasScrollBody: false,
-                      child: EmptyState(),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isDesktop ? 120 : 110,
+                        ),
+                        child: const EmptyState(),
+                      ),
                     )
                   else ...[
                     SliverToBoxAdapter(
@@ -134,18 +139,13 @@ class HomeScreen extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth > 1024) return const SizedBox.shrink();
-          return FloatingActionButton.extended(
-            onPressed: () => _showProjectDialog(context),
-            backgroundColor: HomeConstants.accentOrange,
-            foregroundColor: Colors.white,
-            elevation: 8,
-            label: const Text('New Project', style: TextStyle(fontWeight: FontWeight.w600)),
-            icon: const Icon(Icons.add_rounded),
-          );
-        },
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showProjectDialog(context),
+        backgroundColor: HomeConstants.accentOrange,
+        foregroundColor: Colors.white,
+        elevation: 8,
+        label: const Text('New Project', style: TextStyle(fontWeight: FontWeight.w600)),
+        icon: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -204,21 +204,20 @@ class HomeScreen extends StatelessWidget {
                     controller: titleController,
                     decoration: InputDecoration(
                       labelText: 'Project Title',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: HomeConstants.secondaryBeige,
-                        ),
+                      labelStyle: const TextStyle(color: HomeConstants.lightText),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
                           color: HomeConstants.accentOrange,
                           width: 2,
                         ),
                       ),
+                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
                       filled: true,
-                      fillColor: HomeConstants.primaryBeige,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -233,21 +232,20 @@ class HomeScreen extends StatelessWidget {
                     maxLines: 3,
                     decoration: InputDecoration(
                       labelText: 'Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: HomeConstants.secondaryBeige,
-                        ),
+                      labelStyle: const TextStyle(color: HomeConstants.lightText),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
                           color: HomeConstants.accentOrange,
                           width: 2,
                         ),
                       ),
+                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
                       filled: true,
-                      fillColor: HomeConstants.primaryBeige,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -261,21 +259,20 @@ class HomeScreen extends StatelessWidget {
                     initialValue: selectedCategory,
                     decoration: InputDecoration(
                       labelText: 'Category',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: HomeConstants.secondaryBeige,
-                        ),
+                      labelStyle: const TextStyle(color: HomeConstants.lightText),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
                           color: HomeConstants.accentOrange,
                           width: 2,
                         ),
                       ),
+                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
                       filled: true,
-                      fillColor: HomeConstants.primaryBeige,
                     ),
                     items: AppCategory.values.map((category) {
                       return DropdownMenuItem(
@@ -305,21 +302,20 @@ class HomeScreen extends StatelessWidget {
                     initialValue: selectedEnvironment,
                     decoration: InputDecoration(
                       labelText: 'Environment',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: HomeConstants.secondaryBeige,
-                        ),
+                      labelStyle: const TextStyle(color: HomeConstants.lightText),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
                           color: HomeConstants.accentOrange,
                           width: 2,
                         ),
                       ),
+                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
                       filled: true,
-                      fillColor: HomeConstants.primaryBeige,
                     ),
                     items: Environment.values.map((env) {
                       return DropdownMenuItem(
