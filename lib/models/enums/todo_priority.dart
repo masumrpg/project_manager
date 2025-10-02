@@ -1,6 +1,21 @@
+import 'package:flutter/material.dart';
+
 enum TodoPriority { low, medium, high, urgent }
 
 extension TodoPriorityX on TodoPriority {
+  Color get color {
+    switch (this) {
+      case TodoPriority.low:
+        return Colors.green.shade600;
+      case TodoPriority.medium:
+        return Colors.orange.shade600;
+      case TodoPriority.high:
+        return Colors.red.shade600;
+      case TodoPriority.urgent:
+        return Colors.purple.shade600;
+    }
+  }
+
   String get label {
     switch (this) {
       case TodoPriority.low:

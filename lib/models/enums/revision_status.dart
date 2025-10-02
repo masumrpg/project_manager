@@ -1,6 +1,19 @@
+import 'package:flutter/material.dart';
+
 enum RevisionStatus { pending, approved, rejected }
 
 extension RevisionStatusX on RevisionStatus {
+  Color get color {
+    switch (this) {
+      case RevisionStatus.pending:
+        return Colors.blue.shade600;
+      case RevisionStatus.approved:
+        return Colors.green.shade600;
+      case RevisionStatus.rejected:
+        return Colors.red.shade600;
+    }
+  }
+
   String get label {
     switch (this) {
       case RevisionStatus.pending:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/note.dart';
 import '../../screens/note_detail_screen.dart';
+import 'note_card.dart';
 
 class NotesTab extends StatelessWidget {
   const NotesTab({
@@ -32,7 +33,7 @@ class NotesTab extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text('No notes yet', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
-                Text('Add meeting notes, findings, or decisions.'),
+                const Text('Add meeting notes, findings, or decisions.'),
                 const SizedBox(height: 20),
                 FilledButton.icon(onPressed: onAdd, icon: const Icon(Icons.add), label: const Text('Add Note')),
               ],
@@ -42,78 +43,54 @@ class NotesTab extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
-      itemBuilder: (context, index) {
-        final note = notes[index];
-        return Card(
-          elevation: 0,
-          color: const Color(0xFFFFFBF7),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => NoteDetailScreen(note: note),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = (constraints.maxWidth / 300).floor().clamp(1, 4);
+
+        if (crossAxisCount > 1) {
+          // Use GridView for wider screens
+          return GridView.builder(
+            padding: const EdgeInsets.all(8),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: 1.2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: notes.length,
+            itemBuilder: (context, index) {
+              final note = notes[index];
+              return NoteCard(
+                note: note,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => NoteDetailScreen(note: note)),
                 ),
+                onEdit: () => onEdit(note),
+                onDelete: () => onDelete(note),
               );
             },
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Leading Icon
-                  Icon(Icons.subject_outlined, size: 32, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 16),
-                  // Title and Subtitle
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(note.title, style: Theme.of(context).textTheme.titleMedium),
-                        if (note.description?.isNotEmpty == true)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              note.description!,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Trailing Icons
-                  Wrap(
-                    spacing: 0,
-                    children: [
-                      IconButton(
-                        tooltip: 'Edit note',
-                        onPressed: () => onEdit(note),
-                        icon: const Icon(Icons.edit_outlined),
-                        iconSize: 20,
-                      ),
-                      IconButton(
-                        tooltip: 'Delete note',
-                        onPressed: () => onDelete(note),
-                        icon: const Icon(Icons.delete_outline, color: Color(0xFFE07A5F)),
-                        iconSize: 20,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+          );
+        } else {
+          // Use ListView for narrower screens
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            itemCount: notes.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final note = notes[index];
+              return NoteCard(
+                note: note,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => NoteDetailScreen(note: note)),
+                ),
+                onEdit: () => onEdit(note),
+                onDelete: () => onDelete(note),
+              );
+            },
+          );
+        }
       },
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemCount: notes.length,
     );
   }
-
 }
 

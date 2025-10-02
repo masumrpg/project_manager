@@ -1,6 +1,21 @@
+import 'package:flutter/material.dart';
+
 enum TodoStatus { pending, inProgress, completed, cancelled }
 
 extension TodoStatusX on TodoStatus {
+  Color get color {
+    switch (this) {
+      case TodoStatus.pending:
+        return Colors.grey.shade600;
+      case TodoStatus.inProgress:
+        return Colors.blue.shade600;
+      case TodoStatus.completed:
+        return Colors.green.shade600;
+      case TodoStatus.cancelled:
+        return Colors.red.shade600;
+    }
+  }
+
   String get label {
     switch (this) {
       case TodoStatus.pending:

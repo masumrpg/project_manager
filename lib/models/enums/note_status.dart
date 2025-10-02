@@ -1,6 +1,19 @@
+import 'package:flutter/material.dart';
+
 enum NoteStatus { draft, active, archived }
 
 extension NoteStatusX on NoteStatus {
+  Color get color {
+    switch (this) {
+      case NoteStatus.draft:
+        return Colors.grey.shade600;
+      case NoteStatus.active:
+        return Colors.blue.shade600;
+      case NoteStatus.archived:
+        return Colors.orange.shade600;
+    }
+  }
+
   String get label {
     switch (this) {
       case NoteStatus.draft:
