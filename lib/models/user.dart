@@ -11,5 +11,8 @@ class User extends HiveObject {
   @HiveField(1)
   String role;
 
-  User({required this.name, required this.role});
+  @HiveField(2)
+  String? avatarUrl;
+
+  User({required this.name, required this.role, this.avatarUrl});
 }
