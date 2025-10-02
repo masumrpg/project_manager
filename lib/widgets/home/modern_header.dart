@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/enums/app_category.dart';
-import '../../services/hive_boxes.dart';
+import '../../models/user.dart';
 import 'dashboard_metrics.dart';
 import 'home_constants.dart';
 import 'modern_button.dart';
@@ -14,19 +14,21 @@ class ModernHeader extends StatelessWidget {
     required this.onCreateProject,
     required this.isDesktop,
     required this.isTablet,
-    required this.onClearDatabase,
+    required this.onSignOut,
+    required this.user,
   });
 
   final DashboardMetrics metrics;
   final VoidCallback onCreateProject;
   final bool isDesktop;
   final bool isTablet;
-  final VoidCallback onClearDatabase;
+  final VoidCallback onSignOut;
+  final User? user;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final user = HiveBoxes.userBox.get(0);
+    final currentUser = user;
 
     return Container(
       margin: EdgeInsets.fromLTRB(
@@ -62,7 +64,7 @@ class ModernHeader extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    if (user != null)
+                    if (currentUser != null)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
@@ -70,7 +72,7 @@ class ModernHeader extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'Hello, ${user.name} (${user.role})',
+                          _buildGreeting(currentUser),
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
@@ -105,17 +107,17 @@ class ModernHeader extends StatelessWidget {
                       ),
                       itemBuilder: (context) => [
                         PopupMenuItem(
-                          value: 'clear_database',
+                          value: 'sign_out',
                           child: Row(
                             children: [
                               Icon(
-                                Icons.delete_forever,
+                                Icons.logout,
                                 color: Colors.red.shade400,
                                 size: 20,
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                'Clear Database',
+                                'Sign Out',
                                 style: TextStyle(color: Colors.red.shade400),
                               ),
                             ],
@@ -123,8 +125,8 @@ class ModernHeader extends StatelessWidget {
                         ),
                       ],
                       onSelected: (value) {
-                        if (value == 'clear_database') {
-                          onClearDatabase();
+                        if (value == 'sign_out') {
+                          onSignOut();
                         }
                       },
                     ),
@@ -167,21 +169,21 @@ class ModernHeader extends StatelessWidget {
                   icon: Icons.pending_actions_outlined,
                   label: 'Active todos',
                   value: metrics.activeTodos.toString(),
-                  color: HomeConstants.categoryColors[AppCategory.work]!,
+                  color: HomeConstants.categoryColors[AppCategory.api]!,
                 )),
                 const SizedBox(width: 16),
                 Expanded(child: MetricCard(
                   icon: Icons.task_alt_rounded,
                   label: 'Completed',
                   value: metrics.completedTodos.toString(),
-                  color: HomeConstants.categoryColors[AppCategory.health]!,
+                  color: HomeConstants.categoryColors[AppCategory.desktop]!,
                 )),
                 const SizedBox(width: 16),
                 Expanded(child: MetricCard(
                   icon: Icons.note_alt_outlined,
                   label: 'Notes',
                   value: metrics.totalNotes.toString(),
-                  color: HomeConstants.categoryColors[AppCategory.study]!,
+                  color: HomeConstants.categoryColors[AppCategory.mobile]!,
                 )),
               ],
             )
@@ -194,14 +196,14 @@ class ModernHeader extends StatelessWidget {
                       icon: Icons.pending_actions_outlined,
                       label: 'Active todos',
                       value: metrics.activeTodos.toString(),
-                      color: HomeConstants.categoryColors[AppCategory.work]!,
+                      color: HomeConstants.categoryColors[AppCategory.api]!,
                     )),
                     const SizedBox(width: 12),
                     Expanded(child: MetricCard(
                       icon: Icons.task_alt_rounded,
                       label: 'Completed',
                       value: metrics.completedTodos.toString(),
-                      color: HomeConstants.categoryColors[AppCategory.health]!,
+                      color: HomeConstants.categoryColors[AppCategory.desktop]!,
                     )),
                   ],
                 ),
@@ -213,7 +215,7 @@ class ModernHeader extends StatelessWidget {
                         icon: Icons.note_alt_outlined,
                         label: 'Notes collected',
                         value: metrics.totalNotes.toString(),
-                        color: HomeConstants.categoryColors[AppCategory.study]!,
+                        color: HomeConstants.categoryColors[AppCategory.mobile]!,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -226,5 +228,14 @@ class ModernHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _buildGreeting(User user) {
+    final displayName = (user.name != null && user.name!.trim().isNotEmpty)
+        ? user.name!
+        : user.email;
+    final role = user.role;
+    final roleSuffix = (role != null && role.trim().isNotEmpty) ? ' ($role)' : '';
+    return 'Hello, $displayName$roleSuffix';
   }
 }

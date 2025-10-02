@@ -14,6 +14,7 @@ class TodoFormSheet extends StatefulWidget {
     required this.uuid,
     required this.onCreate,
     required this.onUpdate,
+    required this.projectId,
     this.todo,
     super.key,
   });
@@ -22,6 +23,7 @@ class TodoFormSheet extends StatefulWidget {
   final Todo? todo;
   final Future<bool> Function(Todo) onCreate;
   final Future<bool> Function(Todo) onUpdate;
+  final String projectId;
 
   @override
   State<TodoFormSheet> createState() => _TodoFormSheetState();
@@ -349,6 +351,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                             ? await widget.onCreate(
                                 Todo(
                                   id: widget.uuid.v4(),
+                                  projectId: widget.projectId,
                                   title: _titleController.text.trim(),
                                   description: descriptionText,
                                   content: contentJson,

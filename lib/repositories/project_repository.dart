@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'dart:convert';
 
 import '../models/enums/note_status.dart';
 import '../models/enums/revision_status.dart';
@@ -7,162 +7,146 @@ import '../models/note.dart';
 import '../models/project.dart';
 import '../models/revision.dart';
 import '../models/todo.dart';
-import '../services/hive_boxes.dart';
+import '../services/api_client.dart';
 
 class ProjectRepository {
+  ProjectRepository(this._apiClient);
+
+  final ApiClient _apiClient;
+
   Future<List<Project>> getAllProjects() async {
-    final projects = HiveBoxes.projectsBox.values.toList();
+    final response = await _apiClient.get(
+      '/api/projects',
+      queryParameters: {
+        'pageSize': '50',
+        'page': '1',
+      },
+    );
+
+    final data = _extractDataList(response);
+    final projects = data
+        .map((item) => Project.fromJson(item as Map<String, dynamic>))
+        .toList();
+
     projects.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     return projects;
   }
 
   Future<Project?> getProjectById(String id) async {
-    return HiveBoxes.projectsBox.get(id);
+    try {
+      final response = await _apiClient.get('/api/projects/$id')
+          as Map<String, dynamic>;
+      final data = response['data'] as Map<String, dynamic>?;
+      if (data == null) return null;
+
+      final project = Project.fromJson(data);
+
+      final stats = response['stats'];
+      if (stats is Map<String, dynamic>) {
+        project
+          ..notesCount = stats['notes'] as int?
+          ..todosCount = stats['todos'] as int?
+          ..revisionsCount = stats['revisions'] as int?
+          ..completedTodosCount = stats['completedTodos'] as int?;
+      }
+
+      project
+        ..notes = await _fetchNotes(id)
+        ..todos = await _fetchTodos(id)
+        ..revisions = await _fetchRevisions(id);
+
+      return project;
+    } on ApiException catch (error) {
+      if (error.statusCode == 404) {
+        return null;
+      }
+      rethrow;
+    }
   }
 
   Future<void> createProject(Project project) async {
-    project
-      ..notes ??= HiveList(HiveBoxes.notesBox)
-      ..revisions ??= HiveList(HiveBoxes.revisionsBox)
-      ..todos ??= HiveList(HiveBoxes.todosBox);
-
-    await HiveBoxes.projectsBox.put(project.id, project);
+    await _apiClient.post(
+      '/api/projects',
+      body: project.toCreatePayload(),
+    );
   }
 
   Future<void> updateProject(Project project) async {
-    project.updatedAt = DateTime.now();
-    await HiveBoxes.projectsBox.put(project.id, project);
+    await _apiClient.patch(
+      '/api/projects/${project.id}',
+      body: project.toUpdatePayload(),
+    );
   }
 
   Future<void> updateProjectLongDescription(
     String projectId,
     String longDescription,
   ) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null) return;
-
-    project
-      ..longDescription = longDescription
-      ..updatedAt = DateTime.now();
-    await project.save();
-  }
-
-  Future<void> deleteProject(String id) async {
-    final project = HiveBoxes.projectsBox.get(id);
-    if (project == null) return;
-
-    final notes = project.notes?.toList() ?? [];
-    final revisions = project.revisions?.toList() ?? [];
-    final todos = project.todos?.toList() ?? [];
-
-    for (final note in notes) {
-      await note.delete();
-    }
-    for (final revision in revisions) {
-      await revision.delete();
-    }
-    for (final todo in todos) {
-      await todo.delete();
-    }
-
-    await project.delete();
-  }
-
-  Future<void> addNoteToProject(String projectId, Note note) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null) return;
-
-    await HiveBoxes.notesBox.put(note.id, note);
-    project.notes ??= HiveList(HiveBoxes.notesBox);
-    project.notes?.add(note);
-    project.updatedAt = DateTime.now();
-    await project.save();
-  }
-
-  Future<void> removeNoteFromProject(String projectId, String noteId) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null || project.notes == null) return;
-
-    Note? target;
-    for (final note in project.notes!) {
-      if (note.id == noteId) {
-        target = note;
-        break;
+    dynamic payload;
+    if (longDescription.isEmpty) {
+      payload = null;
+    } else {
+      try {
+        payload = jsonDecode(longDescription);
+      } catch (_) {
+        payload = longDescription;
       }
     }
 
-    if (target == null) return;
+    await _apiClient.patch(
+      '/api/projects/$projectId',
+      body: {'longDescription': payload},
+    );
+  }
 
-    project.notes?.remove(target);
-    project.updatedAt = DateTime.now();
-    await project.save();
-    await target.delete();
+  Future<void> deleteProject(String id) async {
+    await _apiClient.delete('/api/projects/$id');
+  }
+
+  Future<void> addNoteToProject(String projectId, Note note) async {
+    await _apiClient.post(
+      '/api/projects/$projectId/notes',
+      body: note.copyWith(projectId: projectId).toApiPayload(),
+    );
+  }
+
+  Future<void> removeNoteFromProject(String projectId, String noteId) async {
+    await _apiClient.delete('/api/projects/$projectId/notes/$noteId');
   }
 
   Future<void> updateNote(String projectId, Note note) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null) return;
-
-    note.updatedAt = DateTime.now();
-    await note.save();
-
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.patch(
+      '/api/projects/$projectId/notes/${note.id}',
+      body: note.toApiPayload(),
+    );
   }
 
   Future<void> addRevisionToProject(String projectId, Revision revision) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null) return;
-
-    await HiveBoxes.revisionsBox.put(revision.id, revision);
-    project.revisions ??= HiveList(HiveBoxes.revisionsBox);
-    project.revisions?.add(revision);
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.post(
+      '/api/projects/$projectId/revisions',
+      body: revision.copyWith(projectId: projectId).toApiPayload(),
+    );
   }
 
   Future<void> removeRevisionFromProject(
     String projectId,
     String revisionId,
   ) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null || project.revisions == null) return;
-
-    Revision? target;
-    for (final revision in project.revisions!) {
-      if (revision.id == revisionId) {
-        target = revision;
-        break;
-      }
-    }
-
-    if (target == null) return;
-
-    project.revisions?.remove(target);
-    project.updatedAt = DateTime.now();
-    await project.save();
-    await target.delete();
+    await _apiClient.delete('/api/projects/$projectId/revisions/$revisionId');
   }
 
   Future<void> updateRevision(String projectId, Revision revision) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null) return;
-
-    await revision.save();
-
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.patch(
+      '/api/projects/$projectId/revisions/${revision.id}',
+      body: revision.toApiPayload(),
+    );
   }
 
   Future<void> addTodoToProject(String projectId, Todo todo) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null) return;
-
-    await HiveBoxes.todosBox.put(todo.id, todo);
-    project.todos ??= HiveList(HiveBoxes.todosBox);
-    project.todos?.add(todo);
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.post(
+      '/api/projects/$projectId/todos',
+      body: todo.copyWith(projectId: projectId).toApiPayload(),
+    );
   }
 
   Future<void> updateNoteStatus(
@@ -170,24 +154,12 @@ class ProjectRepository {
     String noteId,
     NoteStatus status,
   ) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null || project.notes == null) return;
-
-    Note? target;
-    for (final note in project.notes!) {
-      if (note.id == noteId) {
-        target = note;
-        break;
-      }
-    }
-
-    if (target == null) return;
-
-    target.status = status;
-    await target.save();
-
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.patch(
+      '/api/projects/$projectId/notes/$noteId',
+      body: {
+        'status': status.apiValue,
+      },
+    );
   }
 
   Future<void> updateRevisionStatus(
@@ -195,24 +167,12 @@ class ProjectRepository {
     String revisionId,
     RevisionStatus status,
   ) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null || project.revisions == null) return;
-
-    Revision? target;
-    for (final revision in project.revisions!) {
-      if (revision.id == revisionId) {
-        target = revision;
-        break;
-      }
-    }
-
-    if (target == null) return;
-
-    target.status = status;
-    await target.save();
-
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.patch(
+      '/api/projects/$projectId/revisions/$revisionId',
+      body: {
+        'status': status.apiValue,
+      },
+    );
   }
 
   Future<void> updateTodoStatus(
@@ -220,55 +180,86 @@ class ProjectRepository {
     String todoId,
     TodoStatus status,
   ) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null || project.todos == null) return;
-
-    Todo? target;
-    for (final todo in project.todos!) {
-      if (todo.id == todoId) {
-        target = todo;
-        break;
-      }
-    }
-
-    if (target == null) return;
-
-    target
-      ..status = status
-      ..completedAt = status == TodoStatus.completed ? DateTime.now() : null;
-    await target.save();
-
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.patch(
+      '/api/projects/$projectId/todos/$todoId',
+      body: {
+        'status': status.apiValue,
+      },
+    );
   }
 
   Future<void> updateTodo(String projectId, Todo todo) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null) return;
-
-    await todo.save();
-
-    project.updatedAt = DateTime.now();
-    await project.save();
+    await _apiClient.patch(
+      '/api/projects/$projectId/todos/${todo.id}',
+      body: todo.toApiPayload(),
+    );
   }
 
   Future<void> removeTodoFromProject(String projectId, String todoId) async {
-    final project = HiveBoxes.projectsBox.get(projectId);
-    if (project == null || project.todos == null) return;
+    await _apiClient.delete('/api/projects/$projectId/todos/$todoId');
+  }
 
-    Todo? target;
-    for (final todo in project.todos!) {
-      if (todo.id == todoId) {
-        target = todo;
-        break;
-      }
+  List<dynamic> _extractDataList(dynamic response) {
+    if (response is Map<String, dynamic>) {
+      final data = response['data'];
+      if (data is List) return data;
+    } else if (response is List) {
+      return response;
     }
+    return const <dynamic>[];
+  }
 
-    if (target == null) return;
+  Future<List<Note>> _fetchNotes(String projectId) async {
+    final response = await _apiClient.get(
+      '/api/projects/$projectId/notes',
+      queryParameters: {
+        'pageSize': '50',
+        'page': '1',
+      },
+    );
+    final data = _extractDataList(response);
+    return data
+        .map((item) => Note.fromJson(
+              item as Map<String, dynamic>,
+              fallbackProjectId: projectId,
+            ))
+        .toList()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  }
 
-    project.todos?.remove(target);
-    project.updatedAt = DateTime.now();
-    await project.save();
-    await target.delete();
+  Future<List<Todo>> _fetchTodos(String projectId) async {
+    final response = await _apiClient.get(
+      '/api/projects/$projectId/todos',
+      queryParameters: {
+        'pageSize': '50',
+        'page': '1',
+      },
+    );
+    final data = _extractDataList(response);
+    return data
+        .map((item) => Todo.fromJson(
+              item as Map<String, dynamic>,
+              fallbackProjectId: projectId,
+            ))
+        .toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  }
+
+  Future<List<Revision>> _fetchRevisions(String projectId) async {
+    final response = await _apiClient.get(
+      '/api/projects/$projectId/revisions',
+      queryParameters: {
+        'pageSize': '50',
+        'page': '1',
+      },
+    );
+    final data = _extractDataList(response);
+    return data
+        .map((item) => Revision.fromJson(
+              item as Map<String, dynamic>,
+              fallbackProjectId: projectId,
+            ))
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 }

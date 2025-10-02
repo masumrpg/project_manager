@@ -283,7 +283,7 @@ class _ModernProjectCardState extends State<ModernProjectCard>
 
   Widget _buildContent(ThemeData theme, bool isCompact) {
     return Text(
-      widget.project.description,
+      widget.project.description ?? '',
       style: theme.textTheme.bodyMedium?.copyWith(
         color: HomeConstants.lightText,
         fontSize: isCompact ? 13 : 14,

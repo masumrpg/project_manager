@@ -11,6 +11,7 @@ class NoteFormSheet extends StatefulWidget {
     required this.uuid,
     required this.onCreate,
     required this.onUpdate,
+    required this.projectId,
     this.note,
     super.key,
   });
@@ -19,6 +20,7 @@ class NoteFormSheet extends StatefulWidget {
   final Note? note;
   final Future<bool> Function(Note) onCreate;
   final Future<bool> Function(Note) onUpdate;
+  final String projectId;
 
   @override
   State<NoteFormSheet> createState() => _NoteFormSheetState();
@@ -298,6 +300,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                             ? await widget.onCreate(
                                 Note(
                                   id: widget.uuid.v4(),
+                                  projectId: widget.projectId,
                                   title: _titleController.text.trim(),
                                   description: _descriptionController.text.trim(),
                                   content: contentJson,

@@ -1,18 +1,4 @@
-import 'package:hive/hive.dart';
-
-part 'note_status.g.dart';
-
-@HiveType(typeId: 5)
-enum NoteStatus {
-  @HiveField(0)
-  draft,
-  @HiveField(1)
-  active,
-  @HiveField(2)
-  archived,
-  @HiveField(3)
-  deleted,
-}
+enum NoteStatus { draft, active, archived }
 
 extension NoteStatusX on NoteStatus {
   String get label {
@@ -23,8 +9,29 @@ extension NoteStatusX on NoteStatus {
         return 'Active';
       case NoteStatus.archived:
         return 'Archived';
-      case NoteStatus.deleted:
-        return 'Deleted';
+    }
+  }
+
+  String get apiValue {
+    switch (this) {
+      case NoteStatus.draft:
+        return 'draft';
+      case NoteStatus.active:
+        return 'active';
+      case NoteStatus.archived:
+        return 'archived';
+    }
+  }
+
+  static NoteStatus fromApiValue(String value) {
+    switch (value) {
+      case 'active':
+        return NoteStatus.active;
+      case 'archived':
+        return NoteStatus.archived;
+      case 'draft':
+      default:
+        return NoteStatus.draft;
     }
   }
 }

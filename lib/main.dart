@@ -3,29 +3,53 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
 
-import 'package:project_manager/screens/splash_screen.dart';
+import 'providers/auth_provider.dart';
 import 'providers/project_provider.dart';
 import 'repositories/project_repository.dart';
-import 'services/hive_boxes.dart';
+import 'screens/splash_screen.dart';
+import 'services/api_client.dart';
+import 'services/auth_service.dart';
+import 'services/auth_storage.dart';
+
+const _baseUrl = 'https://project-manager-api-coral.vercel.app';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await HiveBoxes.init();
-  runApp(const ProjectManagerApp());
+  final authStorage = await AuthStorage.create();
+  final apiClient = ApiClient(baseUrl: _baseUrl, authStorage: authStorage);
+  final authService = AuthService(apiClient: apiClient, storage: authStorage);
+
+  runApp(ProjectManagerApp(
+    apiClient: apiClient,
+    authService: authService,
+  ));
 }
 
 class ProjectManagerApp extends StatelessWidget {
-  const ProjectManagerApp({super.key});
+  const ProjectManagerApp({
+    required this.apiClient,
+    required this.authService,
+    super.key,
+  });
+
+  final ApiClient apiClient;
+  final AuthService authService;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(create: (_) => ProjectRepository()),
-        ChangeNotifierProvider(
-          create: (context) =>
-              ProjectProvider(context.read<ProjectRepository>())
-                ..loadProjects(),
+        Provider<ApiClient>.value(value: apiClient),
+        Provider<AuthService>.value(value: authService),
+        Provider<ProjectRepository>(
+          create: (context) => ProjectRepository(context.read<ApiClient>()),
+        ),
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(context.read<AuthService>())
+            ..bootstrap(),
+        ),
+        ChangeNotifierProvider<ProjectProvider>(
+          create: (context) => ProjectProvider(context.read<ProjectRepository>()),
         ),
       ],
       child: MaterialApp(

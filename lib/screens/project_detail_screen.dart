@@ -342,12 +342,11 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       );
     }
 
-    final notes = List<Note>.from(project.notes ?? const <Note>[])
+    final notes = List<Note>.from(project.notes)
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-    final revisions = List<Revision>.from(
-      project.revisions ?? const <Revision>[],
-    )..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final todos = List<Todo>.from(project.todos ?? const <Todo>[])
+    final revisions = List<Revision>.from(project.revisions)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final todos = List<Todo>.from(project.todos)
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
     return Scaffold(
@@ -525,7 +524,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                       ),
                     ] else ...[
                       Text(
-                        project.description,
+                        project.description ?? '',
                         style: TextStyle(
                           fontSize: isDesktop ? 18 : 16,
                           color: lightText,
@@ -847,6 +846,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           note: note,
           onCreate: (n) => provider.addNote(n),
           onUpdate: (n) => provider.updateNote(n),
+          projectId: provider.projectId,
         );
       },
     );
@@ -907,6 +907,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           revision: revision,
           onCreate: (r) => provider.addRevision(r),
           onUpdate: (r) => provider.updateRevision(r),
+          projectId: provider.projectId,
         );
       },
     );
@@ -969,6 +970,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           todo: todo,
           onCreate: (t) => provider.addTodo(t),
           onUpdate: (t) => provider.updateTodo(t),
+          projectId: provider.projectId,
         );
       },
     );

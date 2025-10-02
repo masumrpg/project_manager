@@ -12,28 +12,18 @@ class HomeConstants {
   static const Color shadowColor = Color(0x1A2D3436);
 
   static const Map<AppCategory, Color> categoryColors = {
-    AppCategory.personal: Color(0xFF81B3BA),
-    AppCategory.work: Color(0xFF6C7B95),
-    AppCategory.study: Color(0xFF8FA68E),
-    AppCategory.health: Color(0xFFE07A5F),
-    AppCategory.finance: Color(0xFFB08BBB),
-    AppCategory.travel: Color(0xFF7FB069),
-    AppCategory.shopping: Color(0xFFE9A46A),
-    AppCategory.entertainment: Color(0xFF9A8194),
-    AppCategory.family: Color(0xFF457B9D),
+    AppCategory.web: Color(0xFF6C7B95),
+    AppCategory.mobile: Color(0xFF7FB069),
+    AppCategory.desktop: Color(0xFF81B3BA),
+    AppCategory.api: Color(0xFFB08BBB),
     AppCategory.other: Color(0xFF95A3A4),
   };
 
   static const Map<AppCategory, IconData> categoryIcons = {
-    AppCategory.personal: Icons.person_rounded,
-    AppCategory.work: Icons.work_outline,
-    AppCategory.study: Icons.menu_book_outlined,
-    AppCategory.health: Icons.monitor_heart_outlined,
-    AppCategory.finance: Icons.ssid_chart_rounded,
-    AppCategory.travel: Icons.flight_takeoff,
-    AppCategory.shopping: Icons.shopping_bag_outlined,
-    AppCategory.entertainment: Icons.movie_filter_outlined,
-    AppCategory.family: Icons.family_restroom,
+    AppCategory.web: Icons.web_asset,
+    AppCategory.mobile: Icons.smartphone,
+    AppCategory.desktop: Icons.desktop_windows,
+    AppCategory.api: Icons.api,
     AppCategory.other: Icons.folder_outlined,
   };
 

@@ -1,54 +1,48 @@
-import 'package:hive/hive.dart';
-
-part 'app_category.g.dart';
-
-@HiveType(typeId: 0)
-enum AppCategory {
-  @HiveField(0)
-  personal,
-  @HiveField(1)
-  work,
-  @HiveField(2)
-  study,
-  @HiveField(3)
-  health,
-  @HiveField(4)
-  finance,
-  @HiveField(5)
-  travel,
-  @HiveField(6)
-  shopping,
-  @HiveField(7)
-  entertainment,
-  @HiveField(8)
-  family,
-  @HiveField(9)
-  other,
-}
+enum AppCategory { web, mobile, desktop, api, other }
 
 extension AppCategoryX on AppCategory {
   String get label {
     switch (this) {
-      case AppCategory.personal:
-        return 'Personal';
-      case AppCategory.work:
-        return 'Work';
-      case AppCategory.study:
-        return 'Study';
-      case AppCategory.health:
-        return 'Health';
-      case AppCategory.finance:
-        return 'Finance';
-      case AppCategory.travel:
-        return 'Travel';
-      case AppCategory.shopping:
-        return 'Shopping';
-      case AppCategory.entertainment:
-        return 'Entertainment';
-      case AppCategory.family:
-        return 'Family';
+      case AppCategory.web:
+        return 'Web';
+      case AppCategory.mobile:
+        return 'Mobile';
+      case AppCategory.desktop:
+        return 'Desktop';
+      case AppCategory.api:
+        return 'API';
       case AppCategory.other:
         return 'Other';
+    }
+  }
+
+  String get apiValue {
+    switch (this) {
+      case AppCategory.web:
+        return 'web';
+      case AppCategory.mobile:
+        return 'mobile';
+      case AppCategory.desktop:
+        return 'desktop';
+      case AppCategory.api:
+        return 'api';
+      case AppCategory.other:
+        return 'other';
+    }
+  }
+
+  static AppCategory fromApiValue(String value) {
+    switch (value) {
+      case 'web':
+        return AppCategory.web;
+      case 'mobile':
+        return AppCategory.mobile;
+      case 'desktop':
+        return AppCategory.desktop;
+      case 'api':
+        return AppCategory.api;
+      default:
+        return AppCategory.other;
     }
   }
 }

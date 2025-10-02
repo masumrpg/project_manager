@@ -29,6 +29,7 @@ class ProjectProvider extends ChangeNotifier {
       _error = null;
     } catch (error) {
       _error = error.toString();
+      _projects.clear();
     } finally {
       if (showLoading) {
         _setLoading(false);
@@ -84,6 +85,12 @@ class ProjectProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  void clear() {
+    _projects.clear();
+    _error = null;
+    notifyListeners();
   }
 
   void _setLoading(bool value) {

@@ -1,20 +1,4 @@
-import 'package:hive/hive.dart';
-
-part 'environment.g.dart';
-
-@HiveType(typeId: 1)
-enum Environment {
-  @HiveField(0)
-  development,
-  @HiveField(1)
-  staging,
-  @HiveField(2)
-  production,
-  @HiveField(3)
-  testing,
-  @HiveField(4)
-  local,
-}
+enum Environment { development, staging, production }
 
 extension EnvironmentX on Environment {
   String get label {
@@ -25,10 +9,29 @@ extension EnvironmentX on Environment {
         return 'Staging';
       case Environment.production:
         return 'Production';
-      case Environment.testing:
-        return 'Testing';
-      case Environment.local:
-        return 'Local';
+    }
+  }
+
+  String get apiValue {
+    switch (this) {
+      case Environment.development:
+        return 'development';
+      case Environment.staging:
+        return 'staging';
+      case Environment.production:
+        return 'production';
+    }
+  }
+
+  static Environment fromApiValue(String value) {
+    switch (value) {
+      case 'staging':
+        return Environment.staging;
+      case 'production':
+        return Environment.production;
+      case 'development':
+      default:
+        return Environment.development;
     }
   }
 }

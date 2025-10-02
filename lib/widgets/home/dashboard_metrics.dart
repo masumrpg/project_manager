@@ -28,11 +28,13 @@ class DashboardMetrics {
     DateTime? latest;
 
     for (final project in projects) {
-      notes += project.notes?.length ?? 0;
+      notes += project.notesCount ?? project.notes.length;
 
       final todos = project.todos;
-      if (todos != null) {
-        totalTodos += todos.length;
+      totalTodos += project.todosCount ?? todos.length;
+      if (project.completedTodosCount != null) {
+        completed += project.completedTodosCount!;
+      } else {
         for (final todo in todos) {
           if (todo.status == TodoStatus.completed) {
             completed++;

@@ -1,10 +1,10 @@
-
-import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:project_manager/screens/home_screen.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:project_manager/screens/onboarding_screen.dart';
-import 'package:project_manager/services/hive_boxes.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/auth_provider.dart';
+import '../providers/project_provider.dart';
+import 'auth_screen.dart';
+import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,42 +14,48 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  late Future<bool> _isOnboardingComplete;
-
   @override
   void initState() {
     super.initState();
-    _isOnboardingComplete = _checkOnboardingStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handleNavigation());
   }
 
-  Future<bool> _checkOnboardingStatus() async {
-    await HiveBoxes.init(); 
-    return HiveBoxes.userBox.isNotEmpty;
+  Future<void> _handleNavigation() async {
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.hasInitialized) {
+      await authProvider.bootstrap();
+    }
+
+    if (!mounted) return;
+
+    if (authProvider.isAuthenticated) {
+      final projectProvider = context.read<ProjectProvider>();
+      await projectProvider.loadProjects();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _isOnboardingComplete,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Error initializing app'));
-        } else {
-          final bool isOnboardingComplete = snapshot.data ?? false;
-          return AnimatedSplashScreen(
-            splash: Image.asset('assets/images/logo.png'),
-            nextScreen: isOnboardingComplete
-                ? const HomeScreen()
-                : const OnboardingScreen(),
-            splashTransition: SplashTransition.fadeTransition,
-            pageTransitionType: PageTransitionType.fade,
-            backgroundColor: const Color(0xFFFFFBF7),
-            duration: 1800,
-          );
-        }
-      },
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFBF7),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/images/logo.png', width: 140),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      ),
     );
   }
 }

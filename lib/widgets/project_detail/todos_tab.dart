@@ -92,10 +92,10 @@ class TodosTab extends StatelessWidget {
                             color: todo.status == TodoStatus.completed ? const Color(0xFF636E72) : null,
                           ),
                         ),
-                        if (todo.description.isNotEmpty) ...[
+                        if ((todo.description ?? '').isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
-                            _getPlainTextContent(todo.description), 
+                            _getPlainTextContent(todo.description ?? ''), 
                             maxLines: 2, 
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -221,43 +221,29 @@ class TodosTab extends StatelessWidget {
   }
 
   Color _getStatusColor(TodoStatus status) {
-    switch (status) {
-      case TodoStatus.pending:
-        return const Color(0xFF74B9FF);
-      case TodoStatus.inProgress:
-        return const Color(0xFFE17055);
-      case TodoStatus.completed:
-        return const Color(0xFF00B894);
-      case TodoStatus.cancelled:
-        return const Color(0xFFD63031);
-      case TodoStatus.onHold:
-        return const Color(0xFFFDCB6E);
-    }
+    return switch (status) {
+      TodoStatus.pending => const Color(0xFF74B9FF),
+      TodoStatus.inProgress => const Color(0xFFE17055),
+      TodoStatus.completed => const Color(0xFF00B894),
+      TodoStatus.cancelled => const Color(0xFFD63031),
+    };
   }
 
   Color _badgeColor(TodoPriority priority) {
-    switch (priority) {
-      case TodoPriority.low:
-        return const Color(0xFF4CAF50);
-      case TodoPriority.medium:
-        return const Color(0xFFFFA000);
-      case TodoPriority.high:
-        return const Color(0xFFEF5350);
-      case TodoPriority.critical:
-        return const Color(0xFFB71C1C);
-    }
+    return switch (priority) {
+      TodoPriority.low => const Color(0xFF4CAF50),
+      TodoPriority.medium => const Color(0xFFFFA000),
+      TodoPriority.high => const Color(0xFFEF5350),
+      TodoPriority.urgent => const Color(0xFF6C5CE7),
+    };
   }
 
   IconData _priorityIcon(TodoPriority priority) {
-    switch (priority) {
-      case TodoPriority.low:
-        return Icons.arrow_downward;
-      case TodoPriority.medium:
-        return Icons.filter_list;
-      case TodoPriority.high:
-        return Icons.warning_amber_outlined;
-      case TodoPriority.critical:
-        return Icons.priority_high;
-    }
+    return switch (priority) {
+      TodoPriority.low => Icons.arrow_downward,
+      TodoPriority.medium => Icons.filter_list,
+      TodoPriority.high => Icons.warning_amber_outlined,
+      TodoPriority.urgent => Icons.priority_high,
+    };
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:uuid/uuid.dart';
-import 'dart:convert';
 
 import '../../models/enums/revision_status.dart';
 import '../../models/revision.dart';
@@ -11,6 +10,7 @@ class RevisionFormSheet extends StatefulWidget {
     required this.uuid,
     required this.onCreate,
     required this.onUpdate,
+    required this.projectId,
     this.revision,
     super.key,
   });
@@ -19,6 +19,7 @@ class RevisionFormSheet extends StatefulWidget {
   final Revision? revision;
   final Future<bool> Function(Revision) onCreate;
   final Future<bool> Function(Revision) onUpdate;
+  final String projectId;
 
   @override
   State<RevisionFormSheet> createState() => _RevisionFormSheetState();
@@ -39,15 +40,10 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
     
     // Initialize Quill controller for changes
     Document document;
-    if (widget.revision?.changes != null && widget.revision!.changes.isNotEmpty) {
-      try {
-        // Try to parse as JSON (Quill format)
-        final json = jsonDecode(widget.revision!.changes);
-        document = Document.fromJson(json);
-      } catch (e) {
-        // If parsing fails, treat as plain text
-        document = Document()..insert(0, widget.revision!.changes);
-      }
+    final existingChanges = widget.revision?.changes ?? const <String>[];
+    if (existingChanges.isNotEmpty) {
+      final text = existingChanges.join('\n');
+      document = Document()..insert(0, text);
     } else {
       document = Document();
     }
@@ -266,27 +262,32 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                         if (formState == null || !formState.validate()) return;
                         
                         final navigator = Navigator.of(context);
-                        final changesJson = jsonEncode(_changeLogController.document.toDelta().toJson());
+                        final changeLines = changesText
+                            .split('\n')
+                            .map((line) => line.trim())
+                            .where((line) => line.isNotEmpty)
+                            .toList();
                         
                         final didSucceed = widget.revision == null
                             ? await widget.onCreate(
                                 Revision(
                                   id: widget.uuid.v4(),
+                                  projectId: widget.projectId,
                                   version: _versionController.text.trim(),
                                   description: _descriptionController.text.trim(),
-                                  changes: changesJson,
+                                  changes: changeLines,
                                   status: _selectedStatus,
                                   createdAt: DateTime.now(),
                                 ),
                               )
-                            : widget.revision != null
-                                ? await widget.onUpdate(
-                                    widget.revision!
-                                      ..version = _versionController.text.trim()
-                                      ..description = _descriptionController.text.trim()
-                                      ..changes = changesJson
-                                      ..status = _selectedStatus,
-                                  )
+                          : widget.revision != null
+                              ? await widget.onUpdate(
+                                  widget.revision!
+                                    ..version = _versionController.text.trim()
+                                    ..description = _descriptionController.text.trim()
+                                    ..changes = changeLines
+                                    ..status = _selectedStatus,
+                              )
                                 : false;
                         if (!mounted) return;
                         navigator.pop(didSucceed);

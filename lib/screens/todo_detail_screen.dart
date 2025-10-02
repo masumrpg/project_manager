@@ -23,7 +23,7 @@ class TodoDetailScreen extends StatefulWidget {
 }
 
 class _TodoDetailScreenState extends State<TodoDetailScreen> {
-  late final QuillController _descriptionQuillController;
+  late final QuillController _contentQuillController;
   late TodoStatus _currentStatus;
 
   @override
@@ -31,21 +31,20 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
     super.initState();
     _currentStatus = widget.todo.status;
     
-    // Initialize Quill controller with existing description content
+    // Initialize Quill controller with existing content payload
     Document document;
-    if (widget.todo.description.isNotEmpty) {
+    final content = widget.todo.content;
+    if (content != null && content.isNotEmpty) {
       try {
-        // Try to parse as JSON (Quill document)
-        final jsonData = jsonDecode(widget.todo.description);
+        final jsonData = jsonDecode(content);
         document = Document.fromJson(jsonData);
       } catch (e) {
-        // If parsing fails, treat as plain text
-        document = Document()..insert(0, widget.todo.description);
+        document = Document()..insert(0, content);
       }
     } else {
       document = Document();
     }
-    _descriptionQuillController = QuillController(
+    _contentQuillController = QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
     );
@@ -53,12 +52,15 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
 
   @override
   void dispose() {
-    _descriptionQuillController.dispose();
+    _contentQuillController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final description = widget.todo.description ?? '';
+    final hasContent = widget.todo.content != null && widget.todo.content!.isNotEmpty;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
@@ -171,7 +173,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             const SizedBox(height: 32),
             
             // Description
-            if (widget.todo.description.isNotEmpty) ...[
+            if (description.isNotEmpty) ...[
               Text(
                 'Description',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -182,27 +184,26 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
-                constraints: const BoxConstraints(minHeight: 150),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFE8D5C4)),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: QuillEditor.basic(
-                    controller: _descriptionQuillController,
-                    config: const QuillEditorConfig(
-                      padding: EdgeInsets.zero,
-                    ),
-                  ),
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF2D3436),
+                        height: 1.5,
+                      ) ??
+                      const TextStyle(color: Color(0xFF2D3436)),
                 ),
               ),
-              const SizedBox(height: 32),
-            ],
-            
-            // Due Date
-            if (widget.todo.dueDate != null) ...[
+            const SizedBox(height: 32),
+          ],
+
+          // Due Date
+          if (widget.todo.dueDate != null) ...[
               Text(
                 'Due Date',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -262,7 +263,40 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
               ),
               const SizedBox(height: 32),
             ],
-            
+
+            // Detailed Content
+            if (hasContent) ...[
+              Text(
+                'Details',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: const Color(0xFF2D3436),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(minHeight: 150),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE8D5C4)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: AbsorbPointer(
+                    child: QuillEditor.basic(
+                      controller: _contentQuillController,
+                      config: const QuillEditorConfig(
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+
             // Status with Checkbox
             Text(
               'Status',
@@ -393,43 +427,30 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
   }
 
   Color _getStatusColor(TodoStatus status) {
-    switch (status) {
-      case TodoStatus.pending:
-        return const Color(0xFF74B9FF);
-      case TodoStatus.inProgress:
-        return const Color(0xFFE17055);
-      case TodoStatus.completed:
-        return const Color(0xFF00B894);
-      case TodoStatus.cancelled:
-        return const Color(0xFFD63031);
-      case TodoStatus.onHold:
-        return const Color(0xFFFDCB6E);
-    }
+    return switch (status) {
+      TodoStatus.pending => const Color(0xFF74B9FF),
+      TodoStatus.inProgress => const Color(0xFFE17055),
+      TodoStatus.completed => const Color(0xFF00B894),
+      TodoStatus.cancelled => const Color(0xFFD63031),
+    };
   }
 
   Color _getPriorityColor(TodoPriority priority) {
-    switch (priority) {
-      case TodoPriority.low:
-        return const Color(0xFF00B894);
-      case TodoPriority.medium:
-        return const Color(0xFFE17055);
-      case TodoPriority.high:
-        return const Color(0xFFD63031);
-      case TodoPriority.critical:
-        return const Color(0xFF6C5CE7);
-    }
+    return switch (priority) {
+      TodoPriority.low => const Color(0xFF00B894),
+      TodoPriority.medium => const Color(0xFFE17055),
+      TodoPriority.high => const Color(0xFFD63031),
+      TodoPriority.urgent => const Color(0xFF6C5CE7),
+    };
   }
 
   IconData _getPriorityIcon(TodoPriority priority) {
-    switch (priority) {
-      case TodoPriority.low:
-        return Icons.keyboard_arrow_down;
-      case TodoPriority.medium:
-        return Icons.remove;
-      case TodoPriority.high:
-        return Icons.keyboard_arrow_up;
-      case TodoPriority.critical:
-        return Icons.priority_high;
-    }
+    return switch (priority) {
+      TodoPriority.low => Icons.arrow_downward,
+      TodoPriority.medium => Icons.drag_handle,
+      TodoPriority.high => Icons.arrow_upward,
+      TodoPriority.urgent => Icons.priority_high,
+    };
   }
+
 }

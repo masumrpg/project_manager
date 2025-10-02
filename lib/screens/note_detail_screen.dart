@@ -316,16 +316,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   Color _getStatusColor(NoteStatus status) {
-    switch (status) {
-      case NoteStatus.active:
-        return const Color(0xFF00B894);
-      case NoteStatus.archived:
-        return const Color(0xFF636E72);
-      case NoteStatus.draft:
-        return const Color(0xFFE17055);
-      case NoteStatus.deleted:
-        return const Color(0xFFD63031);
-    }
+    return switch (status) {
+      NoteStatus.active => const Color(0xFF00B894),
+      NoteStatus.archived => const Color(0xFF636E72),
+      NoteStatus.draft => const Color(0xFFE17055),
+    };
   }
 
   String _formatDateTime(DateTime dateTime) {

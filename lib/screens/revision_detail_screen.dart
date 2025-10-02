@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
@@ -28,15 +26,10 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
     
     // Initialize Quill controller with existing changes content
     Document document;
-    if (widget.revision.changes.isNotEmpty) {
-      try {
-        // Try to parse as JSON (Quill document)
-        final jsonData = jsonDecode(widget.revision.changes);
-        document = Document.fromJson(jsonData);
-      } catch (e) {
-        // If parsing fails, treat as plain text
-        document = Document()..insert(0, widget.revision.changes);
-      }
+    final changes = widget.revision.changes;
+    if (changes.isNotEmpty) {
+      final text = changes.join('\n');
+      document = Document()..insert(0, text);
     } else {
       document = Document();
     }
@@ -255,17 +248,10 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
   }
 
   Color _getStatusColor(RevisionStatus status) {
-    switch (status) {
-      case RevisionStatus.pending:
-        return const Color(0xFF74B9FF);
-      case RevisionStatus.inProgress:
-        return const Color(0xFFE17055);
-      case RevisionStatus.completed:
-        return const Color(0xFF00B894);
-      case RevisionStatus.cancelled:
-        return const Color(0xFFD63031);
-      case RevisionStatus.onHold:
-        return const Color(0xFFFDCB6E);
-    }
+    return switch (status) {
+      RevisionStatus.pending => const Color(0xFF74B9FF),
+      RevisionStatus.approved => const Color(0xFF00B894),
+      RevisionStatus.rejected => const Color(0xFFD63031),
+    };
   }
 }

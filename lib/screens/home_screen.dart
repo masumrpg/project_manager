@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
-
 import '../models/enums/app_category.dart';
 import '../models/enums/environment.dart';
 import '../models/project.dart';
+import '../providers/auth_provider.dart';
 import '../providers/project_provider.dart';
-import '../services/hive_boxes.dart';
+import 'auth_screen.dart';
 import '../widgets/home/dashboard_metrics.dart';
 import '../widgets/home/home_constants.dart';
 import '../widgets/home/modern_header.dart';
@@ -17,14 +16,13 @@ import 'project_detail_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static final _uuid = Uuid();
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 1024;
     final isTablet = screenWidth > 768 && screenWidth <= 1024;
+    final auth = context.watch<AuthProvider>();
 
     return Scaffold(
       backgroundColor: HomeConstants.primaryBeige,
@@ -60,7 +58,8 @@ class HomeScreen extends StatelessWidget {
                       onCreateProject: () => _showProjectDialog(context),
                       isDesktop: isDesktop,
                       isTablet: isTablet,
-                      onClearDatabase: () => _showClearDatabaseDialog(context),
+                      onSignOut: () => _confirmSignOut(context),
+                      user: auth.currentUser,
                     ),
                   ),
                   if (projects.isEmpty)
@@ -157,10 +156,12 @@ class HomeScreen extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController(text: project?.title ?? '');
     final descriptionController = TextEditingController(text: project?.description ?? '');
-    AppCategory selectedCategory = project?.category ?? AppCategory.work;
+    AppCategory selectedCategory = project?.category ?? AppCategory.web;
     Environment selectedEnvironment = project?.environment ?? Environment.development;
 
     final provider = context.read<ProjectProvider>();
+    final auth = context.read<AuthProvider>();
+    final currentUserId = auth.currentUser?.id ?? '';
 
     await showModalBottomSheet<void>(
       context: context,
@@ -335,20 +336,29 @@ class HomeScreen extends StatelessWidget {
                     child: FilledButton(
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          final newProject = Project(
-                            id: project?.id ?? _uuid.v4(),
-                            title: titleController.text.trim(),
-                            description: descriptionController.text.trim(),
-                            category: selectedCategory,
-                            environment: selectedEnvironment,
-                            createdAt: project?.createdAt ?? DateTime.now(),
-                            updatedAt: DateTime.now(),
-                          );
+                          final now = DateTime.now();
+                          final updatedProject = project?.copyWith(
+                                title: titleController.text.trim(),
+                                description: descriptionController.text.trim(),
+                                category: selectedCategory,
+                                environment: selectedEnvironment,
+                                updatedAt: now,
+                              ) ??
+                              Project(
+                                id: '',
+                                userId: currentUserId,
+                                title: titleController.text.trim(),
+                                description: descriptionController.text.trim(),
+                                category: selectedCategory,
+                                environment: selectedEnvironment,
+                                createdAt: now,
+                                updatedAt: now,
+                              );
 
                           if (project == null) {
-                            await provider.createProject(newProject);
+                            await provider.createProject(updatedProject);
                           } else {
-                            await provider.updateProject(newProject);
+                            await provider.updateProject(updatedProject);
                           }
 
                           if (context.mounted) {
@@ -473,21 +483,21 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _showClearDatabaseDialog(BuildContext context) async {
+  Future<void> _confirmSignOut(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: HomeConstants.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Clear Database',
+          'Sign Out',
           style: TextStyle(
             color: HomeConstants.darkText,
             fontWeight: FontWeight.w600,
           ),
         ),
         content: Text(
-          'Are you sure you want to clear all data? This will delete all projects, notes, todos, and revisions. This action cannot be undone.',
+          'Are you sure you want to sign out from this device?',
           style: TextStyle(color: HomeConstants.lightText),
         ),
         actions: [
@@ -502,7 +512,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text(
-              'Clear All',
+              'Sign Out',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -511,13 +521,15 @@ class HomeScreen extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      await HiveBoxes.clearAllData();
-      if (context.mounted) {
-        await context.read<ProjectProvider>().loadProjects();
-        if (context.mounted) {
-          _showOperationResult(context, 'Database cleared successfully!');
-        }
-      }
+      final auth = context.read<AuthProvider>();
+      final projects = context.read<ProjectProvider>();
+      await auth.signOut();
+      projects.clear();
+      if (!context.mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+        (route) => false,
+      );
     }
   }
 }
