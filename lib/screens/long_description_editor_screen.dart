@@ -25,6 +25,7 @@ class LongDescriptionEditorScreen extends StatefulWidget {
 
 class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScreen> {
   late final QuillController _controller;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -60,10 +61,27 @@ class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScree
       Navigator.of(context).pop();
       return;
     }
+
+    setState(() {
+      _isLoading = true;
+    });
+
     final jsonStr = jsonEncode(_controller.document.toDelta().toJson());
-    final ok = await widget.onSave!(jsonStr);
-    if (!mounted) return;
-    if (ok) Navigator.of(context).pop(true);
+    bool ok = false;
+    try {
+      ok = await widget.onSave!(jsonStr);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+
+    if (ok) {
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    }
   }
 
   @override
@@ -72,18 +90,31 @@ class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScree
       appBar: AppBar(
         title: Text('Deskripsi Lengkap • ${widget.projectTitle}'),
         actions: [
-          if (!widget.readOnly && widget.onSave != null)
-            IconButton(
-              tooltip: 'Simpan',
-              onPressed: _save,
-              icon: const Icon(Icons.save_outlined),
-            ),
-          if (widget.readOnly && widget.onEdit != null)
-            IconButton(
-              tooltip: 'Edit',
-              onPressed: widget.onEdit,
-              icon: const Icon(Icons.edit_outlined),
-            ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            )
+          else ...[
+            if (!widget.readOnly && widget.onSave != null)
+              IconButton(
+                tooltip: 'Simpan',
+                onPressed: _save,
+                icon: const Icon(Icons.save_outlined),
+              ),
+            if (widget.readOnly && widget.onEdit != null)
+              IconButton(
+                tooltip: 'Edit',
+                onPressed: widget.onEdit,
+                icon: const Icon(Icons.edit_outlined),
+              ),
+          ]
         ],
       ),
       body: Column(

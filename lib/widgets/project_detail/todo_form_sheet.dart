@@ -37,6 +37,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
   DateTime? _dueDate;
   late TodoPriority _selectedPriority;
   late TodoStatus _selectedStatus;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -325,61 +326,71 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
                       child: const Text('Cancel'),
                     ),
                     const SizedBox(width: 12),
                     FilledButton(
-                      onPressed: () async {
-                        final formState = _formKey.currentState;
-                        if (formState == null || !formState.validate()) return;
-                        final navigator = Navigator.of(context);
-                        final now = DateTime.now();
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              final formState = _formKey.currentState;
+                              if (formState == null || !formState.validate()) return;
 
-                        final descriptionText = _descriptionController.text
-                            .trim();
-                        final contentJson =
-                            _contentQuillController.document.isEmpty()
-                            ? null
-                            : jsonEncode(
-                                _contentQuillController.document
-                                    .toDelta()
-                                    .toJson(),
-                              );
+                              setState(() {
+                                _isLoading = true;
+                              });
 
-                        final didSucceed = widget.todo == null
-                            ? await widget.onCreate(
-                                Todo(
-                                  id: widget.uuid.v4(),
-                                  projectId: widget.projectId,
-                                  title: _titleController.text.trim(),
-                                  description: descriptionText,
-                                  content: contentJson,
-                                  priority: _selectedPriority,
-                                  status: _selectedStatus,
-                                  dueDate: _dueDate,
-                                  createdAt: now,
-                                  completedAt: _selectedStatus == TodoStatus.completed ? now : null,
-                                ),
-                              )
-                            : await widget.onUpdate(
-                                widget.todo!
-                                  ..title = _titleController.text.trim()
-                                  ..description = descriptionText
-                                  ..content = contentJson
-                                  ..priority = _selectedPriority
-                                  ..status = _selectedStatus
-                                  ..dueDate = _dueDate
-                                  ..completedAt =
-                                      _selectedStatus == TodoStatus.completed
-                                      ? (widget.todo?.completedAt ??
-                                            DateTime.now())
-                                      : null,
-                              );
-                        if (!mounted) return;
-                        navigator.pop(didSucceed);
-                      },
-                      child: Text(widget.todo == null ? 'Create' : 'Save'),
+                              final navigator = Navigator.of(context);
+                              final now = DateTime.now();
+
+                              final descriptionText = _descriptionController.text.trim();
+                              final contentJson = _contentQuillController.document.isEmpty()
+                                  ? null
+                                  : jsonEncode(
+                                      _contentQuillController.document.toDelta().toJson(),
+                                    );
+
+                              final didSucceed = widget.todo == null
+                                  ? await widget.onCreate(
+                                      Todo(
+                                        id: widget.uuid.v4(),
+                                        projectId: widget.projectId,
+                                        title: _titleController.text.trim(),
+                                        description: descriptionText,
+                                        content: contentJson,
+                                        priority: _selectedPriority,
+                                        status: _selectedStatus,
+                                        dueDate: _dueDate,
+                                        createdAt: now,
+                                        completedAt: _selectedStatus == TodoStatus.completed ? now : null,
+                                      ),
+                                    )
+                                  : await widget.onUpdate(
+                                      widget.todo!
+                                        ..title = _titleController.text.trim()
+                                        ..description = descriptionText
+                                        ..content = contentJson
+                                        ..priority = _selectedPriority
+                                        ..status = _selectedStatus
+                                        ..dueDate = _dueDate
+                                        ..completedAt = _selectedStatus == TodoStatus.completed
+                                            ? (widget.todo?.completedAt ?? DateTime.now())
+                                            : null,
+                                    );
+                              if (!mounted) return;
+                              navigator.pop(didSucceed);
+                            },
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(widget.todo == null ? 'Create' : 'Save'),
                     ),
                   ],
                 ),

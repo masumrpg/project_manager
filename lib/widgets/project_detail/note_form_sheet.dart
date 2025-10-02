@@ -32,6 +32,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
   late final TextEditingController _descriptionController;
   late final QuillController _quillController;
   late NoteStatus _selectedStatus;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -269,61 +270,76 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
                       child: const Text('Cancel'),
                     ),
                     const SizedBox(width: 12),
                     FilledButton(
-                      onPressed: () async {
-                        final formState = _formKey.currentState;
-                        if (formState == null || !formState.validate()) return;
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              final formState = _formKey.currentState;
+                              if (formState == null || !formState.validate()) return;
 
-                        // Validate that content is not empty
-                        final plainText = _quillController.document.toPlainText().trim();
-                        if (plainText.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Content is required'),
-                              backgroundColor: Color(0xFFE07A5F),
-                            ),
-                          );
-                          return;
-                        }
+                              // Validate that content is not empty
+                              final plainText = _quillController.document.toPlainText().trim();
+                              if (plainText.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Content is required'),
+                                    backgroundColor: Color(0xFFE07A5F),
+                                  ),
+                                );
+                                return;
+                              }
 
-                        final navigator = Navigator.of(context);
-                        final now = DateTime.now();
+                              setState(() {
+                                _isLoading = true;
+                              });
 
-                        // Convert Quill document to JSON string
-                        final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
+                              final navigator = Navigator.of(context);
+                              final now = DateTime.now();
 
-                        final didSucceed = widget.note == null
-                            ? await widget.onCreate(
-                                Note(
-                                  id: widget.uuid.v4(),
-                                  projectId: widget.projectId,
-                                  title: _titleController.text.trim(),
-                                  description: _descriptionController.text.trim(),
-                                  content: contentJson,
-                                  status: _selectedStatus,
-                                  createdAt: now,
-                                  updatedAt: now,
-                                ),
-                              )
-                            : widget.note != null
-                                ? await widget.onUpdate(
-                                    widget.note!
-                                      ..title = _titleController.text.trim()
-                                      ..description = _descriptionController.text.trim()
-                                      ..content = contentJson
-                                      ..status = _selectedStatus
-                                      ..updatedAt = now,
-                                  )
-                                : false;
+                              // Convert Quill document to JSON string
+                              final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
 
-                        if (!mounted) return;
-                        navigator.pop(didSucceed);
-                      },
-                      child: Text(widget.note == null ? 'Create' : 'Save'),
+                              final didSucceed = widget.note == null
+                                  ? await widget.onCreate(
+                                      Note(
+                                        id: widget.uuid.v4(),
+                                        projectId: widget.projectId,
+                                        title: _titleController.text.trim(),
+                                        description: _descriptionController.text.trim(),
+                                        content: contentJson,
+                                        status: _selectedStatus,
+                                        createdAt: now,
+                                        updatedAt: now,
+                                      ),
+                                    )
+                                  : widget.note != null
+                                      ? await widget.onUpdate(
+                                          widget.note!
+                                            ..title = _titleController.text.trim()
+                                            ..description = _descriptionController.text.trim()
+                                            ..content = contentJson
+                                            ..status = _selectedStatus
+                                            ..updatedAt = now,
+                                        )
+                                      : false;
+
+                              if (!mounted) return;
+                              navigator.pop(didSucceed);
+                            },
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(widget.note == null ? 'Create' : 'Save'),
                     ),
                   ],
                 ),

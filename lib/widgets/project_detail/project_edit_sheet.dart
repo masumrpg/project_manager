@@ -26,6 +26,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
   late final TextEditingController _descriptionController;
   late AppCategory _selectedCategory;
   late Environment _selectedEnvironment;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -49,6 +50,10 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     final projectProvider = context.read<ProjectProvider>();
     final detailProvider = context.read<ProjectDetailProvider>();
     final navigator = Navigator.of(context);
@@ -62,10 +67,15 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
 
     final success = await projectProvider.updateProject(updatedProject);
 
+    if (!mounted) return;
+
     if (success) {
       await detailProvider.loadProject(showLoading: false);
       navigator.pop(true); // Pop with success
     } else {
+      setState(() {
+        _isLoading = false;
+      });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -123,7 +133,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                   ),
                   const Spacer(),
                   IconButton(
-                    onPressed: () => Navigator.of(context).pop(false),
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
                     icon: const Icon(Icons.close),
                     style: IconButton.styleFrom(
                       backgroundColor: const Color(0xFFF5E6D3).withAlpha((255 * 0.3).round()), // primaryBeige
@@ -210,7 +220,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                 children: [
                   Expanded(
                     child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
                       style: TextButton.styleFrom(
                         foregroundColor: const Color(0xFF636E72), // lightText
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -225,14 +235,23 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton(
-                      onPressed: _submitForm,
+                      onPressed: _isLoading ? null : _submitForm,
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFFE07A5F), // accentOrange
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                      child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],

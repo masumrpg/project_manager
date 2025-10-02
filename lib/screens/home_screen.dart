@@ -153,280 +153,349 @@ class HomeScreen extends StatelessWidget {
     BuildContext context, {
     Project? project,
   }) async {
-    final formKey = GlobalKey<FormState>();
-    final titleController = TextEditingController(text: project?.title ?? '');
-    final descriptionController = TextEditingController(text: project?.description ?? '');
-    AppCategory selectedCategory = project?.category ?? AppCategory.web;
-    Environment selectedEnvironment = project?.environment ?? Environment.development;
-
     final provider = context.read<ProjectProvider>();
     final auth = context.read<AuthProvider>();
     final currentUserId = auth.currentUser?.id ?? '';
 
-    await showModalBottomSheet<void>(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: HomeConstants.cardBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final formKey = GlobalKey<FormState>();
+        final titleController = TextEditingController(
+          text: project?.title ?? '',
+        );
+        final descriptionController = TextEditingController(
+          text: project?.description ?? '',
+        );
+        var selectedCategory = project?.category ?? AppCategory.mobile;
+        var selectedEnvironment =
+            project?.environment ?? Environment.development;
+        bool isLoading = false;
+
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: HomeConstants.cardBackground,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        project == null ? 'Create Project' : 'Edit Project',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              color: HomeConstants.darkText,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        project == null ? 'Create New Project' : 'Edit Project',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: HomeConstants.darkText,
+                        ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close, color: HomeConstants.lightText),
+                      const SizedBox(height: 24),
+                      TextFormField(
+                        controller: titleController,
+                        decoration: InputDecoration(
+                          labelText: 'Project Title',
+                          labelStyle: const TextStyle(
+                            color: HomeConstants.lightText,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.secondaryBeige,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.accentOrange,
+                              width: 2,
+                            ),
+                          ),
+                          fillColor: HomeConstants.primaryBeige.withValues(
+                            alpha: 0.3,
+                          ),
+                          filled: true,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a project title';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: descriptionController,
+                        decoration: InputDecoration(
+                          labelText: 'Description',
+                          labelStyle: const TextStyle(
+                            color: HomeConstants.lightText,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.secondaryBeige,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.accentOrange,
+                              width: 2,
+                            ),
+                          ),
+                          fillColor: HomeConstants.primaryBeige.withValues(
+                            alpha: 0.3,
+                          ),
+                          filled: true,
+                        ),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<AppCategory>(
+                        initialValue: selectedCategory,
+                        decoration: InputDecoration(
+                          labelText: 'Category',
+                          labelStyle: const TextStyle(
+                            color: HomeConstants.lightText,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.secondaryBeige,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.accentOrange,
+                              width: 2,
+                            ),
+                          ),
+                          fillColor: HomeConstants.primaryBeige.withValues(
+                            alpha: 0.3,
+                          ),
+                          filled: true,
+                        ),
+                        items: AppCategory.values.map((cat) {
+                          return DropdownMenuItem(
+                            value: cat,
+                            child: Text(cat.label),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => selectedCategory = value);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<Environment>(
+                        initialValue: selectedEnvironment,
+                        decoration: InputDecoration(
+                          labelText: 'Environment',
+                          labelStyle: const TextStyle(
+                            color: HomeConstants.lightText,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.secondaryBeige,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: HomeConstants.accentOrange,
+                              width: 2,
+                            ),
+                          ),
+                          fillColor: HomeConstants.primaryBeige.withValues(
+                            alpha: 0.3,
+                          ),
+                          filled: true,
+                        ),
+                        items: Environment.values.map((env) {
+                          return DropdownMenuItem(
+                            value: env,
+                            child: Text(env.name.toUpperCase()),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => selectedEnvironment = value);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  if (formKey.currentState!.validate()) {
+                                    setState(() => isLoading = true);
+
+                                    final now = DateTime.now();
+                                    final updatedProject =
+                                        project?.copyWith(
+                                          title: titleController.text.trim(),
+                                          description: descriptionController
+                                              .text
+                                              .trim(),
+                                          category: selectedCategory,
+                                          environment: selectedEnvironment,
+                                          updatedAt: now,
+                                        ) ??
+                                        Project(
+                                          id: '',
+                                          userId: currentUserId,
+                                          title: titleController.text.trim(),
+                                          description: descriptionController
+                                              .text
+                                              .trim(),
+                                          category: selectedCategory,
+                                          environment: selectedEnvironment,
+                                          createdAt: now,
+                                          updatedAt: now,
+                                        );
+
+                                    bool success = false;
+                                    if (project == null) {
+                                      success = await provider.createProject(
+                                        updatedProject,
+                                      );
+                                    } else {
+                                      success = await provider.updateProject(
+                                        updatedProject,
+                                      );
+                                    }
+
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                      if (success) {
+                                        _showOperationResult(
+                                          context,
+                                          project == null
+                                              ? 'Project created successfully!'
+                                              : 'Project updated successfully!',
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: HomeConstants.accentOrange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  project == null
+                                      ? 'Create Project'
+                                      : 'Update Project',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Project Title',
-                      labelStyle: const TextStyle(color: HomeConstants.lightText),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: HomeConstants.accentOrange,
-                          width: 2,
-                        ),
-                      ),
-                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
-                      filled: true,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a project title';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: descriptionController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      labelStyle: const TextStyle(color: HomeConstants.lightText),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: HomeConstants.accentOrange,
-                          width: 2,
-                        ),
-                      ),
-                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
-                      filled: true,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<AppCategory>(
-                    initialValue: selectedCategory,
-                    decoration: InputDecoration(
-                      labelText: 'Category',
-                      labelStyle: const TextStyle(color: HomeConstants.lightText),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: HomeConstants.accentOrange,
-                          width: 2,
-                        ),
-                      ),
-                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
-                      filled: true,
-                    ),
-                    items: AppCategory.values.map((category) {
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Row(
-                          children: [
-                            Icon(
-                              HomeConstants.categoryIcons[category] ??
-                                  Icons.folder,
-                              color: _categoryColor(category),
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(category.name.toUpperCase()),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => selectedCategory = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<Environment>(
-                    initialValue: selectedEnvironment,
-                    decoration: InputDecoration(
-                      labelText: 'Environment',
-                      labelStyle: const TextStyle(color: HomeConstants.lightText),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: HomeConstants.accentOrange,
-                          width: 2,
-                        ),
-                      ),
-                      fillColor: HomeConstants.primaryBeige.withValues(alpha: 0.3),
-                      filled: true,
-                    ),
-                    items: Environment.values.map((env) {
-                      return DropdownMenuItem(
-                        value: env,
-                        child: Text(env.name.toUpperCase()),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => selectedEnvironment = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () async {
-                        if (formKey.currentState!.validate()) {
-                          final now = DateTime.now();
-                          final updatedProject = project?.copyWith(
-                                title: titleController.text.trim(),
-                                description: descriptionController.text.trim(),
-                                category: selectedCategory,
-                                environment: selectedEnvironment,
-                                updatedAt: now,
-                              ) ??
-                              Project(
-                                id: '',
-                                userId: currentUserId,
-                                title: titleController.text.trim(),
-                                description: descriptionController.text.trim(),
-                                category: selectedCategory,
-                                environment: selectedEnvironment,
-                                createdAt: now,
-                                updatedAt: now,
-                              );
-
-                          if (project == null) {
-                            await provider.createProject(updatedProject);
-                          } else {
-                            await provider.updateProject(updatedProject);
-                          }
-
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                            _showOperationResult(
-                              context,
-                              project == null
-                                  ? 'Project created successfully!'
-                                  : 'Project updated successfully!',
-                            );
-                          }
-                        }
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: HomeConstants.accentOrange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        project == null ? 'Create Project' : 'Update Project',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
   Future<void> _confirmDelete(BuildContext context, Project project) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: HomeConstants.cardBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Delete Project',
-          style: TextStyle(
-            color: HomeConstants.darkText,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete "${project.title}"? This action cannot be undone.',
-          style: TextStyle(color: HomeConstants.lightText),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: HomeConstants.lightText),
-            ),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+      builder: (context) {
+        bool isLoading = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: HomeConstants.cardBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(
+                'Delete Project',
+                style: TextStyle(
+                  color: HomeConstants.darkText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              content: Text(
+                'Are you sure you want to delete "${project.title}"? This action cannot be undone.',
+                style: TextStyle(color: HomeConstants.lightText),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isLoading
+                      ? null
+                      : () => Navigator.pop(context, false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: HomeConstants.lightText),
+                  ),
+                ),
+                FilledButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          setState(() => isLoading = true);
+                          Navigator.pop(context, true);
+                        },
+                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
     if (confirmed == true && context.mounted) {
@@ -459,10 +528,6 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  Color _categoryColor(AppCategory category) {
-    return HomeConstants.categoryColors[category] ?? HomeConstants.accentOrange;
-  }
-
   void _openProjectDetail(BuildContext context, String projectId) {
     Navigator.push(
       context,
@@ -486,38 +551,63 @@ class HomeScreen extends StatelessWidget {
   Future<void> _confirmSignOut(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: HomeConstants.cardBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Sign Out',
-          style: TextStyle(
-            color: HomeConstants.darkText,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to sign out from this device?',
-          style: TextStyle(color: HomeConstants.lightText),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: HomeConstants.lightText),
-            ),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text(
-              'Sign Out',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+      builder: (context) {
+        bool isLoading = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: HomeConstants.cardBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(
+                'Sign Out',
+                style: TextStyle(
+                  color: HomeConstants.darkText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              content: Text(
+                'Are you sure you want to sign out from this device?',
+                style: TextStyle(color: HomeConstants.lightText),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isLoading
+                      ? null
+                      : () => Navigator.pop(context, false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: HomeConstants.lightText),
+                  ),
+                ),
+                FilledButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          setState(() => isLoading = true);
+                          Navigator.pop(context, true);
+                        },
+                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Sign Out',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
     if (confirmed == true && context.mounted) {

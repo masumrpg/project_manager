@@ -31,6 +31,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
   late final TextEditingController _descriptionController;
   late final QuillController _changeLogController;
   late RevisionStatus _selectedStatus;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -243,56 +244,71 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
                       child: const Text('Cancel'),
                     ),
                     const SizedBox(width: 12),
                     FilledButton(
-                      onPressed: () async {
-                        // Validate changes field manually since it's not a TextFormField
-                        final changesText = _changeLogController.document.toPlainText().trim();
-                        if (changesText.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Changes is required')),
-                          );
-                          return;
-                        }
-                        
-                        final formState = _formKey.currentState;
-                        if (formState == null || !formState.validate()) return;
-                        
-                        final navigator = Navigator.of(context);
-                        final changeLines = changesText
-                            .split('\n')
-                            .map((line) => line.trim())
-                            .where((line) => line.isNotEmpty)
-                            .toList();
-                        
-                        final didSucceed = widget.revision == null
-                            ? await widget.onCreate(
-                                Revision(
-                                  id: widget.uuid.v4(),
-                                  projectId: widget.projectId,
-                                  version: _versionController.text.trim(),
-                                  description: _descriptionController.text.trim(),
-                                  changes: changeLines,
-                                  status: _selectedStatus,
-                                  createdAt: DateTime.now(),
-                                ),
-                              )
-                          : widget.revision != null
-                              ? await widget.onUpdate(
-                                  widget.revision!
-                                    ..version = _versionController.text.trim()
-                                    ..description = _descriptionController.text.trim()
-                                    ..changes = changeLines
-                                    ..status = _selectedStatus,
-                              )
-                                : false;
-                        if (!mounted) return;
-                        navigator.pop(didSucceed);
-                      },
-                      child: Text(widget.revision == null ? 'Create' : 'Save'),
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              // Validate changes field manually since it's not a TextFormField
+                              final changesText = _changeLogController.document.toPlainText().trim();
+                              if (changesText.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Changes is required')),
+                                );
+                                return;
+                              }
+
+                              final formState = _formKey.currentState;
+                              if (formState == null || !formState.validate()) return;
+
+                              setState(() {
+                                _isLoading = true;
+                              });
+
+                              final navigator = Navigator.of(context);
+                              final changeLines = changesText
+                                  .split('\n')
+                                  .map((line) => line.trim())
+                                  .where((line) => line.isNotEmpty)
+                                  .toList();
+
+                              final didSucceed = widget.revision == null
+                                  ? await widget.onCreate(
+                                      Revision(
+                                        id: widget.uuid.v4(),
+                                        projectId: widget.projectId,
+                                        version: _versionController.text.trim(),
+                                        description: _descriptionController.text.trim(),
+                                        changes: changeLines,
+                                        status: _selectedStatus,
+                                        createdAt: DateTime.now(),
+                                      ),
+                                    )
+                                  : widget.revision != null
+                                      ? await widget.onUpdate(
+                                          widget.revision!
+                                            ..version = _versionController.text.trim()
+                                            ..description = _descriptionController.text.trim()
+                                            ..changes = changeLines
+                                            ..status = _selectedStatus,
+                                        )
+                                      : false;
+                              if (!mounted) return;
+                              navigator.pop(didSucceed);
+                            },
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(widget.revision == null ? 'Create' : 'Save'),
                     ),
                   ],
                 ),
