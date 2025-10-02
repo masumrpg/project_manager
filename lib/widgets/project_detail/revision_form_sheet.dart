@@ -255,10 +255,15 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                               // Validate changes field manually since it's not a TextFormField
                               final changesText = _changeLogController.document.toPlainText().trim();
                               if (changesText.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Changes is required')),
-                                );
-                                return;
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                SnackBar(
+                                                                  content: const Text('Changes is required'),
+                                                                  backgroundColor: const Color(0xFFE07A5F),
+                                                                  behavior: SnackBarBehavior.floating,
+                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                  margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                                                                ),
+                                                              );                                return;
                               }
 
                               final formState = _formKey.currentState;

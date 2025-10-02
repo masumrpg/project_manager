@@ -267,6 +267,8 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       DropdownButtonFormField<AppCategory>(
                         initialValue: selectedCategory,
+                        dropdownColor: HomeConstants.cardBackground,
+                        borderRadius: BorderRadius.circular(16),
                         decoration: InputDecoration(
                           labelText: 'Category',
                           labelStyle: const TextStyle(
@@ -305,6 +307,8 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       DropdownButtonFormField<Environment>(
                         initialValue: selectedEnvironment,
+                        dropdownColor: HomeConstants.cardBackground,
+                        borderRadius: BorderRadius.circular(16),
                         decoration: InputDecoration(
                           labelText: 'Environment',
                           labelStyle: const TextStyle(

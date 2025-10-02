@@ -284,13 +284,15 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                               // Validate that content is not empty
                               final plainText = _quillController.document.toPlainText().trim();
                               if (plainText.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Content is required'),
-                                    backgroundColor: Color(0xFFE07A5F),
-                                  ),
-                                );
-                                return;
+                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                            SnackBar(
+                                                              content: const Text('Content is required'),
+                                                              backgroundColor: const Color(0xFFE07A5F),
+                                                              behavior: SnackBarBehavior.floating,
+                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                              margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                                                            ),
+                                                          );                                return;
                               }
 
                               setState(() {
