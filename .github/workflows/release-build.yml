@@ -1,0 +1,221 @@
+name: Release Builds
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+jobs:
+  android_linux:
+    name: Android & Linux
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev zip
+
+      - name: Fetch packages
+        run: flutter pub get
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Precache toolchains
+        run: flutter precache --linux --android --no-ios --no-web
+
+      - name: Configure Android signing (optional)
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
+          printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_PASSWORD" > android/key.properties
+          printf 'keyPassword=%s\n' "$ANDROID_KEY_PASSWORD" >> android/key.properties
+          printf 'keyAlias=%s\n' "$ANDROID_KEY_ALIAS" >> android/key.properties
+          printf 'storeFile=release.keystore\n' >> android/key.properties
+        shell: bash
+
+      - name: Build Android APK (release)
+        run: flutter build apk --release
+
+      - name: Build Linux bundle (release)
+        run: flutter build linux --release
+
+      - name: Package Linux bundle
+        run: |
+          cd build/linux/x64/release
+          zip -r linux-x64-release.zip bundle
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-zip
+          path: build/linux/x64/release/linux-x64-release.zip
+          if-no-files-found: error
+
+      - name: Clean up signing artifacts
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          rm -f android/app/release.keystore android/key.properties
+        shell: bash
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Fetch packages
+        run: flutter pub get
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Precache Windows toolchain
+        run: flutter precache --windows --no-ios --no-web
+
+      - name: Build Windows bundle (release)
+        run: flutter build windows --release
+
+      - name: Package Windows bundle
+        shell: pwsh
+        run: |
+          $output = "${{ github.workspace }}\windows-x64-release.zip"
+          $sourceDir = "${{ github.workspace }}\build\windows\x64\runner"
+          if (-Not (Test-Path $sourceDir)) {
+            Write-Error 'Windows runner output not found'
+            exit 1
+          }
+          if (Test-Path $output) { Remove-Item $output }
+          Compress-Archive -Path $sourceDir -DestinationPath $output
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: windows-x64-release.zip
+          if-no-files-found: error
+
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Fetch packages
+        run: flutter pub get
+
+      - name: Enable macOS desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Precache macOS toolchain
+        run: flutter precache --macos --no-ios --no-web
+
+      - name: Build macOS app (release)
+        run: flutter build macos --release
+
+      - name: Package macOS app
+        run: |
+          APP_PATH=$(find build/macos/Build/Products/Release -maxdepth 1 -type d -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app bundle produced" >&2
+            exit 1
+          fi
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" macos-release.zip
+        shell: bash
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-zip
+          path: macos-release.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs:
+      - android_linux
+      - windows
+      - macos
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          files: |
+            dist/app-release.apk
+            dist/linux-x64-release.zip
+            dist/windows-x64-release.zip
+            dist/macos-release.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
