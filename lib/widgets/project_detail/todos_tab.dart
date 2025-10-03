@@ -18,7 +18,7 @@ class TodosTab extends StatelessWidget {
   final List<Todo> todos;
   final ValueChanged<Todo> onEdit;
   final ValueChanged<Todo> onDelete;
-  final void Function(Todo, TodoStatus) onStatusChange;
+  final Future<void> Function(Todo, TodoStatus) onStatusChange;
   final VoidCallback onAdd;
 
   @override
@@ -68,9 +68,10 @@ class TodosTab extends StatelessWidget {
                     ),
                   ),
                 ),
-                onStatusChange: (isCompleted) {
-                  final newStatus = isCompleted ? TodoStatus.completed : TodoStatus.pending;
-                  onStatusChange(todo, newStatus);
+                onStatusChange: (isCompleted) async {
+                  final newStatus =
+                      isCompleted ? TodoStatus.completed : TodoStatus.pending;
+                  await onStatusChange(todo, newStatus);
                 },
                 onEdit: () => onEdit(todo),
                 onDelete: () => onDelete(todo),
@@ -95,9 +96,10 @@ class TodosTab extends StatelessWidget {
                     ),
                   ),
                 ),
-                onStatusChange: (isCompleted) {
-                  final newStatus = isCompleted ? TodoStatus.completed : TodoStatus.pending;
-                  onStatusChange(todo, newStatus);
+                onStatusChange: (isCompleted) async {
+                  final newStatus =
+                      isCompleted ? TodoStatus.completed : TodoStatus.pending;
+                  await onStatusChange(todo, newStatus);
                 },
                 onEdit: () => onEdit(todo),
                 onDelete: () => onDelete(todo),

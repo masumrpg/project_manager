@@ -22,6 +22,7 @@ import '../widgets/project_detail/revisions_tab.dart';
 import '../widgets/project_detail/todos_tab.dart';
 import '../widgets/project_detail/error_section.dart';
 import '../widgets/project_detail/tab_button.dart';
+import '../widgets/shared/hover_expandable_fab.dart';
 
 class ProjectDetailScreen extends StatelessWidget {
   const ProjectDetailScreen({required this.projectId, super.key});
@@ -666,67 +667,28 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
   ) {
     switch (_tabController.index) {
       case 0:
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: accentOrange.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FloatingActionButton.extended(
-            backgroundColor: accentOrange,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            onPressed: () => _showNoteSheet(context, provider),
-            icon: const Icon(Icons.note_add_outlined),
-            label: const Text('Add Note'),
-          ),
+        return HoverExpandableFab(
+          onPressed: () => _showNoteSheet(context, provider),
+          icon: Icons.note_add_outlined,
+          label: 'Add Note',
+          backgroundColor: accentOrange,
+          foregroundColor: Colors.white,
         );
       case 1:
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: accentOrange.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FloatingActionButton.extended(
-            backgroundColor: accentOrange,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            onPressed: () => _showRevisionSheet(context, provider),
-            icon: const Icon(Icons.history_edu_outlined),
-            label: const Text('Add Revision'),
-          ),
+        return HoverExpandableFab(
+          onPressed: () => _showRevisionSheet(context, provider),
+          icon: Icons.history_edu_outlined,
+          label: 'Add Revision',
+          backgroundColor: accentOrange,
+          foregroundColor: Colors.white,
         );
       case 2:
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: accentOrange.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FloatingActionButton.extended(
-            backgroundColor: accentOrange,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            onPressed: () => _showTodoSheet(context, provider),
-            icon: const Icon(Icons.add_task),
-            label: const Text('Add Todo'),
-          ),
+        return HoverExpandableFab(
+          onPressed: () => _showTodoSheet(context, provider),
+          icon: Icons.add_task,
+          label: 'Add Todo',
+          backgroundColor: accentOrange,
+          foregroundColor: Colors.white,
         );
       default:
         return null;

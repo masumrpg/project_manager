@@ -11,6 +11,7 @@ import '../widgets/home/home_constants.dart';
 import '../widgets/home/modern_header.dart';
 import '../widgets/home/project_grid.dart';
 import '../widgets/home/state_widgets.dart';
+import '../widgets/shared/hover_expandable_fab.dart';
 import 'project_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -138,13 +139,12 @@ class HomeScreen extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: HoverExpandableFab(
         onPressed: () => _showProjectDialog(context),
+        icon: Icons.add_rounded,
+        label: 'New Project',
         backgroundColor: HomeConstants.accentOrange,
         foregroundColor: Colors.white,
-        elevation: 8,
-        label: const Text('New Project', style: TextStyle(fontWeight: FontWeight.w600)),
-        icon: const Icon(Icons.add_rounded),
       ),
     );
   }

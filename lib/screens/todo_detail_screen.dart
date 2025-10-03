@@ -16,7 +16,7 @@ class TodoDetailScreen extends StatefulWidget {
   });
 
   final Todo todo;
-  final void Function(Todo, TodoStatus) onStatusChange;
+  final Future<void> Function(Todo, TodoStatus) onStatusChange;
 
   @override
   State<TodoDetailScreen> createState() => _TodoDetailScreenState();
@@ -25,6 +25,7 @@ class TodoDetailScreen extends StatefulWidget {
 class _TodoDetailScreenState extends State<TodoDetailScreen> {
   late final QuillController _contentQuillController;
   late TodoStatus _currentStatus;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -315,17 +316,33 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
               ),
               child: Row(
                 children: [
-                  Checkbox(
-                    value: _currentStatus == TodoStatus.completed,
-                    onChanged: (bool? value) {
-                      final newStatus = value == true ? TodoStatus.completed : TodoStatus.pending;
-                      setState(() {
-                        _currentStatus = newStatus;
-                      });
-                      widget.onStatusChange(widget.todo, newStatus);
-                    },
-                    activeColor: const Color(0xFF00B894),
-                  ),
+                  _isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.all(14.0),
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          ),
+                        )
+                      : Checkbox(
+                          value: _currentStatus == TodoStatus.completed,
+                          onChanged: (bool? value) async {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            final newStatus =
+                                value == true ? TodoStatus.completed : TodoStatus.pending;
+                            await widget.onStatusChange(widget.todo, newStatus);
+                            if (mounted) {
+                              setState(() {
+                                _isLoading = false;
+                                _currentStatus = newStatus;
+                              });
+                            }
+                          },
+                          activeColor: const Color(0xFF00B894),
+                        ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
