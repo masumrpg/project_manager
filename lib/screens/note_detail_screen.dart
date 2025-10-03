@@ -300,11 +300,5 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     );
   }
 
-  Color _getStatusColor(NoteStatus status) {
-    return switch (status) {
-      NoteStatus.active => const Color(0xFF00B894),
-      NoteStatus.archived => const Color(0xFF636E72),
-      NoteStatus.draft => const Color(0xFFE17055),
-    };
-  }
+  Color _getStatusColor(NoteStatus status) => status.color;
 }

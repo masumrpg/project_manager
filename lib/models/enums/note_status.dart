@@ -8,9 +8,9 @@ extension NoteStatusX on NoteStatus {
       case NoteStatus.draft:
         return Colors.grey.shade600;
       case NoteStatus.active:
-        return Colors.blue.shade600;
+        return Colors.green.shade600;
       case NoteStatus.archived:
-        return Colors.orange.shade600;
+        return Colors.red.shade600;
     }
   }
 

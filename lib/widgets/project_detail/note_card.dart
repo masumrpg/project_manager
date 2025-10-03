@@ -36,7 +36,11 @@ class NoteCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.sticky_note_2_outlined, color: colorScheme.primary, size: 28),
+                  Icon(
+                    Icons.sticky_note_2_outlined,
+                    color: note.status.color,
+                    size: 28,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
