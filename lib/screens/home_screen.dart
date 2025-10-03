@@ -599,7 +599,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<AppCategory>(
-                  value: _selectedCategory,
+                  initialValue: _selectedCategory,
                   dropdownColor: HomeConstants.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                   decoration: _fieldDecoration('Category'),
@@ -619,7 +619,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<Environment>(
-                  value: _selectedEnvironment,
+                  initialValue: _selectedEnvironment,
                   dropdownColor: HomeConstants.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                   decoration: _fieldDecoration('Environment'),

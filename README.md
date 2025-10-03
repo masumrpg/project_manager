@@ -158,6 +158,52 @@ erDiagram
     PROJECT ||--o{ REVISION : "has many"
 ```
 
+## 🐧 Panduan Build Linux
+
+### Prasyarat
+
+Pastikan Flutter telah terpasang dan dukungan Linux aktif.
+
+```bash
+flutter doctor
+flutter config --enable-linux-desktop
+```
+
+Untuk Ubuntu/Debian, instal dependensi build berikut sebelum memulai.
+
+```bash
+sudo apt update
+sudo apt install build-essential clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+```
+
+### Build Release Standar
+
+Jalankan perintah di bawah jika hanya membutuhkan bundle release Flutter tanpa paket installer.
+
+```bash
+flutter build linux --release
+```
+
+### Membuat Paket Debian (`.deb`)
+
+Gunakan skrip otomatis untuk membangun bundle dan membungkusnya menjadi paket Debian.
+
+```bash
+./tool/package_linux.sh
+```
+
+Skrip akan menghasilkan file `project-manager_<versi>_amd64.deb` pada direktori `dist/linux/`. Nilai `<versi>` mengikuti entri `version` di `pubspec.yaml`.
+
+### Instalasi Paket
+
+Setelah paket tersedia, instal di sistem target dengan `dpkg`.
+
+```bash
+sudo dpkg -i dist/linux/project-manager_<versi>_amd64.deb
+```
+
+Jika ingin membangun ulang, jalankan kembali skrip; artefak lama otomatis ditimpa.
+
 ## 🐘 PostgreSQL Schema untuk Deployment Online
 
 ```sql
