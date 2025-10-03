@@ -190,7 +190,7 @@ class ModernHeader extends StatelessWidget {
                       columns = 1;
                     }
 
-                    columns = columns.clamp(1, blocks.length).toInt();
+                    columns = columns.clamp(2, blocks.length).toInt();
 
                     final double itemWidth = columns == 1
                         ? maxWidth
