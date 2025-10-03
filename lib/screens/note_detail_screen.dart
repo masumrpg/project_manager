@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-import '../models/note.dart';
 import '../models/enums/note_status.dart';
+import '../models/note.dart';
+import '../providers/project_detail_provider.dart';
+import 'note_edit_screen.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   const NoteDetailScreen({
@@ -19,32 +23,14 @@ class NoteDetailScreen extends StatefulWidget {
 }
 
 class _NoteDetailScreenState extends State<NoteDetailScreen> {
+  late Note _note;
   late QuillController _quillController;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize Quill controller with note content
-    Document document;
-    if (widget.note.content.isNotEmpty) {
-      try {
-        // Try to parse as JSON (Quill format)
-        final json = jsonDecode(widget.note.content);
-        document = Document.fromJson(json);
-      } catch (e) {
-        // If parsing fails, treat as plain text
-        document = Document()..insert(0, widget.note.content);
-      }
-    } else {
-      document = Document();
-    }
-
-    _quillController = QuillController(
-      document: document,
-      selection: const TextSelection.collapsed(offset: 0),
-      readOnly: true, // Make it read-only for detail view
-    );
+    _note = widget.note;
+    _quillController = _buildReadOnlyController(_note);
   }
 
   @override
@@ -53,9 +39,80 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     super.dispose();
   }
 
+  QuillController _buildReadOnlyController(Note note) {
+    // Initialize Quill controller with note content
+    Document document;
+    if (note.content.isNotEmpty) {
+      try {
+        // Try to parse as JSON (Quill format)
+        final json = jsonDecode(note.content);
+        document = Document.fromJson(json);
+      } catch (e) {
+        // If parsing fails, treat as plain text
+        document = Document()..insert(0, note.content);
+      }
+    } else {
+      document = Document();
+    }
+
+    return QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+      readOnly: true, // Make it read-only for detail view
+    );
+  }
+
+  void _syncWithProvider(Note updatedNote) {
+    if (_note.updatedAt == updatedNote.updatedAt) return;
+    final newController = _buildReadOnlyController(updatedNote);
+    final oldController = _quillController;
+    setState(() {
+      _note = updatedNote;
+      _quillController = newController;
+    });
+    oldController.dispose();
+  }
+
+  void _showFeedback({required bool success, required String message}) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: success
+              ? const Color(0xFF2E7D32)
+              : const Color(0xFFC62828),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final description = widget.note.description ?? '';
+    final providerNote = context.select<ProjectDetailProvider, Note?>(
+      (provider) {
+        final project = provider.project;
+        if (project == null) return null;
+        for (final note in project.notes) {
+          if (note.id == widget.note.id) {
+            return note;
+          }
+        }
+        return null;
+      },
+    );
+
+    if (providerNote != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncWithProvider(providerNote);
+      });
+    }
+
+    final description = _note.description ?? '';
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF7),
@@ -74,15 +131,33 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () async {
+              final detailProvider = context.read<ProjectDetailProvider>();
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ChangeNotifierProvider<ProjectDetailProvider>.value(
+                    value: detailProvider,
+                    child: NoteEditScreen(note: _note),
+                  ),
+                ),
+              );
+              if (!mounted || result != true) return;
+              _showFeedback(success: true, message: 'Note updated successfully');
+            },
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF2D3436)),
+          ),
+          const SizedBox(width: 8),
           Container(
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _getStatusColor(widget.note.status),
+              color: _getStatusColor(_note.status),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              widget.note.status.label,
+              _note.status.label,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -106,7 +181,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              widget.note.title,
+              _note.title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: const Color(0xFF2D3436),
                     fontWeight: FontWeight.w600,
@@ -185,11 +260,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         DateFormat('dd MMM yyyy, HH:mm')
-                            .format(widget.note.createdAt.toLocal()),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: const Color(0xFF2D3436),
-                              fontWeight: FontWeight.w500,
-                            ),
+                            .format(_note.createdAt.toLocal()),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFF2D3436),
+                            fontWeight: FontWeight.w500,
+                          ),
                       ),
                     ],
                   ),
@@ -208,11 +283,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         DateFormat('dd MMM yyyy, HH:mm')
-                            .format(widget.note.updatedAt.toLocal()),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: const Color(0xFF2D3436),
-                              fontWeight: FontWeight.w500,
-                            ),
+                            .format(_note.updatedAt.toLocal()),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFF2D3436),
+                            fontWeight: FontWeight.w500,
+                          ),
                       ),
                     ],
                   ),

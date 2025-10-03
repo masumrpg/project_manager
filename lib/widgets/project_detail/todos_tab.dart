@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../models/enums/todo_status.dart';
 import '../../../models/todo.dart';
+import '../../providers/project_detail_provider.dart';
 import '../../screens/todo_detail_screen.dart';
 import 'todo_card.dart';
 
@@ -23,6 +25,22 @@ class TodosTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void openTodoDetail(Todo todo) {
+      final detailProvider = context.read<ProjectDetailProvider>();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) =>
+              ChangeNotifierProvider<ProjectDetailProvider>.value(
+            value: detailProvider,
+            child: TodoDetailScreen(
+              todo: todo,
+              onStatusChange: onStatusChange,
+            ),
+          ),
+        ),
+      );
+    }
+
     if (todos.isEmpty) {
       return Center(
         child: Column(
@@ -60,14 +78,7 @@ class TodosTab extends StatelessWidget {
               final todo = todos[index];
               return TodoCard(
                 todo: todo,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => TodoDetailScreen(
-                      todo: todo,
-                      onStatusChange: onStatusChange,
-                    ),
-                  ),
-                ),
+                onTap: () => openTodoDetail(todo),
                 onStatusChange: (isCompleted) async {
                   final newStatus =
                       isCompleted ? TodoStatus.completed : TodoStatus.pending;
@@ -88,14 +99,7 @@ class TodosTab extends StatelessWidget {
               final todo = todos[index];
               return TodoCard(
                 todo: todo,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => TodoDetailScreen(
-                      todo: todo,
-                      onStatusChange: onStatusChange,
-                    ),
-                  ),
-                ),
+                onTap: () => openTodoDetail(todo),
                 onStatusChange: (isCompleted) async {
                   final newStatus =
                       isCompleted ? TodoStatus.completed : TodoStatus.pending;
@@ -111,4 +115,3 @@ class TodosTab extends StatelessWidget {
     );
   }
 }
-

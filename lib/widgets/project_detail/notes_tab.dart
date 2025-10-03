@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/note.dart';
+import '../../providers/project_detail_provider.dart';
 import '../../screens/note_detail_screen.dart';
 import 'note_card.dart';
 
@@ -20,6 +22,19 @@ class NotesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void openNoteDetail(Note note) {
+      final detailProvider = context.read<ProjectDetailProvider>();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) =>
+              ChangeNotifierProvider<ProjectDetailProvider>.value(
+            value: detailProvider,
+            child: NoteDetailScreen(note: note),
+          ),
+        ),
+      );
+    }
+
     if (notes.isEmpty) {
       return Center(
         child: SingleChildScrollView(
@@ -62,9 +77,7 @@ class NotesTab extends StatelessWidget {
               final note = notes[index];
               return NoteCard(
                 note: note,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => NoteDetailScreen(note: note)),
-                ),
+                onTap: () => openNoteDetail(note),
                 onEdit: () => onEdit(note),
                 onDelete: () => onDelete(note),
               );
@@ -80,9 +93,7 @@ class NotesTab extends StatelessWidget {
               final note = notes[index];
               return NoteCard(
                 note: note,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => NoteDetailScreen(note: note)),
-                ),
+                onTap: () => openNoteDetail(note),
                 onEdit: () => onEdit(note),
                 onDelete: () => onDelete(note),
               );
@@ -93,4 +104,3 @@ class NotesTab extends StatelessWidget {
     );
   }
 }
-

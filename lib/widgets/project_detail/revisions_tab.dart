@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/revision.dart';
+import '../../providers/project_detail_provider.dart';
 import '../../screens/revision_detail_screen.dart';
 import 'empty_state.dart';
 import 'revision_card.dart';
@@ -21,6 +23,19 @@ class RevisionsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void openRevisionDetail(Revision revision) {
+      final detailProvider = context.read<ProjectDetailProvider>();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) =>
+              ChangeNotifierProvider<ProjectDetailProvider>.value(
+            value: detailProvider,
+            child: RevisionDetailScreen(revision: revision),
+          ),
+        ),
+      );
+    }
+
     if (revisions.isEmpty) {
       return EmptyState(
         icon: Icons.history,
@@ -50,9 +65,7 @@ class RevisionsTab extends StatelessWidget {
               final revision = revisions[index];
               return RevisionCard(
                 revision: revision,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => RevisionDetailScreen(revision: revision)),
-                ),
+                onTap: () => openRevisionDetail(revision),
                 onEdit: () => onEdit(revision),
                 onDelete: () => onDelete(revision),
               );
@@ -68,9 +81,7 @@ class RevisionsTab extends StatelessWidget {
               final revision = revisions[index];
               return RevisionCard(
                 revision: revision,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => RevisionDetailScreen(revision: revision)),
-                ),
+                onTap: () => openRevisionDetail(revision),
                 onEdit: () => onEdit(revision),
                 onDelete: () => onDelete(revision),
               );
@@ -81,5 +92,4 @@ class RevisionsTab extends StatelessWidget {
     );
   }
 }
-
 

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../models/enums/revision_status.dart';
 import '../models/revision.dart';
+import '../providers/project_detail_provider.dart';
+import 'revision_edit_screen.dart';
 
 class RevisionDetailScreen extends StatefulWidget {
   const RevisionDetailScreen({
@@ -18,26 +21,14 @@ class RevisionDetailScreen extends StatefulWidget {
 }
 
 class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
-  late final QuillController _changesQuillController;
+  late Revision _revision;
+  late QuillController _changesQuillController;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize Quill controller with existing changes content
-    Document document;
-    final changes = widget.revision.changes;
-    if (changes.isNotEmpty) {
-      final text = changes.join('\n');
-      document = Document()..insert(0, text);
-    } else {
-      document = Document();
-    }
-    _changesQuillController = QuillController(
-      document: document,
-      selection: const TextSelection.collapsed(offset: 0),
-      readOnly: true,
-    );
+    _revision = widget.revision;
+    _changesQuillController = _buildReadOnlyController(_revision);
   }
 
   @override
@@ -46,8 +37,72 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
     super.dispose();
   }
 
+  QuillController _buildReadOnlyController(Revision revision) {
+    Document document;
+    final changes = revision.changes;
+    if (changes.isNotEmpty) {
+      final text = changes.join('\n');
+      document = Document()..insert(0, text);
+    } else {
+      document = Document();
+    }
+    return QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+      readOnly: true,
+    );
+  }
+
+  void _syncWithProvider(Revision updatedRevision) {
+    if (_revision.updatedAt == updatedRevision.updatedAt) return;
+    final newController = _buildReadOnlyController(updatedRevision);
+    final oldController = _changesQuillController;
+    setState(() {
+      _revision = updatedRevision;
+      _changesQuillController = newController;
+    });
+    oldController.dispose();
+  }
+
+  void _showFeedback({required bool success, required String message}) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: success
+              ? const Color(0xFF2E7D32)
+              : const Color(0xFFC62828),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final providerRevision = context.select<ProjectDetailProvider, Revision?>(
+      (provider) {
+        final project = provider.project;
+        if (project == null) return null;
+        for (final revision in project.revisions) {
+          if (revision.id == widget.revision.id) {
+            return revision;
+          }
+        }
+        return null;
+      },
+    );
+
+    if (providerRevision != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncWithProvider(providerRevision);
+      });
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
@@ -58,22 +113,43 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         title: Text(
-          'Version ${widget.revision.version}',
+          'Version ${_revision.version}',
           style: const TextStyle(
             color: Color(0xFF2D3436),
             fontWeight: FontWeight.w600,
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () async {
+              final detailProvider = context.read<ProjectDetailProvider>();
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ChangeNotifierProvider<ProjectDetailProvider>.value(
+                    value: detailProvider,
+                    child: RevisionEditScreen(revision: _revision),
+                  ),
+                ),
+              );
+              if (!mounted || result != true) return;
+              _showFeedback(
+                success: true,
+                message: 'Revision updated successfully',
+              );
+            },
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF2D3436)),
+          ),
+          const SizedBox(width: 8),
           Container(
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _getStatusColor(widget.revision.status),
+              color: _getStatusColor(_revision.status),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              widget.revision.status.label,
+              _revision.status.label,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -105,7 +181,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        widget.revision.version,
+                        _revision.version,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: const Color(0xFF2D3436),
                               fontWeight: FontWeight.w600,
@@ -127,7 +203,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                     const SizedBox(height: 4),
                     Text(
                       DateFormat('dd MMM yyyy, HH:mm')
-                          .format(widget.revision.createdAt.toLocal()),
+                          .format(_revision.createdAt.toLocal()),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: const Color(0xFF2D3436),
                             fontWeight: FontWeight.w500,
@@ -141,7 +217,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
             const SizedBox(height: 32),
 
             // Description
-            if (widget.revision.description.isNotEmpty) ...[
+            if (_revision.description.isNotEmpty) ...[
               Text(
                 'Description',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -159,7 +235,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                   border: Border.all(color: const Color(0xFFE8D5C4)),
                 ),
                 child: Text(
-                  widget.revision.description,
+                  _revision.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: const Color(0xFF2D3436),
                         height: 1.5,
@@ -215,7 +291,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         DateFormat('dd MMM yyyy, HH:mm')
-                            .format(widget.revision.createdAt.toLocal()),
+                            .format(_revision.createdAt.toLocal()),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF2D3436),
                               fontWeight: FontWeight.w500,
@@ -236,14 +312,14 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                             ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        DateFormat('dd MMM yyyy, HH:mm')
-                            .format(widget.revision.updatedAt.toLocal()),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: const Color(0xFF2D3436),
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
+                    Text(
+                      DateFormat('dd MMM yyyy, HH:mm')
+                          .format(_revision.updatedAt.toLocal()),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFF2D3436),
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
                     ],
                   ),
                 ),

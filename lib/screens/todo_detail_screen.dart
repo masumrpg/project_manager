@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../models/enums/todo_priority.dart';
 import '../models/enums/todo_status.dart';
 import '../models/todo.dart';
+import '../providers/project_detail_provider.dart';
+import 'todo_edit_screen.dart';
 
 class TodoDetailScreen extends StatefulWidget {
   const TodoDetailScreen({
@@ -23,18 +26,29 @@ class TodoDetailScreen extends StatefulWidget {
 }
 
 class _TodoDetailScreenState extends State<TodoDetailScreen> {
-  late final QuillController _contentQuillController;
+  late Todo _todo;
+  late QuillController _contentQuillController;
   late TodoStatus _currentStatus;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _currentStatus = widget.todo.status;
-    
+    _todo = widget.todo;
+    _currentStatus = _todo.status;
+    _contentQuillController = _buildReadOnlyController(_todo);
+  }
+
+  @override
+  void dispose() {
+    _contentQuillController.dispose();
+    super.dispose();
+  }
+
+  QuillController _buildReadOnlyController(Todo todo) {
     // Initialize Quill controller with existing content payload
     Document document;
-    final content = widget.todo.content;
+    final content = todo.content;
     if (content != null && content.isNotEmpty) {
       try {
         final jsonData = jsonDecode(content);
@@ -45,22 +59,65 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
     } else {
       document = Document();
     }
-    _contentQuillController = QuillController(
+    return QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
+      readOnly: true,
     );
   }
 
-  @override
-  void dispose() {
-    _contentQuillController.dispose();
-    super.dispose();
+  void _syncWithProvider(Todo updatedTodo) {
+    if (_todo.updatedAt == updatedTodo.updatedAt) return;
+    final newController = _buildReadOnlyController(updatedTodo);
+    final oldController = _contentQuillController;
+    setState(() {
+      _todo = updatedTodo;
+      _currentStatus = updatedTodo.status;
+      _contentQuillController = newController;
+    });
+    oldController.dispose();
+  }
+
+  void _showFeedback({required bool success, required String message}) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor:
+              success ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
-    final description = widget.todo.description ?? '';
-    final hasContent = widget.todo.content != null && widget.todo.content!.isNotEmpty;
+    final providerTodo = context.select<ProjectDetailProvider, Todo?>(
+      (provider) {
+        final project = provider.project;
+        if (project == null) return null;
+        for (final todo in project.todos) {
+          if (todo.id == widget.todo.id) {
+            return todo;
+          }
+        }
+        return null;
+      },
+    );
+
+    if (providerTodo != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncWithProvider(providerTodo);
+      });
+    }
+
+    final description = _todo.description ?? '';
+    final hasContent = _todo.content != null && _todo.content!.isNotEmpty;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF7),
@@ -79,6 +136,24 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () async {
+              final detailProvider = context.read<ProjectDetailProvider>();
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ChangeNotifierProvider<ProjectDetailProvider>.value(
+                    value: detailProvider,
+                    child: TodoEditScreen(todo: _todo),
+                  ),
+                ),
+              );
+              if (!mounted || result != true) return;
+              _showFeedback(success: true, message: 'Todo updated successfully');
+            },
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF2D3436)),
+          ),
+          const SizedBox(width: 8),
           Container(
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -119,7 +194,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        widget.todo.title,
+                        _todo.title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: const Color(0xFF2D3436),
                           fontWeight: FontWeight.w600,
@@ -143,23 +218,23 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _getPriorityColor(widget.todo.priority).withValues(alpha: 0.1),
+                        color: _getPriorityColor(_todo.priority).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: _getPriorityColor(widget.todo.priority).withValues(alpha: 0.3)),
+                        border: Border.all(color: _getPriorityColor(_todo.priority).withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            _getPriorityIcon(widget.todo.priority),
+                            _getPriorityIcon(_todo.priority),
                             size: 16,
-                            color: _getPriorityColor(widget.todo.priority),
+                            color: _getPriorityColor(_todo.priority),
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            widget.todo.priority.label,
+                            _todo.priority.label,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: _getPriorityColor(widget.todo.priority),
+                              color: _getPriorityColor(_todo.priority),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -204,7 +279,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
           ],
 
           // Due Date
-          if (widget.todo.dueDate != null) ...[
+          if (_todo.dueDate != null) ...[
               Text(
                 'Due Date',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -224,21 +299,25 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                   children: [
                     Icon(
                       Icons.event,
-                      color: _isOverdue(widget.todo.dueDate!) ? const Color(0xFFD63031) : const Color(0xFF636E72),
+                      color: _isOverdue(_todo.dueDate!)
+                          ? const Color(0xFFD63031)
+                          : const Color(0xFF636E72),
                     ),
                     const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (widget.todo.dueDate != null) ...[
+                        if (_todo.dueDate != null) ...[
                           Text(
-                            DateFormat('EEEE, dd MMMM yyyy').format(widget.todo.dueDate!.toLocal()),
+                            DateFormat('EEEE, dd MMMM yyyy')
+                                .format(_todo.dueDate!.toLocal()),
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF2D3436),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          if (widget.todo.dueDate != null && _isOverdue(widget.todo.dueDate!)) ...[
+                          if (_todo.dueDate != null &&
+                              _isOverdue(_todo.dueDate!)) ...[
                             const SizedBox(height: 4),
                             Text(
                               'Overdue',
@@ -333,7 +412,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                             });
                             final newStatus =
                                 value == true ? TodoStatus.completed : TodoStatus.pending;
-                            await widget.onStatusChange(widget.todo, newStatus);
+                            await widget.onStatusChange(_todo, newStatus);
                             if (mounted) {
                               setState(() {
                                 _isLoading = false;
@@ -385,7 +464,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         DateFormat('dd MMM yyyy, HH:mm')
-                            .format(widget.todo.createdAt.toLocal()),
+                            .format(_todo.createdAt.toLocal()),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF2D3436),
                               fontWeight: FontWeight.w500,
@@ -408,7 +487,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         DateFormat('dd MMM yyyy, HH:mm')
-                            .format(widget.todo.updatedAt.toLocal()),
+                            .format(_todo.updatedAt.toLocal()),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF2D3436),
                               fontWeight: FontWeight.w500,

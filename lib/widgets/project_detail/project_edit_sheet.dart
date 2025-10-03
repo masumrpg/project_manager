@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../models/enums/app_category.dart';
 import '../../../models/enums/environment.dart';
 import '../../../models/project.dart';
+import '../../../providers/project_detail_provider.dart';
 import '../../../providers/project_provider.dart';
-import '../../../screens/project_detail_screen.dart';
 
 class ProjectEditSheet extends StatefulWidget {
   const ProjectEditSheet({
