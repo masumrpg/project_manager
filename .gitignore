@@ -46,3 +46,6 @@ app.*.map.json
 
 # distribution directory
 /dist/
+
+# Environment configuration
+.env

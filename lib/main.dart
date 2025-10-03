@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
+import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/project_provider.dart';
@@ -11,12 +12,17 @@ import 'services/api_client.dart';
 import 'services/auth_service.dart';
 import 'services/auth_storage.dart';
 
-const _baseUrl = 'https://project-manager-api-coral.vercel.app';
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
+
+  final envBaseUrl = dotenv.env['BASE_URL']?.trim();
+  if (envBaseUrl == null || envBaseUrl.isEmpty) {
+    throw StateError('BASE_URL is not set in .env');
+  }
+
   final authStorage = await AuthStorage.create();
-  final apiClient = ApiClient(baseUrl: _baseUrl, authStorage: authStorage);
+  final apiClient = ApiClient(baseUrl: envBaseUrl, authStorage: authStorage);
   final authService = AuthService(apiClient: apiClient, storage: authStorage);
 
   runApp(ProjectManagerApp(
