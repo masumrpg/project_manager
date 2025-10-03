@@ -85,6 +85,8 @@ class ModernHeader extends StatelessWidget {
                             currentUser != null
                                 ? _buildGreeting(currentUser)
                                 : 'Welcome back',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: Colors.white.withValues(alpha: 0.76),
                               fontWeight: FontWeight.w500,
@@ -94,6 +96,8 @@ class ModernHeader extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             'Ship your next project with confidence',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: Colors.white.withValues(alpha: 0.55),
                             ),
@@ -178,14 +182,18 @@ class ModernHeader extends StatelessWidget {
                     ];
 
                     final maxWidth = constraints.maxWidth;
-                    final int columns;
-                    if (maxWidth >= 980) {
+                    int columns;
+                    if (maxWidth >= 1120) {
                       columns = 4;
-                    } else if (maxWidth >= 640) {
+                    } else if (maxWidth >= 760) {
+                      columns = 3;
+                    } else if (maxWidth >= 340) {
                       columns = 2;
                     } else {
                       columns = 1;
                     }
+
+                    columns = columns.clamp(1, blocks.length).toInt();
 
                     final double itemWidth = columns == 1
                         ? maxWidth
@@ -249,7 +257,6 @@ class _StatBlock extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(10),
@@ -260,26 +267,33 @@ class _StatBlock extends StatelessWidget {
             child: Icon(icon, size: 18, color: accent),
           ),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$value',
-                style: textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$value',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  letterSpacing: 0.3,
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.75),
+                    letterSpacing: 0.3,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

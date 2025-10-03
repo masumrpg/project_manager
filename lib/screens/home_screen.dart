@@ -111,6 +111,8 @@ class HomeScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Text(
                                   '${projects.length} projects',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.headlineSmall?.copyWith(
                                     color: HomeConstants.darkText,
                                     fontWeight: FontWeight.w600,
