@@ -1219,6 +1219,55 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Statistics",
+      "item": [
+        {
+          "name": "Get Global Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const stats = pm.response.json();",
+                  "pm.test('Response has all counters', function () {",
+                  "    pm.expect(stats).to.have.property('projectsCount');",
+                  "    pm.expect(stats).to.have.property('noteCount');",
+                  "    pm.expect(stats).to.have.property('todoCount');",
+                  "    pm.expect(stats).to.have.property('revisionsCount');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/statistics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {

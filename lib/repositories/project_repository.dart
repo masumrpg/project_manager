@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../models/dashboard_statistics.dart';
 import '../models/enums/note_status.dart';
 import '../models/enums/revision_status.dart';
 import '../models/enums/todo_status.dart';
@@ -30,6 +31,12 @@ class ProjectRepository {
 
     projects.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     return projects;
+  }
+
+  Future<DashboardStatistics> getStatistics() async {
+    final response = await _apiClient.get('/api/statistics')
+        as Map<String, dynamic>;
+    return DashboardStatistics.fromJson(response);
   }
 
   Future<Project?> getProjectById(String id) async {

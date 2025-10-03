@@ -44,7 +44,10 @@ class HomeScreen extends StatelessWidget {
             }
 
             final projects = provider.projects;
-            final metrics = DashboardMetrics.fromProjects(projects);
+            final metrics = DashboardMetrics.fromData(
+              stats: provider.statistics,
+              projects: projects,
+            );
 
             return RefreshIndicator(
               onRefresh: () => provider.loadProjects(showLoading: false),

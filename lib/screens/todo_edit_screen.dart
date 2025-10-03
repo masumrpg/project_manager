@@ -269,7 +269,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<TodoPriority>(
-                    value: _selectedPriority,
+                    initialValue: _selectedPriority,
                     decoration: InputDecoration(
                       labelText: 'Priority',
                       enabledBorder: OutlineInputBorder(
@@ -298,7 +298,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<TodoStatus>(
-                    value: _selectedStatus,
+                    initialValue: _selectedStatus,
                     decoration: InputDecoration(
                       labelText: 'Status',
                       enabledBorder: OutlineInputBorder(

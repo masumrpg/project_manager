@@ -82,6 +82,15 @@ class _FakeApiClient extends ApiClient {
       };
     }
 
+    if (path == '/api/statistics') {
+      return {
+        'projectsCount': 1,
+        'noteCount': 0,
+        'todoCount': 0,
+        'revisionsCount': 0,
+      };
+    }
+
     if (path == '/api/projects/proj_1') {
       final now = DateTime.now().toUtc().toIso8601String();
       return {

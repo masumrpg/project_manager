@@ -261,7 +261,7 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<RevisionStatus>(
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               decoration: InputDecoration(
                 labelText: 'Status',
                 enabledBorder: OutlineInputBorder(

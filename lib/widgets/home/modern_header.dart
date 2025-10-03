@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/enums/app_category.dart';
 import '../../models/user.dart';
 import 'dashboard_metrics.dart';
 import 'home_constants.dart';
@@ -153,31 +152,29 @@ class ModernHeader extends StatelessWidget {
                   builder: (context, constraints) {
                     const double spacing = 24;
                     final blocks = <Widget>[
+                    _StatBlock(
+                      label: 'Projects',
+                      value: metrics.totalProjects,
+                      accent: Colors.white,
+                      icon: Icons.dashboard_outlined,
+                    ),
                       _StatBlock(
-                        label: 'Projects',
-                        value: metrics.totalProjects,
-                        accent: Colors.white,
-                        icon: Icons.dashboard_outlined,
-                      ),
-                      _StatBlock(
-                        label: 'Active Todos',
-                        value: metrics.activeTodos,
-                        accent: HomeConstants.categoryColors[AppCategory.api]!,
-                        icon: Icons.pending_actions_outlined,
-                      ),
-                      _StatBlock(
-                        label: 'Done Tasks',
-                        value: metrics.completedTodos,
-                        accent:
-                            HomeConstants.categoryColors[AppCategory.desktop]!,
-                        icon: Icons.check_circle_outline,
-                      ),
-                      _StatBlock(
-                        label: 'Notes Logged',
+                        label: 'Notes',
                         value: metrics.totalNotes,
-                        accent:
-                            HomeConstants.categoryColors[AppCategory.mobile]!,
-                        icon: Icons.note_alt_outlined,
+                        accent: Colors.white,
+                        icon: Icons.sticky_note_2_outlined,
+                      ),
+                      _StatBlock(
+                        label: 'Revisions',
+                        value: metrics.totalRevisions,
+                        accent: Colors.white,
+                        icon: Icons.history_edu_outlined,
+                      ),
+                      _StatBlock(
+                        label: 'Todos',
+                        value: metrics.totalTodos,
+                        accent: Colors.white,
+                        icon: Icons.checklist_rounded,
                       ),
                     ];
 

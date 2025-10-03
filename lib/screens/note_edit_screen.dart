@@ -274,7 +274,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<NoteStatus>(
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               decoration: InputDecoration(
                 labelText: 'Status',
                 enabledBorder: OutlineInputBorder(

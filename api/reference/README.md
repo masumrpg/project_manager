@@ -153,6 +153,24 @@ Respons `201` mengembalikan record project lengkap dengan `id`, `userId`, `creat
 
 **DELETE** mengembalikan `{ "id": "proj_123" }` bila sukses.
 
+
+### Statistics
+
+| Method | Path | Deskripsi |
+| --- | --- | --- |
+| `GET` | `/api/statistics` | Statistik global untuk user aktif (jumlah project, note, todo, revision). |
+
+**Get Global Statistics – 200**
+
+```json
+{
+  "projectsCount": 5,
+  "noteCount": 12,
+  "todoCount": 28,
+  "revisionsCount": 7
+}
+```
+
 ### Notes
 
 | Method | Path | Deskripsi |

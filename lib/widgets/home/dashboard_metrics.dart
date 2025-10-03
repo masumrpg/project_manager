@@ -1,4 +1,4 @@
-import '../../models/enums/todo_status.dart';
+import '../../models/dashboard_statistics.dart';
 import '../../models/project.dart';
 
 // Dashboard Metrics Data Class
@@ -6,61 +6,34 @@ class DashboardMetrics {
   const DashboardMetrics({
     required this.totalProjects,
     required this.totalNotes,
-    required this.completedTodos,
-    required this.activeTodos,
+    required this.totalRevisions,
+    required this.totalTodos,
     required this.lastUpdated,
   });
 
-  factory DashboardMetrics.fromProjects(List<Project> projects) {
-    if (projects.isEmpty) {
-      return const DashboardMetrics(
-        totalProjects: 0,
-        totalNotes: 0,
-        completedTodos: 0,
-        activeTodos: 0,
-        lastUpdated: null,
-      );
-    }
-
-    var notes = 0;
-    var completed = 0;
-    var totalTodos = 0;
+  factory DashboardMetrics.fromData({
+    required DashboardStatistics stats,
+    required List<Project> projects,
+  }) {
     DateTime? latest;
-
     for (final project in projects) {
-      notes += project.notesCount ?? project.notes.length;
-
-      final todos = project.todos;
-      totalTodos += project.todosCount ?? todos.length;
-      if (project.completedTodosCount != null) {
-        completed += project.completedTodosCount!;
-      } else {
-        for (final todo in todos) {
-          if (todo.status == TodoStatus.completed) {
-            completed++;
-          }
-        }
-      }
-
       if (latest == null || project.updatedAt.isAfter(latest)) {
         latest = project.updatedAt;
       }
     }
 
-    final active = totalTodos - completed;
-
     return DashboardMetrics(
-      totalProjects: projects.length,
-      totalNotes: notes,
-      completedTodos: completed,
-      activeTodos: active,
+      totalProjects: stats.projectsCount,
+      totalNotes: stats.noteCount,
+      totalRevisions: stats.revisionsCount,
+      totalTodos: stats.todoCount,
       lastUpdated: latest,
     );
   }
 
   final int totalProjects;
   final int totalNotes;
-  final int completedTodos;
-  final int activeTodos;
+  final int totalRevisions;
+  final int totalTodos;
   final DateTime? lastUpdated;
 }

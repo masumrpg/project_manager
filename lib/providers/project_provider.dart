@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../models/dashboard_statistics.dart';
 import '../models/enums/todo_status.dart';
 import '../models/project.dart';
 import '../repositories/project_repository.dart';
@@ -11,10 +12,12 @@ class ProjectProvider extends ChangeNotifier {
   final List<Project> _projects = [];
   bool _isLoading = false;
   String? _error;
+  DashboardStatistics _statistics = DashboardStatistics.empty;
 
   List<Project> get projects => List.unmodifiable(_projects);
   bool get isLoading => _isLoading;
   String? get error => _error;
+  DashboardStatistics get statistics => _statistics;
 
   Future<void> loadProjects({bool showLoading = true}) async {
     if (showLoading) {
@@ -22,14 +25,21 @@ class ProjectProvider extends ChangeNotifier {
     }
 
     try {
-      final data = await _repository.getAllProjects();
+      final projectsFuture = _repository.getAllProjects();
+      final statsFuture = _repository.getStatistics();
+
+      final data = await projectsFuture;
+      final stats = await statsFuture;
+
       _projects
         ..clear()
         ..addAll(data);
+      _statistics = stats;
       _error = null;
     } catch (error) {
       _error = error.toString();
       _projects.clear();
+      _statistics = DashboardStatistics.empty;
     } finally {
       if (showLoading) {
         _setLoading(false);
@@ -89,6 +99,7 @@ class ProjectProvider extends ChangeNotifier {
 
   void clear() {
     _projects.clear();
+    _statistics = DashboardStatistics.empty;
     _error = null;
     notifyListeners();
   }
