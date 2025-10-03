@@ -85,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                           isDesktop ? 48 : 24,
                           24,
                           isDesktop ? 48 : 24,
-                          0
+                          0,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -99,7 +99,8 @@ class HomeScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(14),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: HomeConstants.shadowColor.withValues(alpha: 0.25),
+                                        color: HomeConstants.shadowColor
+                                            .withValues(alpha: 0.25),
                                         blurRadius: 18,
                                         offset: const Offset(0, 8),
                                       ),
@@ -116,11 +117,12 @@ class HomeScreen extends StatelessWidget {
                                   '${projects.length} projects',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    color: HomeConstants.darkText,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: -0.2,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        color: HomeConstants.darkText,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: -0.2,
+                                      ),
                                 ),
                               ],
                             ),
@@ -133,7 +135,7 @@ class HomeScreen extends StatelessWidget {
                         isDesktop ? 48 : 24,
                         16,
                         isDesktop ? 48 : 24,
-                        32
+                        32,
                       ),
                       sliver: isDesktop
                           ? SliverToBoxAdapter(
@@ -195,285 +197,24 @@ class HomeScreen extends StatelessWidget {
     BuildContext context, {
     Project? project,
   }) async {
-    final provider = context.read<ProjectProvider>();
     final auth = context.read<AuthProvider>();
     final currentUserId = auth.currentUser?.id ?? '';
 
-    showModalBottomSheet<void>(
+    final result = await showModalBottomSheet<_ProjectDialogResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        final formKey = GlobalKey<FormState>();
-        final titleController = TextEditingController(
-          text: project?.title ?? '',
-        );
-        final descriptionController = TextEditingController(
-          text: project?.description ?? '',
-        );
-        var selectedCategory = project?.category ?? AppCategory.mobile;
-        var selectedEnvironment =
-            project?.environment ?? Environment.development;
-        bool isLoading = false;
-
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: const BoxDecoration(
-                    color: HomeConstants.cardBackground,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          project == null ? 'Create New Project' : 'Edit Project',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: HomeConstants.darkText,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        TextFormField(
-                          controller: titleController,
-                          decoration: InputDecoration(
-                            labelText: 'Project Title',
-                            labelStyle: const TextStyle(
-                              color: HomeConstants.lightText,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.secondaryBeige,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.accentOrange,
-                                width: 2,
-                              ),
-                            ),
-                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
-                            filled: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a project title';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: descriptionController,
-                          decoration: InputDecoration(
-                            labelText: 'Description',
-                            labelStyle: const TextStyle(
-                              color: HomeConstants.lightText,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.secondaryBeige,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.accentOrange,
-                                width: 2,
-                              ),
-                            ),
-                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
-                            filled: true,
-                          ),
-                          maxLines: 3,
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<AppCategory>(
-                          initialValue: selectedCategory,
-                          dropdownColor: HomeConstants.cardBackground,
-                          borderRadius: BorderRadius.circular(16),
-                          decoration: InputDecoration(
-                            labelText: 'Category',
-                            labelStyle: const TextStyle(
-                              color: HomeConstants.lightText,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.secondaryBeige,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.accentOrange,
-                                width: 2,
-                              ),
-                            ),
-                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
-                            filled: true,
-                          ),
-                          items: AppCategory.values.map((cat) {
-                            return DropdownMenuItem(
-                              value: cat,
-                              child: Text(cat.label),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => selectedCategory = value);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<Environment>(
-                          initialValue: selectedEnvironment,
-                          dropdownColor: HomeConstants.cardBackground,
-                          borderRadius: BorderRadius.circular(16),
-                          decoration: InputDecoration(
-                            labelText: 'Environment',
-                            labelStyle: const TextStyle(
-                              color: HomeConstants.lightText,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.secondaryBeige,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: HomeConstants.accentOrange,
-                                width: 2,
-                              ),
-                            ),
-                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
-                            filled: true,
-                          ),
-                          items: Environment.values.map((env) {
-                            return DropdownMenuItem(
-                              value: env,
-                              child: Text(env.name.toUpperCase()),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => selectedEnvironment = value);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: isLoading
-                                ? null
-                                : () async {
-                                    if (formKey.currentState!.validate()) {
-                                      setState(() => isLoading = true);
-
-                                      final now = DateTime.now();
-                                      final updatedProject =
-                                          project?.copyWith(
-                                            title: titleController.text.trim(),
-                                            description: descriptionController
-                                                .text
-                                                .trim(),
-                                            category: selectedCategory,
-                                            environment: selectedEnvironment,
-                                            updatedAt: now,
-                                          ) ??
-                                          Project(
-                                            id: '',
-                                            userId: currentUserId,
-                                            title: titleController.text.trim(),
-                                            description: descriptionController
-                                                .text
-                                                .trim(),
-                                            category: selectedCategory,
-                                            environment: selectedEnvironment,
-                                            createdAt: now,
-                                            updatedAt: now,
-                                          );
-
-                                      bool success = false;
-                                      if (project == null) {
-                                        success = await provider.createProject(
-                                          updatedProject,
-                                        );
-                                      } else {
-                                        success = await provider.updateProject(
-                                          updatedProject,
-                                        );
-                                      }
-
-                                                                          if (context.mounted) {
-                                                                            Navigator.pop(context);
-                                                                            _showFeedback(
-                                                                              context,
-                                                                              success: success,
-                                                                              message: success
-                                                                                  ? (project == null
-                                                                                      ? 'Project created successfully!'
-                                                                                      : 'Project updated successfully!')
-                                                                                  : provider.error ?? 'An unknown error occurred.',
-                                                                            );
-                                                                          }                                    }
-                                  },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: HomeConstants.accentOrange,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : Text(
-                                    project == null
-                                        ? 'Create Project'
-                                        : 'Update Project',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+      builder: (sheetContext) {
+        return _ProjectFormBottomSheet(
+          project: project,
+          currentUserId: currentUserId,
         );
       },
     );
+
+    if (context.mounted && result != null) {
+      _showFeedback(context, success: result.success, message: result.message);
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, Project project) async {
@@ -601,8 +342,9 @@ class HomeScreen extends StatelessWidget {
           backgroundColor: success
               ? const Color(0xFF2E7D32) // A slightly darker green
               : const Color(0xFFC62828), // A slightly darker red
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     });
@@ -681,5 +423,255 @@ class HomeScreen extends StatelessWidget {
         (route) => false,
       );
     }
+  }
+}
+
+class _ProjectDialogResult {
+  const _ProjectDialogResult({required this.success, required this.message});
+
+  final bool success;
+  final String message;
+}
+
+class _ProjectFormBottomSheet extends StatefulWidget {
+  const _ProjectFormBottomSheet({
+    required this.project,
+    required this.currentUserId,
+  });
+
+  final Project? project;
+  final String currentUserId;
+
+  @override
+  State<_ProjectFormBottomSheet> createState() =>
+      _ProjectFormBottomSheetState();
+}
+
+class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
+  late AppCategory _selectedCategory;
+  late Environment _selectedEnvironment;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.project?.title ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.project?.description ?? '',
+    );
+    _selectedCategory = widget.project?.category ?? AppCategory.mobile;
+    _selectedEnvironment =
+        widget.project?.environment ?? Environment.development;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final provider = context.read<ProjectProvider>();
+    final now = DateTime.now();
+
+    final updatedProject =
+        widget.project?.copyWith(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          category: _selectedCategory,
+          environment: _selectedEnvironment,
+          updatedAt: now,
+        ) ??
+        Project(
+          id: '',
+          userId: widget.currentUserId,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          category: _selectedCategory,
+          environment: _selectedEnvironment,
+          createdAt: now,
+          updatedAt: now,
+        );
+
+    bool success;
+    try {
+      if (widget.project == null) {
+        success = await provider.createProject(updatedProject);
+      } else {
+        success = await provider.updateProject(updatedProject);
+      }
+    } catch (_) {
+      success = false;
+    }
+
+    final message = success
+        ? (widget.project == null
+              ? 'Project created successfully!'
+              : 'Project updated successfully!')
+        : provider.error ?? 'An unknown error occurred.';
+
+    if (!mounted) return;
+
+    Navigator.pop(
+      context,
+      _ProjectDialogResult(success: success, message: message),
+    );
+  }
+
+  InputDecoration _fieldDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: HomeConstants.lightText),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: HomeConstants.secondaryBeige),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: HomeConstants.accentOrange,
+          width: 2,
+        ),
+      ),
+      fillColor: HomeConstants.primaryBeige.withAlpha(76),
+      filled: true,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: HomeConstants.cardBackground,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.project == null
+                      ? 'Create New Project'
+                      : 'Edit Project',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: HomeConstants.darkText,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: _fieldDecoration('Project Title'),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a project title';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: _fieldDecoration('Description'),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<AppCategory>(
+                  value: _selectedCategory,
+                  dropdownColor: HomeConstants.cardBackground,
+                  borderRadius: BorderRadius.circular(16),
+                  decoration: _fieldDecoration('Category'),
+                  items: AppCategory.values
+                      .map(
+                        (cat) => DropdownMenuItem(
+                          value: cat,
+                          child: Text(cat.label),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedCategory = value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<Environment>(
+                  value: _selectedEnvironment,
+                  dropdownColor: HomeConstants.cardBackground,
+                  borderRadius: BorderRadius.circular(16),
+                  decoration: _fieldDecoration('Environment'),
+                  items: Environment.values
+                      .map(
+                        (env) => DropdownMenuItem(
+                          value: env,
+                          child: Text(env.name.toUpperCase()),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedEnvironment = value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _isLoading ? null : _handleSubmit,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: HomeConstants.accentOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            widget.project == null
+                                ? 'Create Project'
+                                : 'Update Project',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
