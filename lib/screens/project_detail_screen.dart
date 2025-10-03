@@ -232,6 +232,21 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
+                tooltip: 'Refresh project',
+                onPressed: () => provider.loadProject(),
+                icon: Icon(Icons.refresh_rounded, color: accentOrange),
+              ),
+            ),
+          ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: cardBackground.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
                 tooltip: 'Edit project',
                 onPressed: () => _showEditProjectDialog(context, project),
                 icon: Icon(Icons.edit_outlined, color: accentOrange),
