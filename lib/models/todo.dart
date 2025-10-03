@@ -15,7 +15,8 @@ class Todo {
     this.dueDate,
     required this.createdAt,
     this.completedAt,
-  });
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   String id;
   String projectId;
@@ -27,6 +28,7 @@ class Todo {
   DateTime? dueDate;
   DateTime createdAt;
   DateTime? completedAt;
+  DateTime updatedAt;
 
   factory Todo.fromJson(Map<String, dynamic> json, {String? fallbackProjectId}) {
     return Todo(
@@ -40,6 +42,7 @@ class Todo {
       dueDate: _parseDate(json['dueDate']),
       createdAt: _parseDate(json['createdAt']) ?? DateTime.now(),
       completedAt: _parseDate(json['completedAt']),
+      updatedAt: _parseDate(json['updatedAt']) ?? _parseDate(json['createdAt']) ?? DateTime.now(),
     );
   }
 
@@ -68,6 +71,7 @@ class Todo {
     DateTime? dueDate,
     DateTime? createdAt,
     DateTime? completedAt,
+    DateTime? updatedAt,
   }) {
     return Todo(
       id: id ?? this.id,
@@ -80,6 +84,7 @@ class Todo {
       dueDate: dueDate ?? this.dueDate,
       createdAt: createdAt ?? this.createdAt,
       completedAt: completedAt ?? this.completedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 

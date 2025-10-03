@@ -378,59 +378,45 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                       Text(
                         'Created',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: const Color(0xFF636E72),
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: const Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        DateFormat('dd MMM yyyy').format(widget.todo.createdAt.toLocal()),
+                        DateFormat('dd MMM yyyy, HH:mm')
+                            .format(widget.todo.createdAt.toLocal()),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF2D3436),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('HH:mm').format(widget.todo.createdAt.toLocal()),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF636E72),
-                        ),
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     ],
                   ),
                 ),
-                if (widget.todo.completedAt != null) ...[
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Completed',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: const Color(0xFF636E72),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        if (widget.todo.completedAt != null) ...[
-                          Text(
-                            DateFormat('dd MMM yyyy').format(widget.todo.completedAt!.toLocal()),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Last Updated',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: const Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy, HH:mm')
+                            .format(widget.todo.updatedAt.toLocal()),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF2D3436),
                               fontWeight: FontWeight.w500,
                             ),
-                          ),
-                          Text(
-                            DateFormat('HH:mm').format(widget.todo.completedAt!.toLocal()),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: const Color(0xFF636E72),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ],
             ),
           ],

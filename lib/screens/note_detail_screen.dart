@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 import '../models/note.dart';
 import '../models/enums/note_status.dart';
@@ -23,7 +24,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize Quill controller with note content
     Document document;
     if (widget.note.content.isNotEmpty) {
@@ -38,7 +39,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     } else {
       document = Document();
     }
-    
+
     _quillController = QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
@@ -54,11 +55,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final description = widget.note.description ?? '';
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFBF7),
         elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
+        ),
         title: const Text(
           'Note Detail',
           style: TextStyle(
@@ -66,248 +73,151 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Color(0xFF2D3436),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _getStatusColor(widget.note.status),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              widget.note.status.label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE8D5C4)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Title',
-                    style: TextStyle(
-                      color: const Color(0xFF636E72).withValues(alpha: 0.8),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+            Text(
+              'Title',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: const Color(0xFF636E72),
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.note.title,
-                    style: const TextStyle(
-                      color: Color(0xFF2D3436),
-                      fontSize: 20,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              widget.note.title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: const Color(0xFF2D3436),
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 32),
+            if (description.isNotEmpty) ...[
+              Text(
+                'Description',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: const Color(0xFF2D3436),
                       fontWeight: FontWeight.w600,
                     ),
-                  ),
-                ],
               ),
-            ),
-
-            if (widget.note.description?.isNotEmpty == true) ...[
-              const SizedBox(height: 20),
-              // Description Section
+              const SizedBox(height: 12),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                  color: const Color(0xFFF5E6D3).withAlpha(76),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFE8D5C4)),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Description',
-                      style: TextStyle(
-                        color: const Color(0xFF636E72).withValues(alpha: 0.8),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF2D3436),
+                        height: 1.5,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.note.description!,
-                      style: const TextStyle(
-                        color: Color(0xFF2D3436),
-                        fontSize: 16,
-                        height: 1.5, // for better readability
-                      ),
-                    ),
-                  ],
                 ),
               ),
+              const SizedBox(height: 32),
             ],
-            
-            const SizedBox(height: 20),
-            
-            // Status Section
+            Text(
+              'Content',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: const Color(0xFF2D3436),
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 12),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              constraints: const BoxConstraints(minHeight: 150),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                color: const Color(0xFFF5E6D3).withAlpha(76),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFE8D5C4)),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Status',
-                    style: TextStyle(
-                      color: const Color(0xFF636E72).withValues(alpha: 0.8),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: AbsorbPointer(
+                  child: QuillEditor.basic(
+                    controller: _quillController,
+                    config: const QuillEditorConfig(
+                      padding: EdgeInsets.zero,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(widget.note.status).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: _getStatusColor(widget.note.status).withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(
-                      widget.note.status.label,
-                      style: TextStyle(
-                        color: _getStatusColor(widget.note.status),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-            
-            const SizedBox(height: 20),
-            
-            // Content Section
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE8D5C4)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                    child: Text(
-                      'Content',
-                      style: TextStyle(
-                        color: const Color(0xFF636E72).withValues(alpha: 0.8),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    constraints: const BoxConstraints(minHeight: 200),
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    child: QuillEditor.basic(
-                      controller: _quillController,
-                      config: const QuillEditorConfig(
-                        padding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // Metadata Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE8D5C4)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Details',
-                    style: TextStyle(
-                      color: const Color(0xFF636E72).withValues(alpha: 0.8),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Created',
-                              style: TextStyle(
-                                color: const Color(0xFF636E72).withValues(alpha: 0.6),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
+                      Text(
+                        'Created',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: const Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _formatDateTime(widget.note.createdAt),
-                              style: const TextStyle(
-                                color: Color(0xFF2D3436),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Updated',
-                              style: TextStyle(
-                                color: const Color(0xFF636E72).withValues(alpha: 0.6),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy, HH:mm')
+                            .format(widget.note.createdAt.toLocal()),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _formatDateTime(widget.note.updatedAt),
-                              style: const TextStyle(
-                                color: Color(0xFF2D3436),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Last Updated',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: const Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy, HH:mm')
+                            .format(widget.note.updatedAt.toLocal()),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -321,9 +231,5 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       NoteStatus.archived => const Color(0xFF636E72),
       NoteStatus.draft => const Color(0xFFE17055),
     };
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

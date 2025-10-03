@@ -23,7 +23,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize Quill controller with existing changes content
     Document document;
     final changes = widget.revision.changes;
@@ -36,6 +36,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
     _changesQuillController = QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
+      readOnly: true,
     );
   }
 
@@ -98,17 +99,17 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                       Text(
                         'Version',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: const Color(0xFF636E72),
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: const Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         widget.revision.version,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: const Color(0xFF2D3436),
-                          fontWeight: FontWeight.w600,
-                        ),
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ],
                   ),
@@ -119,127 +120,134 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                     Text(
                       'Created',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: const Color(0xFF636E72),
-                        fontWeight: FontWeight.w500,
-                      ),
+                            color: const Color(0xFF636E72),
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('dd MMM yyyy').format(widget.revision.createdAt.toLocal()),
+                      DateFormat('dd MMM yyyy, HH:mm')
+                          .format(widget.revision.createdAt.toLocal()),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF2D3436),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      DateFormat('HH:mm').format(widget.revision.createdAt.toLocal()),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF636E72),
-                      ),
+                            color: const Color(0xFF2D3436),
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                   ],
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Description
             if (widget.revision.description.isNotEmpty) ...[
               Text(
                 'Description',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: const Color(0xFF2D3436),
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: const Color(0xFF2D3436),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                  color: const Color(0xFFF5E6D3).withAlpha(76),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFE8D5C4)),
                 ),
                 child: Text(
                   widget.revision.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF2D3436),
-                    height: 1.5,
-                  ),
+                        color: const Color(0xFF2D3436),
+                        height: 1.5,
+                      ),
                 ),
               ),
               const SizedBox(height: 32),
             ],
-            
+
             // Changes
             Text(
               'Changes',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF2D3436),
-                fontWeight: FontWeight.w600,
-              ),
+                    color: const Color(0xFF2D3436),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
               constraints: const BoxConstraints(minHeight: 200),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
+                color: const Color(0xFFF5E6D3).withAlpha(76),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFE8D5C4)),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: QuillEditor.basic(
-                  controller: _changesQuillController,
-                  config: const QuillEditorConfig(
-                    padding: EdgeInsets.zero,
+                child: AbsorbPointer(
+                  child: QuillEditor.basic(
+                    controller: _changesQuillController,
+                    config: const QuillEditorConfig(
+                      padding: EdgeInsets.zero,
+                    ),
                   ),
                 ),
               ),
             ),
-            
             const SizedBox(height: 32),
-            
-            // Status
-            Text(
-              'Status',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF2D3436),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: _getStatusColor(widget.revision.status).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _getStatusColor(widget.revision.status).withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(widget.revision.status),
-                      shape: BoxShape.circle,
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Created',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: const Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy, HH:mm')
+                            .format(widget.revision.createdAt.toLocal()),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.revision.status.label,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: _getStatusColor(widget.revision.status),
-                      fontWeight: FontWeight.w500,
-                    ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Last Updated',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: const Color(0xFF636E72),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy, HH:mm')
+                            .format(widget.revision.updatedAt.toLocal()),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF2D3436),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),

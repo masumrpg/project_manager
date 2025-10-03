@@ -380,6 +380,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                                 status: _selectedStatus,
                                                 dueDate: _dueDate,
                                                 createdAt: now,
+                                                updatedAt: now,
                                                 completedAt: _selectedStatus == TodoStatus.completed ? now : null,
                                               ),
                                             )
@@ -391,6 +392,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                                 ..priority = _selectedPriority
                                                 ..status = _selectedStatus
                                                 ..dueDate = _dueDate
+                                                ..updatedAt = now
                                                 ..completedAt = _selectedStatus == TodoStatus.completed
                                                     ? (widget.todo?.completedAt ?? DateTime.now())
                                                     : null,

@@ -292,6 +292,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                       });
 
                                       final navigator = Navigator.of(context);
+                                      final now = DateTime.now();
                                       final changeLines = changesText
                                           .split('\n')
                                           .map((line) => line.trim())
@@ -307,7 +308,8 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                                 description: _descriptionController.text.trim(),
                                                 changes: changeLines,
                                                 status: _selectedStatus,
-                                                createdAt: DateTime.now(),
+                                                createdAt: now,
+                                                updatedAt: now,
                                               ),
                                             )
                                           : widget.revision != null
@@ -316,7 +318,8 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                                     ..version = _versionController.text.trim()
                                                     ..description = _descriptionController.text.trim()
                                                     ..changes = changeLines
-                                                    ..status = _selectedStatus,
+                                                    ..status = _selectedStatus
+                                                    ..updatedAt = now,
                                                 )
                                               : false;
                                       if (!mounted) return;

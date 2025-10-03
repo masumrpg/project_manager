@@ -11,7 +11,8 @@ class Revision {
     required this.changes,
     this.status = RevisionStatus.pending,
     required this.createdAt,
-  });
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   String id;
   String projectId;
@@ -19,6 +20,7 @@ class Revision {
   String description;
   List<String> changes;
   DateTime createdAt;
+  DateTime updatedAt;
   RevisionStatus status;
 
   factory Revision.fromJson(Map<String, dynamic> json, {String? fallbackProjectId}) {
@@ -30,6 +32,7 @@ class Revision {
       changes: _parseChanges(json['changes']),
       status: RevisionStatusX.fromApiValue(json['status'] as String? ?? 'pending'),
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
     );
   }
 
@@ -49,6 +52,7 @@ class Revision {
     String? description,
     List<String>? changes,
     DateTime? createdAt,
+    DateTime? updatedAt,
     RevisionStatus? status,
   }) {
     return Revision(
@@ -58,6 +62,7 @@ class Revision {
       description: description ?? this.description,
       changes: changes ?? List<String>.from(this.changes),
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
     );
   }
