@@ -35,6 +35,8 @@ class _TodoCardState extends State<TodoCard> {
     final isOverdue = widget.todo.dueDate != null &&
         widget.todo.dueDate!.isBefore(DateTime.now()) &&
         !isCompleted;
+    final titleColor =
+        isCompleted ? colorScheme.onSurfaceVariant : colorScheme.onSurface;
 
     return Card(
       elevation: 0.5,
@@ -83,9 +85,9 @@ class _TodoCardState extends State<TodoCard> {
                         fontWeight: FontWeight.w600,
                         decoration:
                             isCompleted ? TextDecoration.lineThrough : null,
-                        color: isCompleted
-                            ? colorScheme.onSurfaceVariant
-                            : colorScheme.onSurface,
+                        decorationColor:
+                            isCompleted ? titleColor : null,
+                        color: titleColor,
                       ),
                     ),
                     if (widget.todo.description?.isNotEmpty == true) ...[
