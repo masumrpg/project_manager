@@ -87,13 +87,37 @@ class HomeScreen extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Your Projects (${projects.length})',
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                color: HomeConstants.darkText,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: -0.5,
-                              ),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: HomeConstants.shadowColor.withValues(alpha: 0.25),
+                                        blurRadius: 18,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.grid_view_rounded,
+                                    color: HomeConstants.accentOrange,
+                                    size: 22,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Text(
+                                  '${projects.length} projects',
+                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                    color: HomeConstants.darkText,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

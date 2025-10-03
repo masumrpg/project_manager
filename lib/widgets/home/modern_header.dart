@@ -3,8 +3,6 @@ import '../../models/enums/app_category.dart';
 import '../../models/user.dart';
 import 'dashboard_metrics.dart';
 import 'home_constants.dart';
-import 'modern_button.dart';
-import 'metric_card.dart';
 
 // Modern Header Component
 class ModernHeader extends StatelessWidget {
@@ -30,8 +28,8 @@ class ModernHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final currentUser = user;
 
-    return Container(
-      margin: EdgeInsets.fromLTRB(
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
         isDesktop ? 48 : 24,
         16,
         isDesktop ? 48 : 24,
@@ -40,22 +38,27 @@ class ModernHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome Section
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(isDesktop ? 32 : 24),
+            padding: EdgeInsets.symmetric(
+              vertical: isDesktop ? 36 : 28,
+              horizontal: isDesktop ? 40 : 24,
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [HomeConstants.accentOrange, HomeConstants.accentOrange.withValues(alpha: 0.8)],
+                colors: [
+                  HomeConstants.accentOrange,
+                  HomeConstants.accentOrange.withValues(alpha: 0.85),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(32),
               boxShadow: [
                 BoxShadow(
                   color: HomeConstants.shadowColor,
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  blurRadius: 26,
+                  offset: const Offset(0, 18),
                 ),
               ],
             ),
@@ -64,167 +67,147 @@ class ModernHeader extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    if (currentUser != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          _buildGreeting(currentUser),
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Hello, Guest',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    const Spacer(),
-                    PopupMenuButton<String>(
-                      icon: const Icon(
-                        Icons.more_vert,
+                    CircleAvatar(
+                      radius: isDesktop ? 28 : 24,
+                      backgroundColor: Colors.white.withValues(alpha: 0.18),
+                      child: const Icon(
+                        Icons.dashboard_customize_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: 24,
                       ),
-                      color: HomeConstants.cardBackground,
-                      shape: RoundedRectangleBorder(
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentUser != null
+                                ? _buildGreeting(currentUser)
+                                : 'Welcome back',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.76),
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Ship your next project with confidence',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.55),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'sign_out',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.logout,
-                                color: Colors.red.shade400,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Sign Out',
-                                style: TextStyle(color: Colors.red.shade400),
-                              ),
-                            ],
-                          ),
+                      child: PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.more_horiz,
+                          color: Colors.white70,
                         ),
-                      ],
-                      onSelected: (value) {
-                        if (value == 'sign_out') {
-                          onSignOut();
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      child: const Icon(Icons.person, color: Colors.white, size: 20),
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: 'sign_out',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.logout_rounded,
+                                  color: HomeConstants.accentOrange,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Sign out',
+                                  style: TextStyle(
+                                    color: HomeConstants.accentOrange,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        onSelected: (value) {
+                          if (value == 'sign_out') onSignOut();
+                        },
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  'Your\nProjects (${metrics.totalProjects})',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    height: 1.1,
-                  ),
+                const SizedBox(height: 32),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    const double spacing = 24;
+                    final blocks = <Widget>[
+                      _StatBlock(
+                        label: 'Projects',
+                        value: metrics.totalProjects,
+                        accent: Colors.white,
+                        icon: Icons.dashboard_outlined,
+                      ),
+                      _StatBlock(
+                        label: 'Active Todos',
+                        value: metrics.activeTodos,
+                        accent: HomeConstants.categoryColors[AppCategory.api]!,
+                        icon: Icons.pending_actions_outlined,
+                      ),
+                      _StatBlock(
+                        label: 'Done Tasks',
+                        value: metrics.completedTodos,
+                        accent:
+                            HomeConstants.categoryColors[AppCategory.desktop]!,
+                        icon: Icons.check_circle_outline,
+                      ),
+                      _StatBlock(
+                        label: 'Notes Logged',
+                        value: metrics.totalNotes,
+                        accent:
+                            HomeConstants.categoryColors[AppCategory.mobile]!,
+                        icon: Icons.note_alt_outlined,
+                      ),
+                    ];
+
+                    final maxWidth = constraints.maxWidth;
+                    final int columns;
+                    if (maxWidth >= 980) {
+                      columns = 4;
+                    } else if (maxWidth >= 640) {
+                      columns = 2;
+                    } else {
+                      columns = 1;
+                    }
+
+                    final double itemWidth = columns == 1
+                        ? maxWidth
+                        : (maxWidth - spacing * (columns - 1)) / columns;
+
+                    return Wrap(
+                      spacing: spacing,
+                      runSpacing: 16,
+                      children: blocks
+                          .map(
+                            (block) => SizedBox(
+                              width: columns == 1 ? maxWidth : itemWidth,
+                              child: block,
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
                 ),
-                const SizedBox(height: 16),
-                if (!isDesktop)
-                  ModernButton(
-                    onPressed: onCreateProject,
-                    icon: Icons.add_rounded,
-                    label: 'New Project',
-                    isLight: true,
-                  ),
               ],
             ),
           ),
-
-          const SizedBox(height: 24),
-
-          // Metrics Cards
-          if (isDesktop)
-            Row(
-              children: [
-                Expanded(child: MetricCard(
-                  icon: Icons.pending_actions_outlined,
-                  label: 'Active todos',
-                  value: metrics.activeTodos.toString(),
-                  color: HomeConstants.categoryColors[AppCategory.api]!,
-                )),
-                const SizedBox(width: 16),
-                Expanded(child: MetricCard(
-                  icon: Icons.task_alt_rounded,
-                  label: 'Completed',
-                  value: metrics.completedTodos.toString(),
-                  color: HomeConstants.categoryColors[AppCategory.desktop]!,
-                )),
-                const SizedBox(width: 16),
-                Expanded(child: MetricCard(
-                  icon: Icons.note_alt_outlined,
-                  label: 'Notes',
-                  value: metrics.totalNotes.toString(),
-                  color: HomeConstants.categoryColors[AppCategory.mobile]!,
-                )),
-              ],
-            )
-          else
-            Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: MetricCard(
-                      icon: Icons.pending_actions_outlined,
-                      label: 'Active todos',
-                      value: metrics.activeTodos.toString(),
-                      color: HomeConstants.categoryColors[AppCategory.api]!,
-                    )),
-                    const SizedBox(width: 12),
-                    Expanded(child: MetricCard(
-                      icon: Icons.task_alt_rounded,
-                      label: 'Completed',
-                      value: metrics.completedTodos.toString(),
-                      color: HomeConstants.categoryColors[AppCategory.desktop]!,
-                    )),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: MetricCard(
-                        icon: Icons.note_alt_outlined,
-                        label: 'Notes collected',
-                        value: metrics.totalNotes.toString(),
-                        color: HomeConstants.categoryColors[AppCategory.mobile]!,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Placeholder to keep grid alignment and equal widths
-                    const Expanded(child: SizedBox.shrink()),
-                  ],
-                ),
-              ],
-            ),
         ],
       ),
     );
@@ -237,5 +220,69 @@ class ModernHeader extends StatelessWidget {
     final role = user.role;
     final roleSuffix = (role != null && role.trim().isNotEmpty) ? ' ($role)' : '';
     return 'Hello, $displayName$roleSuffix';
+  }
+}
+
+class _StatBlock extends StatelessWidget {
+  const _StatBlock({
+    required this.label,
+    required this.value,
+    required this.accent,
+    required this.icon,
+  });
+
+  final String label;
+  final int value;
+  final Color accent;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: accent),
+          ),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$value',
+                style: textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
