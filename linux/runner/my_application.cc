@@ -7,6 +7,10 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <limits.h>
+#include <unistd.h>
+
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
@@ -43,15 +47,58 @@ static void my_application_activate(GApplication* application) {
     }
   }
 #endif
+
+  // Attempt to set a custom window icon from the bundled resources.
+  gchar* icon_path = nullptr;
+  char executable_path[PATH_MAX];
+  ssize_t executable_path_length = readlink("/proc/self/exe", executable_path, sizeof(executable_path) - 1);
+  if (executable_path_length != -1) {
+    executable_path[executable_path_length] = '\0';
+    gchar* bundle_dir = g_path_get_dirname(executable_path);
+    icon_path = g_build_filename(bundle_dir, "data", "app_icon.png", nullptr);
+    g_free(bundle_dir);
+  }
+
+  const gchar* fallback_icon_paths[] = {
+      icon_path,
+      "/usr/share/icons/hicolor/256x256/apps/project-manager.png",
+      nullptr,
+  };
+
+  for (int i = 0; fallback_icon_paths[i] != nullptr; ++i) {
+    if (fallback_icon_paths[i] == nullptr) {
+      continue;
+    }
+    g_autoptr(GError) error = nullptr;
+    GdkPixbuf* icon = gdk_pixbuf_new_from_file(fallback_icon_paths[i], &error);
+    if (icon != nullptr) {
+      gtk_window_set_icon(window, icon);
+      g_object_unref(icon);
+      break;
+    }
+    if (error != nullptr) {
+      g_warning("Failed to load icon from %s: %s", fallback_icon_paths[i], error->message);
+    }
+  }
+
+  g_free(icon_path);
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "project_manager");
+    gtk_header_bar_set_title(header_bar, "Project Manager");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "project_manager");
+    gtk_window_set_title(window, "Project Manager");
   }
+
+  gtk_window_set_icon_name(window, "project-manager");
+#ifdef GDK_WINDOWING_X11
+  gdk_set_program_class(APPLICATION_ID);
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+  gtk_window_set_wmclass(window, APPLICATION_ID, APPLICATION_ID);
+  G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
   gtk_window_set_default_size(window, 1280, 720);
 
@@ -136,6 +183,7 @@ MyApplication* my_application_new() {
   // corresponding .desktop file. This ensures better integration by allowing
   // the application to be recognized beyond its binary name.
   g_set_prgname(APPLICATION_ID);
+  g_set_application_name("Project Manager");
 
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID,

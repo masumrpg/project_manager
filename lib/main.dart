@@ -1,36 +1,78 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
 import 'package:provider/provider.dart';
 
+import 'providers/auth_provider.dart';
 import 'providers/project_provider.dart';
 import 'repositories/project_repository.dart';
-import 'screens/home_screen.dart';
-import 'services/hive_boxes.dart';
+import 'screens/splash_screen.dart';
+import 'services/api_client.dart';
+import 'services/auth_service.dart';
+import 'services/auth_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await HiveBoxes.init();
-  runApp(const ProjectManagerApp());
+  await dotenv.load(fileName: '.env');
+
+  final envBaseUrl = dotenv.env['BASE_URL']?.trim();
+  if (envBaseUrl == null || envBaseUrl.isEmpty) {
+    throw StateError('BASE_URL is not set in .env');
+  }
+
+  final authStorage = await AuthStorage.create();
+  final apiClient = ApiClient(baseUrl: envBaseUrl, authStorage: authStorage);
+  final authService = AuthService(apiClient: apiClient, storage: authStorage);
+
+  runApp(ProjectManagerApp(
+    apiClient: apiClient,
+    authService: authService,
+  ));
 }
 
 class ProjectManagerApp extends StatelessWidget {
-  const ProjectManagerApp({super.key});
+  const ProjectManagerApp({
+    required this.apiClient,
+    required this.authService,
+    super.key,
+  });
+
+  final ApiClient apiClient;
+  final AuthService authService;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(create: (_) => ProjectRepository()),
-        ChangeNotifierProvider(
-          create: (context) =>
-              ProjectProvider(context.read<ProjectRepository>())
-                ..loadProjects(),
+        Provider<ApiClient>.value(value: apiClient),
+        Provider<AuthService>.value(value: authService),
+        Provider<ProjectRepository>(
+          create: (context) => ProjectRepository(context.read<ApiClient>()),
+        ),
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(context.read<AuthService>())
+            ..bootstrap(),
+        ),
+        ChangeNotifierProvider<ProjectProvider>(
+          create: (context) => ProjectProvider(context.read<ProjectRepository>()),
         ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Project Manager',
         theme: _buildTheme(),
-        home: const HomeScreen(),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          FlutterQuillLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('id'),
+        ],
+        home: const SplashScreen(),
       ),
     );
   }

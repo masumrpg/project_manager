@@ -1,20 +1,21 @@
-import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
 
-part 'todo_priority.g.dart';
-
-@HiveType(typeId: 3)
-enum TodoPriority {
-  @HiveField(0)
-  low,
-  @HiveField(1)
-  medium,
-  @HiveField(2)
-  high,
-  @HiveField(3)
-  critical,
-}
+enum TodoPriority { low, medium, high, urgent }
 
 extension TodoPriorityX on TodoPriority {
+  Color get color {
+    switch (this) {
+      case TodoPriority.low:
+        return Colors.green.shade600;
+      case TodoPriority.medium:
+        return Colors.orange.shade600;
+      case TodoPriority.high:
+        return Colors.red.shade600;
+      case TodoPriority.urgent:
+        return Colors.purple.shade600;
+    }
+  }
+
   String get label {
     switch (this) {
       case TodoPriority.low:
@@ -23,8 +24,35 @@ extension TodoPriorityX on TodoPriority {
         return 'Medium';
       case TodoPriority.high:
         return 'High';
-      case TodoPriority.critical:
-        return 'Critical';
+      case TodoPriority.urgent:
+        return 'Urgent';
+    }
+  }
+
+  String get apiValue {
+    switch (this) {
+      case TodoPriority.low:
+        return 'low';
+      case TodoPriority.medium:
+        return 'medium';
+      case TodoPriority.high:
+        return 'high';
+      case TodoPriority.urgent:
+        return 'urgent';
+    }
+  }
+
+  static TodoPriority fromApiValue(String value) {
+    switch (value) {
+      case 'medium':
+        return TodoPriority.medium;
+      case 'high':
+        return TodoPriority.high;
+      case 'urgent':
+        return TodoPriority.urgent;
+      case 'low':
+      default:
+        return TodoPriority.low;
     }
   }
 }

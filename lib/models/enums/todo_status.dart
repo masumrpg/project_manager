@@ -1,22 +1,21 @@
-import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
 
-part 'todo_status.g.dart';
-
-@HiveType(typeId: 4)
-enum TodoStatus {
-  @HiveField(0)
-  pending,
-  @HiveField(1)
-  inProgress,
-  @HiveField(2)
-  completed,
-  @HiveField(3)
-  cancelled,
-  @HiveField(4)
-  onHold,
-}
+enum TodoStatus { pending, inProgress, completed, cancelled }
 
 extension TodoStatusX on TodoStatus {
+  Color get color {
+    switch (this) {
+      case TodoStatus.pending:
+        return Colors.grey.shade600;
+      case TodoStatus.inProgress:
+        return Colors.blue.shade600;
+      case TodoStatus.completed:
+        return Colors.green.shade600;
+      case TodoStatus.cancelled:
+        return Colors.red.shade600;
+    }
+  }
+
   String get label {
     switch (this) {
       case TodoStatus.pending:
@@ -27,8 +26,33 @@ extension TodoStatusX on TodoStatus {
         return 'Completed';
       case TodoStatus.cancelled:
         return 'Cancelled';
-      case TodoStatus.onHold:
-        return 'On Hold';
+    }
+  }
+
+  String get apiValue {
+    switch (this) {
+      case TodoStatus.pending:
+        return 'pending';
+      case TodoStatus.inProgress:
+        return 'in_progress';
+      case TodoStatus.completed:
+        return 'completed';
+      case TodoStatus.cancelled:
+        return 'cancelled';
+    }
+  }
+
+  static TodoStatus fromApiValue(String value) {
+    switch (value) {
+      case 'in_progress':
+        return TodoStatus.inProgress;
+      case 'completed':
+        return TodoStatus.completed;
+      case 'cancelled':
+        return TodoStatus.cancelled;
+      case 'pending':
+      default:
+        return TodoStatus.pending;
     }
   }
 }

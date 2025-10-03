@@ -7,7 +7,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "project_manager")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.example.project_manager")
+set(APPLICATION_ID "com.projectmanager.ProjectManager")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -120,6 +120,22 @@ install(CODE "
   " COMPONENT Runtime)
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
+
+# Provide the application icon to the runtime bundle if available.
+set(APP_ICON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/app_icon.png")
+if(EXISTS "${APP_ICON_PATH}")
+  install(FILES "${APP_ICON_PATH}"
+    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
+    COMPONENT Runtime)
+endif()
+
+# Provide icon theme assets for desktop environments that rely on the hicolor icon lookup.
+set(APP_ICON_THEME_DIR "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/icons")
+if(EXISTS "${APP_ICON_THEME_DIR}")
+  install(DIRECTORY "${APP_ICON_THEME_DIR}/"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons"
+    COMPONENT Runtime)
+endif()
 
 # Install the AOT library on non-Debug builds only.
 if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
