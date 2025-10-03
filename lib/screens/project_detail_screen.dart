@@ -261,6 +261,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       floatingActionButton: _buildModernFab(context, provider, accentOrange),
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               // Project header

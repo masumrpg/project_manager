@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/enums/app_category.dart';
 import '../models/enums/environment.dart';
@@ -24,8 +25,9 @@ class HomeScreen extends StatelessWidget {
     final isDesktop = screenWidth > 1024;
     final isTablet = screenWidth > 768 && screenWidth <= 1024;
     final auth = context.watch<AuthProvider>();
+    final isAndroid = Theme.of(context).platform == TargetPlatform.android;
 
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: HomeConstants.primaryBeige,
       body: SafeArea(
         child: Consumer<ProjectProvider>(
@@ -146,6 +148,17 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: HomeConstants.accentOrange,
         foregroundColor: Colors.white,
       ),
+    );
+
+    if (!isAndroid) return scaffold;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: scaffold,
     );
   }
 
