@@ -176,260 +176,254 @@ class HomeScreen extends StatelessWidget {
 
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: const BoxDecoration(
-                  color: HomeConstants.cardBackground,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        project == null ? 'Create New Project' : 'Edit Project',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: HomeConstants.darkText,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: const BoxDecoration(
+                    color: HomeConstants.cardBackground,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          project == null ? 'Create New Project' : 'Edit Project',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: HomeConstants.darkText,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      TextFormField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          labelText: 'Project Title',
-                          labelStyle: const TextStyle(
-                            color: HomeConstants.lightText,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.secondaryBeige,
+                        const SizedBox(height: 24),
+                        TextFormField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                            labelText: 'Project Title',
+                            labelStyle: const TextStyle(
+                              color: HomeConstants.lightText,
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.accentOrange,
-                              width: 2,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.secondaryBeige,
+                              ),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.accentOrange,
+                                width: 2,
+                              ),
+                            ),
+                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
+                            filled: true,
                           ),
-                          fillColor: HomeConstants.primaryBeige.withValues(
-                            alpha: 0.3,
-                          ),
-                          filled: true,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter a project title';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter a project title';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: descriptionController,
-                        decoration: InputDecoration(
-                          labelText: 'Description',
-                          labelStyle: const TextStyle(
-                            color: HomeConstants.lightText,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.secondaryBeige,
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: descriptionController,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            labelStyle: const TextStyle(
+                              color: HomeConstants.lightText,
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.accentOrange,
-                              width: 2,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.secondaryBeige,
+                              ),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.accentOrange,
+                                width: 2,
+                              ),
+                            ),
+                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
+                            filled: true,
                           ),
-                          fillColor: HomeConstants.primaryBeige.withValues(
-                            alpha: 0.3,
-                          ),
-                          filled: true,
+                          maxLines: 3,
                         ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<AppCategory>(
-                        initialValue: selectedCategory,
-                        dropdownColor: HomeConstants.cardBackground,
-                        borderRadius: BorderRadius.circular(16),
-                        decoration: InputDecoration(
-                          labelText: 'Category',
-                          labelStyle: const TextStyle(
-                            color: HomeConstants.lightText,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.secondaryBeige,
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<AppCategory>(
+                          initialValue: selectedCategory,
+                          dropdownColor: HomeConstants.cardBackground,
+                          borderRadius: BorderRadius.circular(16),
+                          decoration: InputDecoration(
+                            labelText: 'Category',
+                            labelStyle: const TextStyle(
+                              color: HomeConstants.lightText,
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.accentOrange,
-                              width: 2,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.secondaryBeige,
+                              ),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.accentOrange,
+                                width: 2,
+                              ),
+                            ),
+                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
+                            filled: true,
                           ),
-                          fillColor: HomeConstants.primaryBeige.withValues(
-                            alpha: 0.3,
-                          ),
-                          filled: true,
+                          items: AppCategory.values.map((cat) {
+                            return DropdownMenuItem(
+                              value: cat,
+                              child: Text(cat.label),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => selectedCategory = value);
+                            }
+                          },
                         ),
-                        items: AppCategory.values.map((cat) {
-                          return DropdownMenuItem(
-                            value: cat,
-                            child: Text(cat.label),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => selectedCategory = value);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<Environment>(
-                        initialValue: selectedEnvironment,
-                        dropdownColor: HomeConstants.cardBackground,
-                        borderRadius: BorderRadius.circular(16),
-                        decoration: InputDecoration(
-                          labelText: 'Environment',
-                          labelStyle: const TextStyle(
-                            color: HomeConstants.lightText,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.secondaryBeige,
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<Environment>(
+                          initialValue: selectedEnvironment,
+                          dropdownColor: HomeConstants.cardBackground,
+                          borderRadius: BorderRadius.circular(16),
+                          decoration: InputDecoration(
+                            labelText: 'Environment',
+                            labelStyle: const TextStyle(
+                              color: HomeConstants.lightText,
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(
-                              color: HomeConstants.accentOrange,
-                              width: 2,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.secondaryBeige,
+                              ),
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: HomeConstants.accentOrange,
+                                width: 2,
+                              ),
+                            ),
+                            fillColor: HomeConstants.primaryBeige.withAlpha(76),
+                            filled: true,
                           ),
-                          fillColor: HomeConstants.primaryBeige.withValues(
-                            alpha: 0.3,
-                          ),
-                          filled: true,
+                          items: Environment.values.map((env) {
+                            return DropdownMenuItem(
+                              value: env,
+                              child: Text(env.name.toUpperCase()),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => selectedEnvironment = value);
+                            }
+                          },
                         ),
-                        items: Environment.values.map((env) {
-                          return DropdownMenuItem(
-                            value: env,
-                            child: Text(env.name.toUpperCase()),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => selectedEnvironment = value);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: isLoading
-                              ? null
-                              : () async {
-                                  if (formKey.currentState!.validate()) {
-                                    setState(() => isLoading = true);
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: isLoading
+                                ? null
+                                : () async {
+                                    if (formKey.currentState!.validate()) {
+                                      setState(() => isLoading = true);
 
-                                    final now = DateTime.now();
-                                    final updatedProject =
-                                        project?.copyWith(
-                                          title: titleController.text.trim(),
-                                          description: descriptionController
-                                              .text
-                                              .trim(),
-                                          category: selectedCategory,
-                                          environment: selectedEnvironment,
-                                          updatedAt: now,
-                                        ) ??
-                                        Project(
-                                          id: '',
-                                          userId: currentUserId,
-                                          title: titleController.text.trim(),
-                                          description: descriptionController
-                                              .text
-                                              .trim(),
-                                          category: selectedCategory,
-                                          environment: selectedEnvironment,
-                                          createdAt: now,
-                                          updatedAt: now,
+                                      final now = DateTime.now();
+                                      final updatedProject =
+                                          project?.copyWith(
+                                            title: titleController.text.trim(),
+                                            description: descriptionController
+                                                .text
+                                                .trim(),
+                                            category: selectedCategory,
+                                            environment: selectedEnvironment,
+                                            updatedAt: now,
+                                          ) ??
+                                          Project(
+                                            id: '',
+                                            userId: currentUserId,
+                                            title: titleController.text.trim(),
+                                            description: descriptionController
+                                                .text
+                                                .trim(),
+                                            category: selectedCategory,
+                                            environment: selectedEnvironment,
+                                            createdAt: now,
+                                            updatedAt: now,
+                                          );
+
+                                      bool success = false;
+                                      if (project == null) {
+                                        success = await provider.createProject(
+                                          updatedProject,
                                         );
-
-                                    bool success = false;
-                                    if (project == null) {
-                                      success = await provider.createProject(
-                                        updatedProject,
-                                      );
-                                    } else {
-                                      success = await provider.updateProject(
-                                        updatedProject,
-                                      );
-                                    }
-
-                                    if (context.mounted) {
-                                      Navigator.pop(context);
-                                      if (success) {
-                                        _showOperationResult(
-                                          context,
-                                          project == null
-                                              ? 'Project created successfully!'
-                                              : 'Project updated successfully!',
+                                      } else {
+                                        success = await provider.updateProject(
+                                          updatedProject,
                                         );
                                       }
-                                    }
-                                  }
-                                },
-                          style: FilledButton.styleFrom(
-                            backgroundColor: HomeConstants.accentOrange,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+
+                                                                          if (context.mounted) {
+                                                                            Navigator.pop(context);
+                                                                            _showFeedback(
+                                                                              context,
+                                                                              success: success,
+                                                                              message: success
+                                                                                  ? (project == null
+                                                                                      ? 'Project created successfully!'
+                                                                                      : 'Project updated successfully!')
+                                                                                  : provider.error ?? 'An unknown error occurred.',
+                                                                            );
+                                                                          }                                    }
+                                  },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: HomeConstants.accentOrange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    project == null
+                                        ? 'Create Project'
+                                        : 'Update Project',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                           ),
-                          child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  project == null
-                                      ? 'Create Project'
-                                      : 'Update Project',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -503,9 +497,16 @@ class HomeScreen extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      await context.read<ProjectProvider>().deleteProject(project.id);
+      final provider = context.read<ProjectProvider>();
+      final success = await provider.deleteProject(project.id);
       if (context.mounted) {
-        _showOperationResult(context, 'Project deleted successfully!');
+        _showFeedback(
+          context,
+          success: success,
+          message: success
+              ? 'Project deleted successfully!'
+              : provider.error ?? 'Failed to delete project.',
+        );
       }
     }
   }
@@ -541,15 +542,28 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showOperationResult(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        backgroundColor: HomeConstants.accentOrange,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
+  void _showFeedback(
+    BuildContext context, {
+    required bool success,
+    required String message,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) return;
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: success
+              ? const Color(0xFF2E7D32) // A slightly darker green
+              : const Color(0xFFC62828), // A slightly darker red
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    });
   }
 
   Future<void> _confirmSignOut(BuildContext context) async {

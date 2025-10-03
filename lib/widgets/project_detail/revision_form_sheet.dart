@@ -32,6 +32,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
   late final QuillController _changeLogController;
   late RevisionStatus _selectedStatus;
   bool _isLoading = false;
+  double _borderRadius = 24.0;
 
   @override
   void initState() {
@@ -67,260 +68,281 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFFBF7),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: 24 + MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF636E72).withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const Text(
-                  'Revision',
-                  style: TextStyle(
-                    color: Color(0xFF2D3436),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 24,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _versionController,
-                  decoration: InputDecoration(
-                    label: RichText(
-                      text: const TextSpan(
-                        text: 'Version',
-                        style: TextStyle(color: Color(0xFF636E72)),
-                        children: [
-                          TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
-                  ),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'Version is required' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 12),
-                // Changes field with Quill editor
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
-                      text: const TextSpan(
-                        text: 'Changes',
-                        style: TextStyle(
-                          color: Color(0xFF636E72),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        children: [
-                          TextSpan(
-                              text: ' *',
-                              style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
+    return NotificationListener<DraggableScrollableNotification>(
+      onNotification: (notification) {
+        final newRadius = notification.extent < 1.0 ? 24.0 : 0.0;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && newRadius != _borderRadius) {
+            setState(() {
+              _borderRadius = newRadius;
+            });
+          }
+        });
+        return true;
+      },
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 1.0,
+        expand: true,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFFBF7),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(_borderRadius),
+                topRight: Radius.circular(_borderRadius),
+              ),
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 12, bottom: 8),
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE8D5C4)),
+                        color: const Color(0xFF636E72).withAlpha(76),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15.0),
-                        child: Column(
-                          children: [
-                            QuillSimpleToolbar(
-                              controller: _changeLogController,
-                              config: const QuillSimpleToolbarConfig(
-                                toolbarSize: 40,
-                                multiRowsDisplay: false,
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: EdgeInsets.only(
+                        left: 24,
+                        right: 24,
+                        bottom: 24 + MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                      children: [
+                        const Text(
+                          'Revision',
+                          style: TextStyle(
+                            color: Color(0xFF2D3436),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 24,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _versionController,
+                          decoration: InputDecoration(
+                            label: RichText(
+                              text: const TextSpan(
+                                text: 'Version',
+                                style: TextStyle(color: Color(0xFF636E72)),
+                                children: [
+                                  TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+                                ],
                               ),
                             ),
-                            Container(
-                              constraints: const BoxConstraints(
-                                minHeight: 120,
-                                maxHeight: 200,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                            ),
+                            fillColor: const Color(0xFFF5E6D3).withAlpha(76),
+                            filled: true,
+                            labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                          ),
+                          validator: (value) => (value == null || value.trim().isEmpty) ? 'Version is required' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _descriptionController,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                            ),
+                            fillColor: const Color(0xFFF5E6D3).withAlpha(76),
+                            filled: true,
+                            labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                          ),
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 12),
+                        // Changes field with Quill editor
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RichText(
+                              text: const TextSpan(
+                                text: 'Changes',
+                                style: TextStyle(
+                                  color: Color(0xFF636E72),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                children: [
+                                  TextSpan(
+                                      text: ' *',
+                                      style: TextStyle(color: Colors.red)),
+                                ],
                               ),
-                              padding: const EdgeInsets.all(16),
-                              child: QuillEditor.basic(
-                                controller: _changeLogController,
-                                config: const QuillEditorConfig(
-                                  padding: EdgeInsets.zero,
-                                  expands: false,
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5E6D3).withAlpha(76),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: const Color(0xFFE8D5C4)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15.0),
+                                child: Column(
+                                  children: [
+                                    QuillSimpleToolbar(
+                                      controller: _changeLogController,
+                                      config: const QuillSimpleToolbarConfig(
+                                        toolbarSize: 40,
+                                        multiRowsDisplay: false,
+                                      ),
+                                    ),
+                                    Container(
+                                      constraints: const BoxConstraints(
+                                        minHeight: 120,
+                                        maxHeight: 200,
+                                      ),
+                                      padding: const EdgeInsets.all(16),
+                                      child: QuillEditor.basic(
+                                        controller: _changeLogController,
+                                        config: const QuillEditorConfig(
+                                          padding: EdgeInsets.zero,
+                                          expands: false,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<RevisionStatus>(
-                  initialValue: _selectedStatus,
-                  decoration: InputDecoration(
-                    labelText: 'Status',
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
-                    ),
-                    fillColor: const Color(0xFFF5E6D3).withValues(alpha: 0.3),
-                    filled: true,
-                    labelStyle: const TextStyle(color: Color(0xFF636E72)),
-                  ),
-                  dropdownColor: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  items: RevisionStatus.values
-                      .map((status) => DropdownMenuItem(value: status, child: Text(status.label)))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) setState(() => _selectedStatus = value);
-                  },
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: 12),
-                    FilledButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () async {
-                              // Validate changes field manually since it's not a TextFormField
-                              final changesText = _changeLogController.document.toPlainText().trim();
-                              if (changesText.isEmpty) {
-                                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                                SnackBar(
-                                                                  content: const Text('Changes is required'),
-                                                                  backgroundColor: const Color(0xFFE07A5F),
-                                                                  behavior: SnackBarBehavior.floating,
-                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                                  margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                                                                ),
-                                                              );                                return;
-                              }
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<RevisionStatus>(
+                          initialValue: _selectedStatus,
+                          decoration: InputDecoration(
+                            labelText: 'Status',
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE07A5F), width: 2),
+                            ),
+                            fillColor: const Color(0xFFF5E6D3).withAlpha(76),
+                            filled: true,
+                            labelStyle: const TextStyle(color: Color(0xFF636E72)),
+                          ),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          items: RevisionStatus.values
+                              .map((status) => DropdownMenuItem(value: status, child: Text(status.label)))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) setState(() => _selectedStatus = value);
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            const SizedBox(width: 12),
+                            FilledButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      // Validate changes field manually since it's not a TextFormField
+                                      final changesText = _changeLogController.document.toPlainText().trim();
+                                      if (changesText.isEmpty) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: const Text('Changes is required'),
+                                            backgroundColor: const Color(0xFFE07A5F),
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                                          ),
+                                        );
+                                        return;
+                                      }
 
-                              final formState = _formKey.currentState;
-                              if (formState == null || !formState.validate()) return;
+                                      final formState = _formKey.currentState;
+                                      if (formState == null || !formState.validate()) return;
 
-                              setState(() {
-                                _isLoading = true;
-                              });
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
 
-                              final navigator = Navigator.of(context);
-                              final changeLines = changesText
-                                  .split('\n')
-                                  .map((line) => line.trim())
-                                  .where((line) => line.isNotEmpty)
-                                  .toList();
+                                      final navigator = Navigator.of(context);
+                                      final changeLines = changesText
+                                          .split('\n')
+                                          .map((line) => line.trim())
+                                          .where((line) => line.isNotEmpty)
+                                          .toList();
 
-                              final didSucceed = widget.revision == null
-                                  ? await widget.onCreate(
-                                      Revision(
-                                        id: widget.uuid.v4(),
-                                        projectId: widget.projectId,
-                                        version: _versionController.text.trim(),
-                                        description: _descriptionController.text.trim(),
-                                        changes: changeLines,
-                                        status: _selectedStatus,
-                                        createdAt: DateTime.now(),
+                                      final didSucceed = widget.revision == null
+                                          ? await widget.onCreate(
+                                              Revision(
+                                                id: widget.uuid.v4(),
+                                                projectId: widget.projectId,
+                                                version: _versionController.text.trim(),
+                                                description: _descriptionController.text.trim(),
+                                                changes: changeLines,
+                                                status: _selectedStatus,
+                                                createdAt: DateTime.now(),
+                                              ),
+                                            )
+                                          : widget.revision != null
+                                              ? await widget.onUpdate(
+                                                  widget.revision!
+                                                    ..version = _versionController.text.trim()
+                                                    ..description = _descriptionController.text.trim()
+                                                    ..changes = changeLines
+                                                    ..status = _selectedStatus,
+                                                )
+                                              : false;
+                                      if (!mounted) return;
+                                      navigator.pop(didSucceed);
+                                    },
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
                                       ),
                                     )
-                                  : widget.revision != null
-                                      ? await widget.onUpdate(
-                                          widget.revision!
-                                            ..version = _versionController.text.trim()
-                                            ..description = _descriptionController.text.trim()
-                                            ..changes = changeLines
-                                            ..status = _selectedStatus,
-                                        )
-                                      : false;
-                              if (!mounted) return;
-                              navigator.pop(didSucceed);
-                            },
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(widget.revision == null ? 'Create' : 'Save'),
+                                  : Text(widget.revision == null ? 'Create' : 'Save'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

@@ -27,6 +27,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
   late AppCategory _selectedCategory;
   late Environment _selectedEnvironment;
   bool _isLoading = false;
+  double _borderRadius = 24.0;
 
   @override
   void initState() {
@@ -95,173 +96,193 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final viewInsets = MediaQuery.of(context).viewInsets;
-    final sheetHeight = MediaQuery.of(context).size.height * 0.85;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: viewInsets.bottom),
-      child: Container(
-        height: sheetHeight,
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFFBF7), // cardBackground
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Handle
-            Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFF636E72).withAlpha((255 * 0.3).round()), // lightText
-                borderRadius: BorderRadius.circular(2),
+    return NotificationListener<DraggableScrollableNotification>(
+      onNotification: (notification) {
+        final newRadius = notification.extent < 1.0 ? 24.0 : 0.0;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && newRadius != _borderRadius) {
+            setState(() {
+              _borderRadius = newRadius;
+            });
+          }
+        });
+        return true;
+      },
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 1.0,
+        expand: true,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFFBF7), // cardBackground
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(_borderRadius),
+                topRight: Radius.circular(_borderRadius),
               ),
             ),
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                children: [
-                  const Text(
-                    'Edit Project',
-                    style: TextStyle(
-                      color: Color(0xFF2D3436), // darkText
-                      fontWeight: FontWeight.w600,
-                      fontSize: 24,
-                    ),
+            child: Column(
+              children: [
+                // Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF636E72).withAlpha((255 * 0.3).round()), // lightText
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-                    icon: const Icon(Icons.close),
-                    style: IconButton.styleFrom(
-                      backgroundColor: const Color(0xFFF5E6D3).withAlpha((255 * 0.3).round()), // primaryBeige
-                      foregroundColor: const Color(0xFF636E72), // lightText
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Form
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                ),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                     children: [
-                      TextFormField(
-                        controller: _titleController,
-                        decoration: _buildInputDecoration(label: 'Title', isRequired: true),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Title is required';
-                          }
-                          return null;
-                        },
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Edit Project',
+                              style: TextStyle(
+                                color: Color(0xFF2D3436), // darkText
+                                fontWeight: FontWeight.w600,
+                                fontSize: 24,
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                              icon: const Icon(Icons.close),
+                              style: IconButton.styleFrom(
+                                backgroundColor: const Color(0xFFF5E6D3).withAlpha((255 * 0.3).round()), // primaryBeige
+                                foregroundColor: const Color(0xFF636E72), // lightText
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _descriptionController,
-                        decoration: _buildInputDecoration(label: 'Description'),
-                        maxLines: 3,
+                      // Form
+                      Form(
+                        key: _formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextFormField(
+                                controller: _titleController,
+                                decoration: _buildInputDecoration(label: 'Title', isRequired: true),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Title is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _descriptionController,
+                                decoration: _buildInputDecoration(label: 'Description'),
+                                maxLines: 3,
+                              ),
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<AppCategory>(
+                                initialValue: _selectedCategory,
+                                decoration: _buildInputDecoration(label: 'Category'),
+                                dropdownColor: const Color(0xFFFFFBF7), // cardBackground
+                                borderRadius: BorderRadius.circular(16),
+                                items: AppCategory.values
+                                    .map((value) => DropdownMenuItem<AppCategory>(
+                                          value: value,
+                                          child: Text(value.label, style: const TextStyle(color: Color(0xFF2D3436))),
+                                        ))
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedCategory = value);
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<Environment>(
+                                initialValue: _selectedEnvironment,
+                                decoration: _buildInputDecoration(label: 'Environment'),
+                                dropdownColor: const Color(0xFFFFFBF7), // cardBackground
+                                borderRadius: BorderRadius.circular(16),
+                                items: Environment.values
+                                    .map((value) => DropdownMenuItem<Environment>(
+                                          value: value,
+                                          child: Text(value.label, style: const TextStyle(color: Color(0xFF2D3436))),
+                                        ))
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedEnvironment = value);
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<AppCategory>(
-                        initialValue: _selectedCategory,
-                        decoration: _buildInputDecoration(label: 'Category'),
-                        dropdownColor: const Color(0xFFFFFBF7), // cardBackground
-                        borderRadius: BorderRadius.circular(16),
-                        items: AppCategory.values
-                            .map((value) => DropdownMenuItem<AppCategory>(
-                                  value: value,
-                                  child: Text(value.label, style: const TextStyle(color: Color(0xFF2D3436))),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedCategory = value);
-                          }
-                        },
+                      // Actions
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: const Color(0xFF636E72), // lightText
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
+                                  ),
+                                ),
+                                child: const Text('Cancel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: _isLoading ? null : _submitForm,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFFE07A5F), // accentOrange
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<Environment>(
-                        initialValue: _selectedEnvironment,
-                        decoration: _buildInputDecoration(label: 'Environment'),
-                        dropdownColor: const Color(0xFFFFFBF7), // cardBackground
-                        borderRadius: BorderRadius.circular(16),
-                        items: Environment.values
-                            .map((value) => DropdownMenuItem<Environment>(
-                                  value: value,
-                                  child: Text(value.label, style: const TextStyle(color: Color(0xFF2D3436))),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedEnvironment = value);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
-            // Actions
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF636E72), // lightText
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
-                        ),
-                      ),
-                      child: const Text('Cancel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: _isLoading ? null : _submitForm,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFE07A5F), // accentOrange
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
