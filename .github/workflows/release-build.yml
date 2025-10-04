@@ -147,23 +147,23 @@ jobs:
       - name: Build Windows bundle (release)
         run: flutter build windows --release
 
-      - name: Package Windows bundle
-        shell: pwsh
+      - name: Get app version
+        id: get_version
+        shell: bash
         run: |
-          $output = "${{ github.workspace }}\windows-x64-release.zip"
-          $sourceDir = "${{ github.workspace }}\build\windows\x64\runner"
-          if (-Not (Test-Path $sourceDir)) {
-            Write-Error 'Windows runner output not found'
-            exit 1
-          }
-          if (Test-Path $output) { Remove-Item $output }
-          Compress-Archive -Path $sourceDir -DestinationPath $output
+          echo "APP_VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //; s/+.*//')" >> $GITHUB_ENV
+
+      - name: Compile Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1
+        with:
+          script-file: tool/package_windows.iss
+          args: /DAppVersion=${{ env.APP_VERSION }}
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-zip
-          path: windows-x64-release.zip
+          name: windows-installer
+          path: dist\catatan-kaki-setup.exe
           if-no-files-found: error
 
   macos:
@@ -242,7 +242,7 @@ jobs:
           files: |
             dist/app-release.apk
             dist/*.deb
-            dist/windows-x64-release.zip
+            dist/catatan-kaki-setup.exe
             dist/macos-release.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
