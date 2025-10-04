@@ -88,13 +88,8 @@ jobs:
       - name: Build Android APK (release)
         run: flutter build apk --release
 
-      - name: Build Linux bundle (release)
-        run: flutter build linux --release
-
-      - name: Package Linux bundle
-        run: |
-          cd build/linux/x64/release
-          zip -r linux-x64-release.zip bundle
+      - name: Package Linux bundle as deb
+        run: tool/package_linux.sh
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
@@ -106,8 +101,8 @@ jobs:
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-zip
-          path: build/linux/x64/release/linux-x64-release.zip
+          name: linux-deb
+          path: dist/linux/*.deb
           if-no-files-found: error
 
       - name: Clean up signing artifacts
@@ -246,7 +241,7 @@ jobs:
           generate_release_notes: true
           files: |
             dist/app-release.apk
-            dist/linux-x64-release.zip
+            dist/*.deb
             dist/windows-x64-release.zip
             dist/macos-release.zip
         env:

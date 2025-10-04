@@ -132,4 +132,4 @@ POSTRM
 chmod 755 "$PKG_DIR/DEBIAN/postrm"
 
 dpkg-deb --build "$PKG_DIR"
-echo "Created Debian package: $DIST_DIR/${PKG_NAME}_${VERSION}_${ARCH}.deb"
+echo "Created Debian package: $DIST_DIR/${PKG_NAME}_${ARCH}.deb"
