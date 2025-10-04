@@ -24,6 +24,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _signUpPasswordController = TextEditingController();
 
   bool _isSignInMode = true;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -45,35 +46,56 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _handleSignIn(AuthProvider auth, ProjectProvider projects) async {
     final form = _signInFormKey.currentState;
     if (form == null || !form.validate()) return;
-
-    final success = await auth.signIn(
-      email: _signInEmailController.text.trim(),
-      password: _signInPasswordController.text,
+    await _submit(
+      action: () => auth.signIn(
+        email: _signInEmailController.text.trim(),
+        password: _signInPasswordController.text,
+      ),
+      auth: auth,
+      projects: projects,
+      successMessage: 'Selamat datang kembali!',
     );
-
-    if (!success) {
-      _showError(auth.error);
-      return;
-    }
-
-    await _navigateToHome(projects);
   }
 
   Future<void> _handleSignUp(AuthProvider auth, ProjectProvider projects) async {
     final form = _signUpFormKey.currentState;
     if (form == null || !form.validate()) return;
-
-    final success = await auth.signUp(
-      name: _signUpNameController.text.trim(),
-      email: _signUpEmailController.text.trim(),
-      password: _signUpPasswordController.text,
+    await _submit(
+      action: () => auth.signUp(
+        name: _signUpNameController.text.trim(),
+        email: _signUpEmailController.text.trim(),
+        password: _signUpPasswordController.text,
+      ),
+      auth: auth,
+      projects: projects,
+      successMessage: 'Akun berhasil dibuat. Selamat datang!',
     );
+  }
+
+  Future<void> _submit({
+    required Future<bool> Function() action,
+    required AuthProvider auth,
+    required ProjectProvider projects,
+    required String successMessage,
+  }) async {
+    if (!mounted || _isSubmitting) return;
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final success = await action();
+
+    if (!mounted) return;
 
     if (!success) {
+      setState(() {
+        _isSubmitting = false;
+      });
       _showError(auth.error);
       return;
     }
 
+    _showSuccess(successMessage);
     await _navigateToHome(projects);
   }
 
@@ -81,6 +103,10 @@ class _AuthScreenState extends State<AuthScreen> {
     await projects.loadProjects();
     if (!mounted) return;
     context.go('/home');
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = false;
+    });
   }
 
   void _showError(String? message) {
@@ -89,6 +115,20 @@ class _AuthScreenState extends State<AuthScreen> {
       SnackBar(
         content: Text(message, style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.red.shade600,
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF2E7D32),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -141,7 +181,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       const SizedBox(height: 24),
                       TextButton(
-                        onPressed: auth.isLoading ? null : _toggleMode,
+                        onPressed: (_isSubmitting || auth.isLoading) ? null : _toggleMode,
                         child: Text(
                           _isSignInMode
                               ? "Belum punya akun? Daftar"
@@ -170,6 +210,7 @@ class _AuthScreenState extends State<AuthScreen> {
             decoration: _inputDecoration('Email'),
             keyboardType: TextInputType.emailAddress,
             validator: _emailValidator,
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -177,10 +218,15 @@ class _AuthScreenState extends State<AuthScreen> {
             decoration: _inputDecoration('Kata Sandi'),
             obscureText: true,
             validator: _passwordValidator,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) {
+              if (_isSubmitting || auth.isLoading) return;
+              _handleSignIn(auth, projects);
+            },
           ),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: auth.isLoading
+            onPressed: (_isSubmitting || auth.isLoading)
                 ? null
                 : () => _handleSignIn(auth, projects),
             style: FilledButton.styleFrom(
@@ -191,7 +237,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: auth.isLoading
+            child: (_isSubmitting || auth.isLoading)
                 ? const SizedBox(
                     height: 20,
                     width: 20,
@@ -222,6 +268,7 @@ class _AuthScreenState extends State<AuthScreen> {
               }
               return null;
             },
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -229,6 +276,7 @@ class _AuthScreenState extends State<AuthScreen> {
             decoration: _inputDecoration('Email'),
             keyboardType: TextInputType.emailAddress,
             validator: _emailValidator,
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -241,10 +289,15 @@ class _AuthScreenState extends State<AuthScreen> {
               }
               return null;
             },
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) {
+              if (_isSubmitting || auth.isLoading) return;
+              _handleSignUp(auth, projects);
+            },
           ),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: auth.isLoading
+            onPressed: (_isSubmitting || auth.isLoading)
                 ? null
                 : () => _handleSignUp(auth, projects),
             style: FilledButton.styleFrom(
@@ -255,7 +308,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: auth.isLoading
+            child: (_isSubmitting || auth.isLoading)
                 ? const SizedBox(
                     height: 20,
                     width: 20,
