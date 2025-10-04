@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
@@ -58,22 +59,30 @@ class ProjectManagerApp extends StatelessWidget {
           create: (context) =>
               ProjectProvider(context.read<ProjectRepository>()),
         ),
+        Provider<GoRouter>(
+          lazy: false,
+          create: (context) => createRouter(context.read<AuthProvider>()),
+        ),
       ],
-      child: MaterialApp.router(
-        routerConfig: router,
-        debugShowCheckedModeBanner: false,
-        title: 'Catatan Kaki',
-        theme: _buildTheme(),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          FlutterQuillLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en'),
-          Locale('id'),
-        ],
+      child: Consumer<GoRouter>(
+        builder: (context, router, _) {
+          return MaterialApp.router(
+            routerConfig: router,
+            debugShowCheckedModeBanner: false,
+            title: 'Catatan Kaki',
+            theme: _buildTheme(),
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              FlutterQuillLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('id'),
+            ],
+          );
+        },
       ),
     );
   }
