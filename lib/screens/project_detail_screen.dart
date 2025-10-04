@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:project_manager/widgets/project_detail/project_edit_sheet.dart';
+import 'package:catatan_kaki/widgets/project_detail/project_edit_sheet.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -111,7 +111,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 CircularProgressIndicator(color: accentOrange, strokeWidth: 3),
                 const SizedBox(height: 16),
                 Text(
-                  'Loading project...',
+                  'Memuat proyek...',
                   style: TextStyle(
                     color: lightText,
                     fontSize: 16,
@@ -132,7 +132,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           backgroundColor: cardBackground,
           elevation: 0,
           title: Text(
-            'Project',
+            'Proyek',
             style: TextStyle(
               color: darkText,
               fontSize: isDesktop ? 24 : 20,
@@ -154,7 +154,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           backgroundColor: cardBackground,
           elevation: 0,
           title: Text(
-            'Project',
+            'Proyek',
             style: TextStyle(
               color: darkText,
               fontSize: isDesktop ? 24 : 20,
@@ -183,7 +183,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 Icon(Icons.folder_off_outlined, size: 64, color: lightText),
                 const SizedBox(height: 16),
                 Text(
-                  'Project not found',
+                  'Proyek tidak ditemukan',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -192,7 +192,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'It may have been deleted.',
+                  'Mungkin sudah dihapus.',
                   style: TextStyle(color: lightText, fontSize: 16),
                 ),
               ],
@@ -232,7 +232,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
-                tooltip: 'Refresh project',
+                tooltip: 'Segarkan proyek',
                 onPressed: () => provider.loadProject(),
                 icon: Icon(Icons.refresh_rounded, color: accentOrange),
               ),
@@ -247,7 +247,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
-                tooltip: 'Edit project',
+                tooltip: 'Edit proyek',
                 onPressed: () => _showEditProjectDialog(context, project),
                 icon: Icon(Icons.edit_outlined, color: accentOrange),
               ),
@@ -263,8 +263,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
               ),
               child: IconButton(
                 tooltip: (project.longDescription ?? '').isEmpty
-                    ? 'Tambahkan deskripsi lengkap'
-                    : 'Edit deskripsi lengkap',
+                    ? 'Tambah deskripsi panjang'
+                    : 'Edit deskripsi panjang',
                 onPressed: () =>
                     _openLongDescriptionEditor(context, provider, project),
                 icon: Icon(Icons.notes_outlined, color: accentOrange),
@@ -417,7 +417,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Created ${DateFormat('MMM d, y').format(project.createdAt)}',
+                          'Dibuat ${DateFormat('MMM d, y').format(project.createdAt)}',
                           style: TextStyle(fontSize: 14, color: lightText),
                         ),
                       ],
@@ -443,7 +443,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         child: MouseRegion(
                           cursor: SystemMouseCursors.click,
                           child: TabButton(
-                            text: 'Notes',
+                            text: 'Catatan',
                             isSelected: _tabController.index == 0,
                             onTap: () => _tabController.animateTo(0),
                           ),
@@ -454,7 +454,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         child: MouseRegion(
                           cursor: SystemMouseCursors.click,
                           child: TabButton(
-                            text: 'Revisions',
+                            text: 'Revisi',
                             isSelected: _tabController.index == 1,
                             onTap: () => _tabController.animateTo(1),
                           ),
@@ -465,7 +465,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         child: MouseRegion(
                           cursor: SystemMouseCursors.click,
                           child: TabButton(
-                            text: 'Todos',
+                            text: 'Tugas',
                             isSelected: _tabController.index == 2,
                             onTap: () => _tabController.animateTo(2),
                           ),
@@ -545,7 +545,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
         return HoverExpandableFab(
           onPressed: () => _showNoteSheet(context, provider),
           icon: Icons.note_add_outlined,
-          label: 'Add Note',
+          label: 'Tambah Catatan',
           backgroundColor: accentOrange,
           foregroundColor: Colors.white,
         );
@@ -553,7 +553,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
         return HoverExpandableFab(
           onPressed: () => _showRevisionSheet(context, provider),
           icon: Icons.history_edu_outlined,
-          label: 'Add Revision',
+          label: 'Tambah Revisi',
           backgroundColor: accentOrange,
           foregroundColor: Colors.white,
         );
@@ -561,7 +561,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
         return HoverExpandableFab(
           onPressed: () => _showTodoSheet(context, provider),
           icon: Icons.add_task,
-          label: 'Add Todo',
+          label: 'Tambah Tugas',
           backgroundColor: accentOrange,
           foregroundColor: Colors.white,
         );
@@ -587,8 +587,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 context,
                 success: ok,
                 message: ok
-                    ? 'Long description saved'
-                    : provider.error ?? 'Failed to save',
+                    ? 'Deskripsi panjang disimpan'
+                    : provider.error ?? 'Gagal menyimpan',
               );
             }
             return ok;
@@ -619,8 +619,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                         context,
                         success: ok,
                         message: ok
-                            ? 'Long description saved'
-                            : provider.error ?? 'Failed to save',
+                            ? 'Deskripsi panjang disimpan'
+                            : provider.error ?? 'Gagal menyimpan',
                       );
                     }
                     return ok;
@@ -662,7 +662,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       _showFeedback(
         context,
         success: true,
-        message: 'Project updated successfully',
+        message: 'Proyek berhasil diperbarui',
       );
     }
   }
@@ -693,13 +693,13 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       _showFeedback(
         context,
         success: true,
-        message: note == null ? 'Note added' : 'Note updated',
+        message: note == null ? 'Catatan ditambahkan' : 'Catatan diperbarui',
       );
     } else if (success == false) {
       _showFeedback(
         context,
         success: false,
-        message: provider.error ?? 'Failed to save note',
+        message: provider.error ?? 'Gagal menyimpan catatan',
       );
     }
   }
@@ -711,8 +711,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
   ) async {
     final confirmed = await _confirmDeletion(
       context,
-      title: 'Delete Note',
-      message: 'Are you sure you want to delete "${note.title}"?',
+      title: 'Hapus Catatan',
+      message: 'Anda yakin ingin menghapus "${note.title}"?',
     );
 
     if (confirmed != true) return;
@@ -723,8 +723,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context,
       success: success,
       message: success
-          ? 'Note deleted'
-          : provider.error ?? 'Failed to delete note',
+          ? 'Catatan dihapus'
+          : provider.error ?? 'Gagal menghapus catatan',
     );
   }
 
@@ -755,13 +755,13 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       _showFeedback(
         context,
         success: true,
-        message: revision == null ? 'Revision added' : 'Revision updated',
+        message: revision == null ? 'Revisi ditambahkan' : 'Revisi diperbarui',
       );
     } else if (success == false) {
       _showFeedback(
         context,
         success: false,
-        message: provider.error ?? 'Failed to save revision',
+        message: provider.error ?? 'Gagal menyimpan revisi',
       );
     }
   }
@@ -773,8 +773,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
   ) async {
     final confirmed = await _confirmDeletion(
       context,
-      title: 'Delete Revision',
-      message: 'Delete revision ${revision.version}?',
+      title: 'Hapus Revisi',
+      message: 'Hapus revisi ${revision.version}?',
     );
 
     if (confirmed != true) return;
@@ -785,8 +785,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context,
       success: success,
       message: success
-          ? 'Revision deleted'
-          : provider.error ?? 'Failed to delete revision',
+          ? 'Revisi dihapus'
+          : provider.error ?? 'Gagal menghapus revisi',
     );
   }
 
@@ -818,13 +818,13 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       _showFeedback(
         context,
         success: true,
-        message: todo == null ? 'Todo created' : 'Todo updated',
+        message: todo == null ? 'Tugas dibuat' : 'Tugas diperbarui',
       );
     } else if (success == false) {
       _showFeedback(
         context,
         success: false,
-        message: provider.error ?? 'Failed to save todo',
+        message: provider.error ?? 'Gagal menyimpan tugas',
       );
     }
     return;
@@ -837,8 +837,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
   ) async {
     final confirmed = await _confirmDeletion(
       context,
-      title: 'Delete Todo',
-      message: 'Delete todo "${todo.title}"?',
+      title: 'Hapus Tugas',
+      message: 'Hapus tugas "${todo.title}"?',
     );
 
     if (confirmed != true) return;
@@ -849,8 +849,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context,
       success: success,
       message: success
-          ? 'Todo deleted'
-          : provider.error ?? 'Failed to delete todo',
+          ? 'Tugas dihapus'
+          : provider.error ?? 'Gagal menghapus tugas',
     );
   }
 
@@ -866,8 +866,8 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
       context,
       success: success,
       message: success
-          ? 'Todo marked as ${status.label.toLowerCase()}'
-          : provider.error ?? 'Failed to update status',
+          ? 'Tugas ditandai sebagai ${status.label.toLowerCase()}'
+          : provider.error ?? 'Gagal memperbarui status',
     );
   }
 
@@ -901,7 +901,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
               style: TextButton.styleFrom(
                 foregroundColor: const Color(0xFF636E72),
               ), // lightText
-              child: const Text('Cancel'),
+              child: const Text('Batal'),
             ),
             FilledButton.tonal(
               style: FilledButton.styleFrom(
@@ -912,7 +912,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                 ),
               ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Delete'),
+              child: const Text('Hapus'),
             ),
           ],
         );

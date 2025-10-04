@@ -110,7 +110,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
         });
         messenger.showSnackBar(
           SnackBar(
-            content: Text(provider.error ?? 'Failed to save todo'),
+            content: Text(provider.error ?? 'Gagal menyimpan tugas'),
             backgroundColor: const Color(0xFFE07A5F),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -127,7 +127,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
       backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
         title: const Text(
-          'Edit Todo',
+          'Edit Tugas',
           style: TextStyle(
             color: Color(0xFF2D3436),
             fontWeight: FontWeight.w600,
@@ -151,7 +151,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
               : IconButton(
                   onPressed: _saveTodo,
                   icon: const Icon(Icons.save_outlined, color: Color(0xFF2D3436)),
-                  tooltip: 'Save Todo',
+                  tooltip: 'Simpan Tugas',
                 ),
           const SizedBox(width: 8),
         ],
@@ -166,7 +166,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
               decoration: InputDecoration(
                 label: RichText(
                   text: const TextSpan(
-                    text: 'Title',
+                    text: 'Judul',
                     style: TextStyle(color: Color(0xFF636E72)),
                     children: [
                       TextSpan(
@@ -189,13 +189,13 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
                 labelStyle: const TextStyle(color: Color(0xFF636E72)),
               ),
               validator: (value) =>
-                  (value == null || value.trim().isEmpty) ? 'Title is required' : null,
+                  (value == null || value.trim().isEmpty) ? 'Judul harus diisi' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _descriptionController,
               decoration: InputDecoration(
-                labelText: 'Description',
+                labelText: 'Deskripsi',
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -218,7 +218,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Content',
+                  'Konten',
                   style: TextStyle(
                     color: const Color(0xFF636E72),
                     fontSize: 16,
@@ -252,7 +252,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
                           child: QuillEditor.basic(
                             controller: _contentQuillController,
                             config: const QuillEditorConfig(
-                              placeholder: 'Add rich content here...',
+                              placeholder: 'Tambahkan konten di sini...',
                               padding: EdgeInsets.zero,
                               expands: false,
                             ),
@@ -271,7 +271,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
                   child: DropdownButtonFormField<TodoPriority>(
                     initialValue: _selectedPriority,
                     decoration: InputDecoration(
-                      labelText: 'Priority',
+                      labelText: 'Prioritas',
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -347,7 +347,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
                     icon: const Icon(Icons.event),
                     label: Text(
                       _dueDate == null
-                          ? 'Due date'
+                          ? 'Tanggal jatuh tempo'
                           : DateFormat('dd MMM yyyy').format(_dueDate!),
                     ),
                   ),
@@ -355,7 +355,7 @@ class _TodoEditScreenState extends State<TodoEditScreen> {
                 if (_dueDate != null) ...[
                   const SizedBox(width: 8),
                   IconButton(
-                    tooltip: 'Clear due date',
+                    tooltip: 'Hapus tanggal jatuh tempo',
                     onPressed: () {
                       setState(() => _dueDate = null);
                     },

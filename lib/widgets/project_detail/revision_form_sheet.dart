@@ -119,7 +119,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                       ),
                       children: [
                         const Text(
-                          'Revision',
+                          'Revisi',
                           style: TextStyle(
                             color: Color(0xFF2D3436),
                             fontWeight: FontWeight.w600,
@@ -132,7 +132,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                           decoration: InputDecoration(
                             label: RichText(
                               text: const TextSpan(
-                                text: 'Version',
+                                text: 'Versi',
                                 style: TextStyle(color: Color(0xFF636E72)),
                                 children: [
                                   TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
@@ -151,13 +151,13 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                             filled: true,
                             labelStyle: const TextStyle(color: Color(0xFF636E72)),
                           ),
-                          validator: (value) => (value == null || value.trim().isEmpty) ? 'Version is required' : null,
+                          validator: (value) => (value == null || value.trim().isEmpty) ? 'Versi harus diisi' : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _descriptionController,
                           decoration: InputDecoration(
-                            labelText: 'Description',
+                            labelText: 'Deskripsi',
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -179,7 +179,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                           children: [
                             RichText(
                               text: const TextSpan(
-                                text: 'Changes',
+                                text: 'Perubahan',
                                 style: TextStyle(
                                   color: Color(0xFF636E72),
                                   fontSize: 16,
@@ -262,7 +262,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                           children: [
                             TextButton(
                               onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-                              child: const Text('Cancel'),
+                              child: const Text('Batal'),
                             ),
                             const SizedBox(width: 12),
                             FilledButton(
@@ -274,7 +274,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                       if (changesText.isEmpty) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: const Text('Changes is required'),
+                                            content: const Text('Perubahan harus diisi'),
                                             backgroundColor: const Color(0xFFE07A5F),
                                             behavior: SnackBarBehavior.floating,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -334,7 +334,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : Text(widget.revision == null ? 'Create' : 'Save'),
+                                  : Text(widget.revision == null ? 'Buat' : 'Simpan'),
                             ),
                           ],
                         ),

@@ -59,7 +59,7 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
     if (changesText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Changes is required'),
+          content: const Text('Perubahan harus diisi'),
           backgroundColor: const Color(0xFFE07A5F),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -105,7 +105,7 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
         });
         messenger.showSnackBar(
           SnackBar(
-            content: Text(provider.error ?? 'Failed to save revision'),
+            content: Text(provider.error ?? 'Gagal menyimpan revisi'),
             backgroundColor: const Color(0xFFE07A5F),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -122,7 +122,7 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
       backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
         title: const Text(
-          'Edit Revision',
+          'Edit Revisi',
           style: TextStyle(
             color: Color(0xFF2D3436),
             fontWeight: FontWeight.w600,
@@ -146,7 +146,7 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
               : IconButton(
                   onPressed: _saveRevision,
                   icon: const Icon(Icons.save_outlined, color: Color(0xFF2D3436)),
-                  tooltip: 'Save Revision',
+                  tooltip: 'Simpan Revisi',
                 ),
           const SizedBox(width: 8),
         ],
@@ -161,7 +161,7 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
               decoration: InputDecoration(
                 label: RichText(
                   text: const TextSpan(
-                    text: 'Version',
+                    text: 'Versi',
                     style: TextStyle(color: Color(0xFF636E72)),
                     children: [
                       TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
@@ -181,13 +181,13 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
                 labelStyle: const TextStyle(color: Color(0xFF636E72)),
               ),
               validator: (value) =>
-                  (value == null || value.trim().isEmpty) ? 'Version is required' : null,
+                  (value == null || value.trim().isEmpty) ? 'Versi harus diisi' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _descriptionController,
               decoration: InputDecoration(
-                labelText: 'Description',
+                labelText: 'Deskripsi',
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -208,7 +208,7 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
               children: [
                 RichText(
                   text: const TextSpan(
-                    text: 'Changes',
+                    text: 'Perubahan',
                     style: TextStyle(
                       color: Color(0xFF636E72),
                       fontSize: 16,

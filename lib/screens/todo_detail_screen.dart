@@ -129,7 +129,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         title: Text(
-          'Todo Details',
+          'Detail Tugas',
           style: const TextStyle(
             color: Color(0xFF2D3436),
             fontWeight: FontWeight.w600,
@@ -149,7 +149,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                 ),
               );
               if (!mounted || result != true) return;
-              _showFeedback(success: true, message: 'Todo updated successfully');
+              _showFeedback(success: true, message: 'Tugas berhasil diperbarui');
             },
             icon: const Icon(Icons.edit_outlined, color: Color(0xFF2D3436)),
           ),
@@ -186,7 +186,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Title',
+                        'Judul',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           color: const Color(0xFF636E72),
                           fontWeight: FontWeight.w500,
@@ -208,7 +208,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Priority',
+                      'Prioritas',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: const Color(0xFF636E72),
                         fontWeight: FontWeight.w500,
@@ -251,7 +251,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             // Description
             if (description.isNotEmpty) ...[
               Text(
-                'Description',
+                'Deskripsi',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: const Color(0xFF2D3436),
                   fontWeight: FontWeight.w600,
@@ -281,7 +281,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
           // Due Date
           if (_todo.dueDate != null) ...[
               Text(
-                'Due Date',
+                'Tanggal Jatuh Tempo',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: const Color(0xFF2D3436),
                   fontWeight: FontWeight.w600,
@@ -320,7 +320,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                               _isOverdue(_todo.dueDate!)) ...[
                             const SizedBox(height: 4),
                             Text(
-                              'Overdue',
+                              'Terlambat',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: const Color(0xFFD63031),
                                 fontWeight: FontWeight.w500,
@@ -329,7 +329,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                           ],
                         ] else ...[
                           Text(
-                            'No due date set',
+                            'Tidak ada tanggal jatuh tempo',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontStyle: FontStyle.italic,
@@ -347,7 +347,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
             // Detailed Content
             if (hasContent) ...[
               Text(
-                'Details',
+                'Detail',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: const Color(0xFF2D3436),
                   fontWeight: FontWeight.w600,
@@ -425,7 +425,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _currentStatus == TodoStatus.completed ? 'Completed' : 'Mark as completed',
+                      _currentStatus == TodoStatus.completed ? 'Selesai' : 'Tandai sebagai selesai',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: _getStatusColor(_currentStatus),
                         fontWeight: FontWeight.w500,
@@ -455,7 +455,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Created',
+                        'Dibuat',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontWeight: FontWeight.w500,
@@ -478,7 +478,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'Last Updated',
+                        'Terakhir Diperbarui',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontWeight: FontWeight.w500,

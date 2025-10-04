@@ -19,13 +19,13 @@ extension TodoPriorityX on TodoPriority {
   String get label {
     switch (this) {
       case TodoPriority.low:
-        return 'Low';
+        return 'Rendah';
       case TodoPriority.medium:
-        return 'Medium';
+        return 'Sedang';
       case TodoPriority.high:
-        return 'High';
+        return 'Tinggi';
       case TodoPriority.urgent:
-        return 'Urgent';
+        return 'Mendesak';
     }
   }
 

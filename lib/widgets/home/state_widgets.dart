@@ -41,7 +41,7 @@ class EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'No Projects Yet',
+            'Belum Ada Proyek',
             style: theme.textTheme.headlineSmall?.copyWith(
               color: HomeConstants.darkText,
               fontWeight: FontWeight.w600,
@@ -49,7 +49,7 @@ class EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Create your first project to get started',
+            'Buat proyek pertama Anda untuk memulai',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: HomeConstants.lightText,
             ),
@@ -94,7 +94,7 @@ class ErrorState extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Something went wrong',
+            'Terjadi kesalahan',
             style: theme.textTheme.headlineSmall?.copyWith(
               color: HomeConstants.darkText,
               fontWeight: FontWeight.w600,
@@ -112,7 +112,7 @@ class ErrorState extends StatelessWidget {
           FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Try Again'),
+            label: const Text('Coba Lagi'),
             style: FilledButton.styleFrom(
               backgroundColor: HomeConstants.accentOrange,
               foregroundColor: Colors.white,

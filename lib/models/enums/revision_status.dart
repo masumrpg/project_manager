@@ -17,11 +17,11 @@ extension RevisionStatusX on RevisionStatus {
   String get label {
     switch (this) {
       case RevisionStatus.pending:
-        return 'Pending';
+        return 'Menunggu';
       case RevisionStatus.approved:
-        return 'Approved';
+        return 'Disetujui';
       case RevisionStatus.rejected:
-        return 'Rejected';
+        return 'Ditolak';
     }
   }
 

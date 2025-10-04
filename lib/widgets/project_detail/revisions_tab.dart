@@ -59,10 +59,10 @@ class RevisionsTab extends StatelessWidget {
                       ),
                       child: EmptyState(
                         icon: Icons.history,
-                        title: 'Revision history is empty',
+                        title: 'Riwayat revisi kosong',
                         description:
-                            'Track milestones and release notes to keep everyone aligned.',
-                        actionLabel: 'Add Revision',
+                            'Lacak tonggak pencapaian dan catatan rilis untuk menjaga semua orang tetap selaras.',
+                        actionLabel: 'Tambah Revisi',
                         onAction: onAdd,
                       ),
                     ),

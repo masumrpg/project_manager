@@ -83,7 +83,7 @@ class ModernHeader extends StatelessWidget {
                           Text(
                             currentUser != null
                                 ? _buildGreeting(currentUser)
-                                : 'Welcome back',
+                                : 'Selamat datang kembali',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleMedium?.copyWith(
@@ -94,7 +94,7 @@ class ModernHeader extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Ship your next project with confidence',
+                            'Kirim proyek Anda berikutnya dengan percaya diri',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -130,7 +130,7 @@ class ModernHeader extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  'Sign out',
+                                  'Keluar',
                                   style: TextStyle(
                                     color: HomeConstants.accentOrange,
                                     fontWeight: FontWeight.w600,
@@ -153,25 +153,25 @@ class ModernHeader extends StatelessWidget {
                     const double spacing = 24;
                     final blocks = <Widget>[
                     _StatBlock(
-                      label: 'Projects',
+                      label: 'Proyek',
                       value: metrics.totalProjects,
                       accent: Colors.white,
                       icon: Icons.dashboard_outlined,
                     ),
                       _StatBlock(
-                        label: 'Notes',
+                        label: 'Catatan',
                         value: metrics.totalNotes,
                         accent: Colors.white,
                         icon: Icons.sticky_note_2_outlined,
                       ),
                       _StatBlock(
-                        label: 'Revisions',
+                        label: 'Revisi',
                         value: metrics.totalRevisions,
                         accent: Colors.white,
                         icon: Icons.history_edu_outlined,
                       ),
                       _StatBlock(
-                        label: 'Todos',
+                        label: 'Tugas',
                         value: metrics.totalTodos,
                         accent: Colors.white,
                         icon: Icons.checklist_rounded,
@@ -224,7 +224,7 @@ class ModernHeader extends StatelessWidget {
         : user.email;
     final role = user.role;
     final roleSuffix = (role != null && role.trim().isNotEmpty) ? ' ($role)' : '';
-    return 'Hello, $displayName$roleSuffix';
+    return 'Halo, $displayName$roleSuffix';
   }
 }
 

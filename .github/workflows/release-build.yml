@@ -88,13 +88,8 @@ jobs:
       - name: Build Android APK (release)
         run: flutter build apk --release
 
-      - name: Build Linux bundle (release)
-        run: flutter build linux --release
-
-      - name: Package Linux bundle
-        run: |
-          cd build/linux/x64/release
-          zip -r linux-x64-release.zip bundle
+      - name: Package Linux bundle as deb
+        run: tool/package_linux.sh
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
@@ -106,8 +101,8 @@ jobs:
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-zip
-          path: build/linux/x64/release/linux-x64-release.zip
+          name: linux-deb
+          path: dist/linux/*.deb
           if-no-files-found: error
 
       - name: Clean up signing artifacts
@@ -152,23 +147,23 @@ jobs:
       - name: Build Windows bundle (release)
         run: flutter build windows --release
 
-      - name: Package Windows bundle
-        shell: pwsh
+      - name: Get app version
+        id: get_version
+        shell: bash
         run: |
-          $output = "${{ github.workspace }}\windows-x64-release.zip"
-          $sourceDir = "${{ github.workspace }}\build\windows\x64\runner"
-          if (-Not (Test-Path $sourceDir)) {
-            Write-Error 'Windows runner output not found'
-            exit 1
-          }
-          if (Test-Path $output) { Remove-Item $output }
-          Compress-Archive -Path $sourceDir -DestinationPath $output
+          echo "APP_VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //; s/+.*//')" >> $GITHUB_ENV
+
+      - name: Compile Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1
+        with:
+          script-file: tool/package_windows.iss
+          args: /DAppVersion=${{ env.APP_VERSION }}
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-zip
-          path: windows-x64-release.zip
+          name: windows-installer
+          path: dist\catatan-kaki-setup.exe
           if-no-files-found: error
 
   macos:
@@ -224,6 +219,33 @@ jobs:
           path: macos-release.zip
           if-no-files-found: error
 
+  deploy-web:
+    name: Deploy Web to GitHub Pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable web
+        run: flutter config --enable-web
+
+      - name: Build web
+        run: flutter build web --release --base-href /${{ github.event.repository.name }}/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
   release:
     name: Publish Release
     runs-on: ubuntu-latest
@@ -246,8 +268,8 @@ jobs:
           generate_release_notes: true
           files: |
             dist/app-release.apk
-            dist/linux-x64-release.zip
-            dist/windows-x64-release.zip
+            dist/*.deb
+            dist/catatan-kaki-setup.exe
             dist/macos-release.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:project_manager/models/todo.dart';
-import 'package:project_manager/models/enums/todo_status.dart';
-import 'package:project_manager/models/enums/todo_priority.dart';
+import 'package:catatan_kaki/models/todo.dart';
+import 'package:catatan_kaki/models/enums/todo_status.dart';
+import 'package:catatan_kaki/models/enums/todo_priority.dart';
 
 class TodoCard extends StatefulWidget {
   const TodoCard({
@@ -153,14 +153,14 @@ class _TodoCardState extends State<TodoCard> {
                 ),
               ),
               PopupMenuButton<String>(
-                tooltip: 'More actions',
+                tooltip: 'Tindakan lainnya',
                 onSelected: (value) {
                   if (value == 'edit') widget.onEdit();
                   if (value == 'delete') widget.onDelete();
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  const PopupMenuItem(value: 'edit', child: Text('Ubah')),
+                  const PopupMenuItem(value: 'delete', child: Text('Hapus')),
                 ],
                 icon: Icon(Icons.more_vert,
                     color: colorScheme.onSurfaceVariant),

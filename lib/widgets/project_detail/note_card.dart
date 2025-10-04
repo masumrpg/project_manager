@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:project_manager/models/note.dart';
-import 'package:project_manager/models/enums/note_status.dart';
+import 'package:catatan_kaki/models/note.dart';
+import 'package:catatan_kaki/models/enums/note_status.dart';
 
 class NoteCard extends StatelessWidget {
   const NoteCard({
@@ -49,14 +49,14 @@ class NoteCard extends StatelessWidget {
                     ),
                   ),
                   PopupMenuButton<String>(
-                    tooltip: 'More actions',
+                    tooltip: 'Tindakan lainnya',
                     onSelected: (value) {
                       if (value == 'edit') onEdit();
                       if (value == 'delete') onDelete();
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                      const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                      const PopupMenuItem(value: 'edit', child: Text('Ubah')),
+                      const PopupMenuItem(value: 'delete', child: Text('Hapus')),
                     ],
                     icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
                   ),

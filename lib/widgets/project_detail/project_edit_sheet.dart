@@ -81,7 +81,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              projectProvider.error ?? 'Failed to update project',
+              projectProvider.error ?? 'Gagal memperbarui proyek',
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.red.shade700,
@@ -145,7 +145,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                         child: Row(
                           children: [
                             const Text(
-                              'Edit Project',
+                              'Edit Proyek',
                               style: TextStyle(
                                 color: Color(0xFF2D3436), // darkText
                                 fontWeight: FontWeight.w600,
@@ -177,10 +177,10 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                             children: [
                               TextFormField(
                                 controller: _titleController,
-                                decoration: _buildInputDecoration(label: 'Title', isRequired: true),
+                                decoration: _buildInputDecoration(label: 'Judul', isRequired: true),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return 'Title is required';
+                                    return 'Judul harus diisi';
                                   }
                                   return null;
                                 },
@@ -188,13 +188,13 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                               const SizedBox(height: 16),
                               TextFormField(
                                 controller: _descriptionController,
-                                decoration: _buildInputDecoration(label: 'Description'),
+                                decoration: _buildInputDecoration(label: 'Deskripsi'),
                                 maxLines: 3,
                               ),
                               const SizedBox(height: 16),
                               DropdownButtonFormField<AppCategory>(
                                 initialValue: _selectedCategory,
-                                decoration: _buildInputDecoration(label: 'Category'),
+                                decoration: _buildInputDecoration(label: 'Kategori'),
                                 dropdownColor: const Color(0xFFFFFBF7), // cardBackground
                                 borderRadius: BorderRadius.circular(16),
                                 items: AppCategory.values
@@ -212,7 +212,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                               const SizedBox(height: 16),
                               DropdownButtonFormField<Environment>(
                                 initialValue: _selectedEnvironment,
-                                decoration: _buildInputDecoration(label: 'Environment'),
+                                decoration: _buildInputDecoration(label: 'Lingkungan'),
                                 dropdownColor: const Color(0xFFFFFBF7), // cardBackground
                                 borderRadius: BorderRadius.circular(16),
                                 items: Environment.values
@@ -248,7 +248,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                                     side: const BorderSide(color: Color(0xFFE8D5C4)), // secondaryBeige
                                   ),
                                 ),
-                                child: const Text('Cancel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                child: const Text('Batal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -270,7 +270,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                    : const Text('Simpan Perubahan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                               ),
                             ),
                           ],
