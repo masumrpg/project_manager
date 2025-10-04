@@ -1744,6 +1744,7 @@ THE SOFTWARE.
 --------------------------------------------------------------------------------
 args
 csslib
+logging
 
 Copyright 2013, the Dart project authors. 
 
@@ -2649,6 +2650,7 @@ cross_file
 file_selector_platform_interface
 file_selector_windows
 flutter_lints
+go_router
 path_provider_linux
 path_provider_platform_interface
 path_provider_windows
