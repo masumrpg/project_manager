@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../models/enums/app_category.dart';
 import '../models/enums/environment.dart';
 import '../models/project.dart';
 import '../providers/auth_provider.dart';
 import '../providers/project_provider.dart';
-import 'auth_screen.dart';
 import '../widgets/home/dashboard_metrics.dart';
 import '../widgets/home/home_constants.dart';
 import '../widgets/home/modern_header.dart';
 import '../widgets/home/project_grid.dart';
 import '../widgets/home/state_widgets.dart';
 import '../widgets/shared/hover_expandable_fab.dart';
-import 'project_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -142,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                               child: DesktopProjectGrid(
                                 projects: projects,
                                 onProjectTap: (project) =>
-                                    _openProjectDetail(context, project.id),
+                                    _openProjectDetail(context, project),
                                 onEditProject: (project) => _showProjectDialog(
                                   context,
                                   project: project,
@@ -155,7 +154,7 @@ class HomeScreen extends StatelessWidget {
                               child: MobileProjectList(
                                 projects: projects,
                                 onProjectTap: (project) =>
-                                    _openProjectDetail(context, project.id),
+                                    _openProjectDetail(context, project),
                                 onEditProject: (project) => _showProjectDialog(
                                   context,
                                   project: project,
@@ -244,7 +243,7 @@ class HomeScreen extends StatelessWidget {
                 TextButton(
                   onPressed: isLoading
                       ? null
-                      : () => Navigator.pop(context, false),
+                      : () => context.pop(false),
                   child: Text(
                     'Batal',
                     style: TextStyle(color: HomeConstants.lightText),
@@ -255,22 +254,9 @@ class HomeScreen extends StatelessWidget {
                       ? null
                       : () {
                           setState(() => isLoading = true);
-                          Navigator.pop(context, true);
+                          context.pop(true);
                         },
-                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Hapus',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                  child: const Text('Hapus'),
                 ),
               ],
             );
@@ -316,13 +302,8 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  void _openProjectDetail(BuildContext context, String projectId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProjectDetailScreen(projectId: projectId),
-      ),
-    );
+  void _openProjectDetail(BuildContext context, Project project) {
+    context.push('/project/${project.id}');
   }
 
   void _showFeedback(
@@ -377,7 +358,7 @@ class HomeScreen extends StatelessWidget {
                 TextButton(
                   onPressed: isLoading
                       ? null
-                      : () => Navigator.pop(context, false),
+                      : () => context.pop(false),
                   child: Text(
                     'Batal',
                     style: TextStyle(color: HomeConstants.lightText),
@@ -388,7 +369,7 @@ class HomeScreen extends StatelessWidget {
                       ? null
                       : () {
                           setState(() => isLoading = true);
-                          Navigator.pop(context, true);
+                          context.pop(true);
                         },
                   style: FilledButton.styleFrom(backgroundColor: Colors.red),
                   child: isLoading
@@ -418,10 +399,7 @@ class HomeScreen extends StatelessWidget {
       await auth.signOut();
       projects.clear();
       if (!context.mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const AuthScreen()),
-        (route) => false,
-      );
+      context.go('/auth');
     }
   }
 }
@@ -522,8 +500,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
 
     if (!mounted) return;
 
-    Navigator.pop(
-      context,
+    context.pop(
       _ProjectDialogResult(success: success, message: message),
     );
   }

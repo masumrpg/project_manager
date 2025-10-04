@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 
 class LongDescriptionEditorScreen extends StatefulWidget {
   const LongDescriptionEditorScreen({
@@ -58,7 +59,7 @@ class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScree
   Future<void> _save() async {
     if (widget.onSave == null) {
       if (!mounted) return;
-      Navigator.of(context).pop();
+      context.pop();
       return;
     }
 
@@ -80,7 +81,7 @@ class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScree
 
     if (ok) {
       if (!mounted) return;
-      Navigator.of(context).pop(true);
+      context.pop(true);
     }
   }
 

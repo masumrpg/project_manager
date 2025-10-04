@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/project_provider.dart';
 import 'repositories/project_repository.dart';
-import 'screens/splash_screen.dart';
+import 'router/app_router.dart';
 import 'services/api_client.dart';
 import 'services/auth_service.dart';
 import 'services/auth_storage.dart';
@@ -55,10 +55,12 @@ class ProjectManagerApp extends StatelessWidget {
             ..bootstrap(),
         ),
         ChangeNotifierProvider<ProjectProvider>(
-          create: (context) => ProjectProvider(context.read<ProjectRepository>()),
+          create: (context) =>
+              ProjectProvider(context.read<ProjectRepository>()),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
+        routerConfig: router,
         debugShowCheckedModeBanner: false,
         title: 'Catatan Kaki',
         theme: _buildTheme(),
@@ -72,7 +74,6 @@ class ProjectManagerApp extends StatelessWidget {
           Locale('en'),
           Locale('id'),
         ],
-        home: const SplashScreen(),
       ),
     );
   }

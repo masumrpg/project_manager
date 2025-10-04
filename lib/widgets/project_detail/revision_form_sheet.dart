@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/enums/revision_status.dart';
@@ -261,7 +262,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                              onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                              onPressed: _isLoading ? null : () => context.pop(false),
                               child: const Text('Batal'),
                             ),
                             const SizedBox(width: 12),
@@ -291,7 +292,6 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                         _isLoading = true;
                                       });
 
-                                      final navigator = Navigator.of(context);
                                       final now = DateTime.now();
                                       final changeLines = changesText
                                           .split('\n')
@@ -299,8 +299,8 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                           .where((line) => line.isNotEmpty)
                                           .toList();
 
-                                      final didSucceed = widget.revision == null
-                                          ? await widget.onCreate(
+                                      final didSucceed = await (widget.revision == null
+                                          ? widget.onCreate(
                                               Revision(
                                                 id: widget.uuid.v4(),
                                                 projectId: widget.projectId,
@@ -312,18 +312,16 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                                 updatedAt: now,
                                               ),
                                             )
-                                          : widget.revision != null
-                                              ? await widget.onUpdate(
-                                                  widget.revision!
-                                                    ..version = _versionController.text.trim()
-                                                    ..description = _descriptionController.text.trim()
-                                                    ..changes = changeLines
-                                                    ..status = _selectedStatus
-                                                    ..updatedAt = now,
-                                                )
-                                              : false;
-                                      if (!mounted) return;
-                                      navigator.pop(didSucceed);
+                                          : widget.onUpdate(
+                                              widget.revision!
+                                                ..version = _versionController.text.trim()
+                                                ..description = _descriptionController.text.trim()
+                                                ..changes = changeLines
+                                                ..status = _selectedStatus
+                                                ..updatedAt = now,
+                                            ));
+                                      if (!context.mounted) return;
+                                      context.pop(didSucceed);
                                     },
                               child: _isLoading
                                   ? const SizedBox(

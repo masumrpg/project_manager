@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/enums/note_status.dart';
@@ -82,7 +83,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     });
 
     final provider = context.read<ProjectDetailProvider>();
-    final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
     final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
@@ -96,24 +96,24 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
     final didSucceed = await provider.updateNote(updatedNote);
 
-    if (mounted) {
-      if (didSucceed) {
-        await provider.loadProject(showLoading: false);
-        navigator.pop(true);
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(provider.error ?? 'Gagal menyimpan catatan'),
-            backgroundColor: const Color(0xFFE07A5F),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          ),
-        );
-      }
+    if (!mounted) return;
+
+    if (didSucceed) {
+      await provider.loadProject(showLoading: false);
+      if (mounted) context.pop(true);
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(provider.error ?? 'Gagal menyimpan catatan'),
+          backgroundColor: const Color(0xFFE07A5F),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        ),
+      );
     }
   }
 
@@ -132,7 +132,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
         backgroundColor: const Color(0xFFFFFBF7),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         actions: [

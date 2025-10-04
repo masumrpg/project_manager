@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/enums/app_category.dart';
@@ -57,7 +58,6 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
 
     final projectProvider = context.read<ProjectProvider>();
     final detailProvider = context.read<ProjectDetailProvider>();
-    final navigator = Navigator.of(context);
 
     final updatedProject = widget.project
       ..title = _titleController.text.trim()
@@ -72,7 +72,8 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
 
     if (success) {
       await detailProvider.loadProject(showLoading: false);
-      navigator.pop(true); // Pop with success
+      if (!mounted) return;
+      context.pop(true); // Pop with success
     } else {
       setState(() {
         _isLoading = false;
@@ -154,7 +155,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                             ),
                             const Spacer(),
                             IconButton(
-                              onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                              onPressed: _isLoading ? null : () => context.pop(false),
                               icon: const Icon(Icons.close),
                               style: IconButton.styleFrom(
                                 backgroundColor: const Color(0xFFF5E6D3).withAlpha((255 * 0.3).round()), // primaryBeige
@@ -239,7 +240,7 @@ class _ProjectEditSheetState extends State<ProjectEditSheet> {
                           children: [
                             Expanded(
                               child: TextButton(
-                                onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                                onPressed: _isLoading ? null : () => context.pop(false),
                                 style: TextButton.styleFrom(
                                   foregroundColor: const Color(0xFF636E72), // lightText
                                   padding: const EdgeInsets.symmetric(vertical: 16),
