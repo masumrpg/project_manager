@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:project_manager/models/revision.dart';
-import 'package:project_manager/models/enums/revision_status.dart';
+import 'package:catatan_kaki/models/revision.dart';
+import 'package:catatan_kaki/models/enums/revision_status.dart';
 
 class RevisionCard extends StatelessWidget {
   const RevisionCard({

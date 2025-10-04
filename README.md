@@ -1,6 +1,6 @@
-# Project Manager
+# Catatan Kaki
 
-Project Manager is a Flutter application for coordinating projects, notes, revisions, and todos through a streamlined interface connected to a remote API.
+Catatan Kaki is a Flutter application for coordinating projects, notes, revisions, and todos through a streamlined interface connected to a remote API.
 
 ## Key Features
 
@@ -193,14 +193,14 @@ Use the helper script to build the Flutter bundle and package it as `.deb`:
 ./tool/package_linux.sh
 ```
 
-The script outputs `project-manager_<version>_amd64.deb` in `dist/linux/`, matching the `version` field in `pubspec.yaml`.
+The script outputs `catatan-kaki_<version>_amd64.deb` in `dist/linux/`, matching the `version` field in `pubspec.yaml`.
 
 ### Install the Package
 
 Install on the target system with `dpkg`.
 
 ```
-sudo dpkg -i dist/linux/project-manager_<version>_amd64.deb
+sudo dpkg -i dist/linux/catatan-kaki_<version>_amd64.deb
 ```
 
 Re-run the packaging script to rebuild; previous artefacts are overwritten automatically.

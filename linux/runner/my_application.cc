@@ -61,7 +61,7 @@ static void my_application_activate(GApplication* application) {
 
   const gchar* fallback_icon_paths[] = {
       icon_path,
-      "/usr/share/icons/hicolor/256x256/apps/project-manager.png",
+      "/usr/share/icons/hicolor/256x256/apps/catatan_kaki.png",
       nullptr,
   };
 
@@ -85,14 +85,14 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "Project Manager");
+    gtk_header_bar_set_title(header_bar, "Catatan Kaki");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "Project Manager");
+    gtk_window_set_title(window, "Catatan Kaki");
   }
 
-  gtk_window_set_icon_name(window, "project-manager");
+  gtk_window_set_icon_name(window, "catatan_kaki");
 #ifdef GDK_WINDOWING_X11
   gdk_set_program_class(APPLICATION_ID);
   G_GNUC_BEGIN_IGNORE_DEPRECATIONS
@@ -178,12 +178,10 @@ static void my_application_class_init(MyApplicationClass* klass) {
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
-  // Set the program name to the application ID, which helps various systems
-  // like GTK and desktop environments map this running application to its
-  // corresponding .desktop file. This ensures better integration by allowing
-  // the application to be recognized beyond its binary name.
+  // Keep the program name in sync with the application ID so Linux shells
+  // associate this binary with the installed desktop entry.
   g_set_prgname(APPLICATION_ID);
-  g_set_application_name("Project Manager");
+  g_set_application_name("Catatan Kaki");
 
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID,

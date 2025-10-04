@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:project_manager/models/note.dart';
-import 'package:project_manager/models/enums/note_status.dart';
+import 'package:catatan_kaki/models/note.dart';
+import 'package:catatan_kaki/models/enums/note_status.dart';
 
 class NoteCard extends StatelessWidget {
   const NoteCard({

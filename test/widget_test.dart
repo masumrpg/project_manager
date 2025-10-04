@@ -9,12 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:project_manager/main.dart';
-import 'package:project_manager/services/api_client.dart';
-import 'package:project_manager/services/auth_service.dart';
-import 'package:project_manager/services/auth_storage.dart';
-import 'package:project_manager/screens/home_screen.dart';
-import 'package:project_manager/models/user.dart';
+import 'package:catatan_kaki/main.dart';
+import 'package:catatan_kaki/services/api_client.dart';
+import 'package:catatan_kaki/services/auth_service.dart';
+import 'package:catatan_kaki/services/auth_storage.dart';
+import 'package:catatan_kaki/screens/home_screen.dart';
+import 'package:catatan_kaki/models/user.dart';
 
 void main() {
   testWidgets('Home screen renders base layout', (WidgetTester tester) async {

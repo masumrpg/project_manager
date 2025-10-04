@@ -12,9 +12,9 @@ fi
 flutter build linux --release
 
 VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //; s/+.*//')
-PKG_NAME="project-manager"
-APP_ID="com.projectmanager.ProjectManager"
-APP_DISPLAY_NAME="Project Manager"
+PKG_NAME="catatan-kaki"
+APP_ID="com.masum.catatan_kaki"
+APP_DISPLAY_NAME="Catatan Kaki"
 APP_SUPPORT_DIR="$APP_ID"
 HIVE_SUBDIR="hive"
 ARCH="amd64"
@@ -37,19 +37,19 @@ cat <<DESKTOP > "$PKG_DIR/usr/share/applications/${APP_ID}.desktop"
 [Desktop Entry]
 Name=$APP_DISPLAY_NAME
 Comment=Organize and track your projects
-Exec=project-manager
-Icon=project-manager
+Exec=catatan-kaki
+Icon=catatan_kaki
 Terminal=false
 Type=Application
 Categories=Utility;Productivity;
 StartupWMClass=$APP_ID
 DESKTOP
 
-cat <<'LAUNCHER' > "$PKG_DIR/usr/bin/project-manager"
+cat <<'LAUNCHER' > "$PKG_DIR/usr/bin/catatan-kaki"
 #!/bin/sh
-exec /usr/lib/project-manager/project_manager "$@"
+exec /usr/lib/catatan-kaki/catatan_kaki "$@"
 LAUNCHER
-chmod 755 "$PKG_DIR/usr/bin/project-manager"
+chmod 755 "$PKG_DIR/usr/bin/catatan-kaki"
 
 # Copy icon theme assets.
 ICON_SOURCE_DIR="$ROOT_DIR/linux/runner/resources/icons/hicolor"
@@ -58,7 +58,7 @@ if [ -d "$ICON_SOURCE_DIR" ]; then
     rel_dir="${size_dir#$ICON_SOURCE_DIR/}"
     install_dir="$PKG_DIR/usr/share/icons/hicolor/$rel_dir/apps"
     mkdir -p "$install_dir"
-    cp "$size_dir/apps/project-manager.png" "$install_dir/"
+    cp "$size_dir/apps/catatan_kaki.png" "$install_dir/"
   done
 fi
 
@@ -68,7 +68,7 @@ Version: $VERSION
 Section: utils
 Priority: optional
 Architecture: $ARCH
-Maintainer: Project Manager Team <support@example.com>
+Maintainer: Catatan Kaki Team <support@example.com>
 Depends: libgtk-3-0 (>= 3.22), libstdc++6 (>= 9)
 Description: Flutter-based project management dashboard
  Manage and track your projects with a modern desktop experience.
@@ -77,8 +77,7 @@ CONTROL
 cat <<POSTINST > "$PKG_DIR/DEBIAN/postinst"
 #!/bin/sh
 set -e
-cd /
-rm -f /usr/share/applications/project-manager.desktop || true
+# Update icon and desktop database caches
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
   gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true
 fi
@@ -89,30 +88,39 @@ exit 0
 POSTINST
 chmod 755 "$PKG_DIR/DEBIAN/postinst"
 
-cleanup_user_state() {
-  user="\$1"
-  [ -n "\$user" ] || return
-  home_dir="\$(getent passwd "\$user" | cut -d: -f6 2>/dev/null)"
-  [ -n "\$home_dir" ] || return
-
-  rm -rf "\$home_dir/.local/share/$APP_SUPPORT_DIR" \
-         "\$home_dir/.local/share/$APP_SUPPORT_DIR/$HIVE_SUBDIR" \
-         "\$home_dir/.local/share/project_manager" \
-         "\$home_dir/Documents/project_manager"
-}
-
 cat <<POSTRM > "$PKG_DIR/DEBIAN/postrm"
 #!/bin/sh
 set -e
-cd /
-rm -f /usr/share/applications/project-manager.desktop || true
-if [ -n "\$SUDO_USER" ] && [ "\$SUDO_USER" != "root" ]; then
-  cleanup_user_state "\$SUDO_USER"
+
+cleanup_user_state() {
+  USER_TO_CLEAN=\"\$1\"
+  if [ -z \"\$USER_TO_CLEAN\" ] || [ \"\$USER_TO_CLEAN\" = \"root\" ]; then
+    return
+  fi
+  HOME_DIR=\$(getent passwd \"\$USER_TO_CLEAN\" | cut -d: -f6)
+  if [ -z \"\$HOME_DIR\" ] || [ ! -d \"\$HOME_DIR\" ]; then
+    return
+  fi
+
+  # Clean up application data
+  rm -rf \"\$HOME_DIR/.local/share/$APP_SUPPORT_DIR\"
+  rm -rf \"\$HOME_DIR/.local/share/catatan_kaki\"
+  rm -rf \"\$HOME_DIR/Documents/catatan_kaki\"
+}
+
+if [ \"\$1\" = \"purge\" ]; then
+  # Attempt to clean up for the user who is running sudo
+  if [ -n \"\$SUDO_USER\" ]; then
+    cleanup_user_state \"\$SUDO_USER\"
+  fi
+  # Attempt to clean up for the logged-in user
+  INSTALLER_USER=\$(logname 2>/dev/null || true)
+  if [ -n \"\$INSTALLER_USER\" ]; then
+    cleanup_user_state \"\$INSTALLER_USER\"
+  fi
 fi
-installer_user="\$(logname 2>/dev/null || true)"
-if [ -n "\$installer_user" ] && [ "\$installer_user" != "root" ]; then
-  cleanup_user_state "\$installer_user"
-fi
+
+# Update icon and desktop database caches
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
   gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true
 fi

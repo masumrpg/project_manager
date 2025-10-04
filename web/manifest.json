@@ -1,6 +1,6 @@
 {
-    "name": "project_manager",
-    "short_name": "project_manager",
+    "name": "Catatan Kaki",
+    "short_name": "CatatanKaki",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -60,7 +60,7 @@ class ProjectManagerApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Project Manager',
+        title: 'Catatan Kaki',
         theme: _buildTheme(),
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,

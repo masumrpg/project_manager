@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:project_manager/widgets/project_detail/project_edit_sheet.dart';
+import 'package:catatan_kaki/widgets/project_detail/project_edit_sheet.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';

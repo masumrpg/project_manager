@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:project_manager/models/todo.dart';
-import 'package:project_manager/models/enums/todo_status.dart';
-import 'package:project_manager/models/enums/todo_priority.dart';
+import 'package:catatan_kaki/models/todo.dart';
+import 'package:catatan_kaki/models/enums/todo_status.dart';
+import 'package:catatan_kaki/models/enums/todo_priority.dart';
 
 class TodoCard extends StatefulWidget {
   const TodoCard({
