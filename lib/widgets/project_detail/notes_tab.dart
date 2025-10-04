@@ -64,20 +64,20 @@ class NotesTab extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No notes yet',
+                            'Belum ada catatan',
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            'Add meeting notes, findings, or decisions.',
+                            'Tambahkan catatan rapat, temuan, atau keputusan.',
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
                           FilledButton.icon(
                             onPressed: onAdd,
                             icon: const Icon(Icons.add),
-                            label: const Text('Add Note'),
+                            label: const Text('Tambah Catatan'),
                           ),
                         ],
                       ),

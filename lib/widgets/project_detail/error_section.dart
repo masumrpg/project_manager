@@ -12,9 +12,9 @@ class ErrorSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyState(
       icon: Icons.error_outline,
-      title: 'Something went wrong',
+      title: 'Terjadi kesalahan',
       description: message,
-      actionLabel: 'Retry',
+      actionLabel: 'Coba lagi',
       onAction: onRetry,
     );
   }

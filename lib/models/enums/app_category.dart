@@ -12,7 +12,7 @@ extension AppCategoryX on AppCategory {
       case AppCategory.api:
         return 'API';
       case AppCategory.other:
-        return 'Other';
+        return 'Lainnya';
     }
   }
 

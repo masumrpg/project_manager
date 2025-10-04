@@ -117,7 +117,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       Image.asset('assets/images/logo.png', height: 120),
                       const SizedBox(height: 24),
                       Text(
-                        _isSignInMode ? 'Welcome back' : 'Create account',
+                        _isSignInMode ? 'Selamat datang kembali' : 'Buat akun',
                         style: theme.textTheme.headlineMedium?.copyWith(
                           color: const Color(0xFF2D3436),
                           fontWeight: FontWeight.w700,
@@ -127,8 +127,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       const SizedBox(height: 8),
                       Text(
                         _isSignInMode
-                            ? 'Sign in to continue managing your projects.'
-                            : 'Complete the form below to get started.',
+                            ? 'Masuk untuk melanjutkan mengelola proyek Anda.'
+                            : 'Lengkapi formulir di bawah ini untuk memulai.',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: const Color(0xFF636E72),
                         ),
@@ -146,8 +146,8 @@ class _AuthScreenState extends State<AuthScreen> {
                         onPressed: auth.isLoading ? null : _toggleMode,
                         child: Text(
                           _isSignInMode
-                              ? "Don't have an account? Sign up"
-                              : 'Already have an account? Sign in',
+                              ? "Belum punya akun? Daftar"
+                              : 'Sudah punya akun? Masuk',
                         ),
                       ),
                     ],
@@ -176,7 +176,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _signInPasswordController,
-            decoration: _inputDecoration('Password'),
+            decoration: _inputDecoration('Kata Sandi'),
             obscureText: true,
             validator: _passwordValidator,
           ),
@@ -200,7 +200,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Text(
-                    'Sign In',
+                    'Masuk',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
           ),
@@ -217,10 +217,10 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           TextFormField(
             controller: _signUpNameController,
-            decoration: _inputDecoration('Name'),
+            decoration: _inputDecoration('Nama'),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Name is required';
+                return 'Nama harus diisi';
               }
               return null;
             },
@@ -235,11 +235,11 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _signUpPasswordController,
-            decoration: _inputDecoration('Password (min. 8 chars)'),
+            decoration: _inputDecoration('Kata Sandi (min. 8 karakter)'),
             obscureText: true,
             validator: (value) {
               if (value == null || value.length < 8) {
-                return 'Password must be at least 8 characters';
+                return 'Kata sandi minimal harus 8 karakter';
               }
               return null;
             },
@@ -264,7 +264,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Text(
-                    'Sign Up',
+                    'Daftar',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
           ),
@@ -291,17 +291,17 @@ class _AuthScreenState extends State<AuthScreen> {
 
   String? _emailValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Email is required';
+      return 'Email harus diisi';
     }
     if (!value.contains('@')) {
-      return 'Enter a valid email';
+      return 'Masukkan email yang valid';
     }
     return null;
   }
 
   String? _passwordValidator(String? value) {
     if (value == null || value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return 'Kata sandi minimal harus 6 karakter';
     }
     return null;
   }

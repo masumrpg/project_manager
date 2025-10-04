@@ -73,20 +73,20 @@ class TodosTab extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No todos yet',
+                            'Belum ada tugas',
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            'Plan tasks and track progress here.',
+                            'Rencanakan tugas dan lacak kemajuan di sini.',
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
                           FilledButton.icon(
                             onPressed: onAdd,
                             icon: const Icon(Icons.add_task),
-                            label: const Text('Add Todo'),
+                            label: const Text('Tambah Tugas'),
                           ),
                         ],
                       ),

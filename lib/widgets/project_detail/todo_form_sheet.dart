@@ -134,7 +134,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                       ),
                       children: [
                         Text(
-                          widget.todo == null ? 'Add Todo' : 'Edit Todo',
+                          widget.todo == null ? 'Tambah Tugas' : 'Edit Tugas',
                           style: const TextStyle(
                             color: Color(0xFF2D3436),
                             fontWeight: FontWeight.w600,
@@ -147,7 +147,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                           decoration: InputDecoration(
                             label: RichText(
                               text: const TextSpan(
-                                text: 'Title',
+                                text: 'Judul',
                                 style: TextStyle(color: Color(0xFF636E72)),
                                 children: [
                                   TextSpan(
@@ -169,14 +169,14 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                             filled: true,
                             labelStyle: const TextStyle(color: Color(0xFF636E72)),
                           ),
-                          validator: (value) => (value == null || value.trim().isEmpty) ? 'Title is required' : null,
+                          validator: (value) => (value == null || value.trim().isEmpty) ? 'Judul harus diisi' : null,
                         ),
                         const SizedBox(height: 12),
                         // Description with TextFormField
                         TextFormField(
                           controller: _descriptionController,
                           decoration: InputDecoration(
-                            labelText: 'Description',
+                            labelText: 'Deskripsi',
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -200,7 +200,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Content',
+                              'Konten',
                               style: TextStyle(
                                 color: const Color(0xFF636E72),
                                 fontSize: 16,
@@ -234,7 +234,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                       child: QuillEditor.basic(
                                         controller: _contentQuillController,
                                         config: const QuillEditorConfig(
-                                          placeholder: 'Add rich content here...',
+                                          placeholder: 'Tambahkan konten di sini...',
                                           padding: EdgeInsets.zero,
                                           expands: false,
                                         ),
@@ -253,7 +253,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                               child: DropdownButtonFormField<TodoPriority>(
                                 initialValue: _selectedPriority,
                                 decoration: InputDecoration(
-                                  labelText: 'Priority',
+                                  labelText: 'Prioritas',
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -323,7 +323,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                 icon: const Icon(Icons.event),
                                 label: Text(
                                   _dueDate == null
-                                      ? 'Due date'
+                                      ? 'Tanggal jatuh tempo'
                                       : DateFormat('dd MMM yyyy').format(_dueDate!),
                                 ),
                               ),
@@ -331,7 +331,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                             if (_dueDate != null) ...[
                               const SizedBox(width: 8),
                               IconButton(
-                                tooltip: 'Clear due date',
+                                tooltip: 'Hapus tanggal jatuh tempo',
                                 onPressed: () { setState(() => _dueDate = null); },
                                 icon: const Icon(Icons.close),
                               ),
@@ -344,7 +344,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                           children: [
                             TextButton(
                               onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-                              child: const Text('Cancel'),
+                              child: const Text('Batal'),
                             ),
                             const SizedBox(width: 12),
                             FilledButton(
@@ -409,7 +409,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : Text(widget.todo == null ? 'Create' : 'Save'),
+                                  : Text(widget.todo == null ? 'Buat' : 'Simpan'),
                             ),
                           ],
                         ),

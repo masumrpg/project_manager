@@ -17,11 +17,11 @@ extension NoteStatusX on NoteStatus {
   String get label {
     switch (this) {
       case NoteStatus.draft:
-        return 'Draft';
+        return 'Draf';
       case NoteStatus.active:
-        return 'Active';
+        return 'Aktif';
       case NoteStatus.archived:
-        return 'Archived';
+        return 'Diarsipkan';
     }
   }
 

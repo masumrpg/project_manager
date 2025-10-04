@@ -126,7 +126,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                       ),
                       children: [
                         Text(
-                          widget.note == null ? 'Add Note' : 'Edit Note',
+                          widget.note == null ? 'Tambah Catatan' : 'Edit Catatan',
                           style: const TextStyle(
                             color: Color(0xFF2D3436),
                             fontWeight: FontWeight.w600,
@@ -139,7 +139,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                           decoration: InputDecoration(
                             label: RichText(
                               text: const TextSpan(
-                                text: 'Title',
+                                text: 'Judul',
                                 style: TextStyle(color: Color(0xFF636E72)),
                                 children: [
                                   TextSpan(
@@ -166,7 +166,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Title is required';
+                              return 'Judul harus diisi';
                             }
                             return null;
                           },
@@ -175,7 +175,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                         TextFormField(
                           controller: _descriptionController,
                           decoration: InputDecoration(
-                            labelText: 'Description',
+                            labelText: 'Deskripsi',
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: const BorderSide(color: Color(0xFFE8D5C4)),
@@ -196,7 +196,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                           children: [
                             RichText(
                               text: const TextSpan(
-                                text: 'Content',
+                                text: 'Konten',
                                 style: TextStyle(
                                   color: Color(0xFF636E72),
                                   fontSize: 16,
@@ -237,7 +237,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                                       child: QuillEditor.basic(
                                         controller: _quillController,
                                         config: const QuillEditorConfig(
-                                          placeholder: 'Write your note content here...',
+                                          placeholder: 'Tulis konten catatan Anda di sini...',
                                           padding: EdgeInsets.zero,
                                           expands: false,
                                         ),
@@ -286,7 +286,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                           children: [
                             TextButton(
                               onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-                              child: const Text('Cancel'),
+                              child: const Text('Batal'),
                             ),
                             const SizedBox(width: 12),
                             FilledButton(
@@ -301,7 +301,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                                       if (plainText.isEmpty) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: const Text('Content is required'),
+                                            content: const Text('Konten harus diisi'),
                                             backgroundColor: const Color(0xFFE07A5F),
                                             behavior: SnackBarBehavior.floating,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -357,7 +357,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : Text(widget.note == null ? 'Create' : 'Save'),
+                                  : Text(widget.note == null ? 'Buat' : 'Simpan'),
                             ),
                           ],
                         ),

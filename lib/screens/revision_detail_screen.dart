@@ -113,7 +113,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         title: Text(
-          'Version ${_revision.version}',
+          'Versi ${_revision.version}',
           style: const TextStyle(
             color: Color(0xFF2D3436),
             fontWeight: FontWeight.w600,
@@ -135,7 +135,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
               if (!mounted || result != true) return;
               _showFeedback(
                 success: true,
-                message: 'Revision updated successfully',
+                message: 'Revisi berhasil diperbarui',
               );
             },
             icon: const Icon(Icons.edit_outlined, color: Color(0xFF2D3436)),
@@ -173,7 +173,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Version',
+                        'Versi',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontWeight: FontWeight.w500,
@@ -194,7 +194,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Created',
+                      'Dibuat',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: const Color(0xFF636E72),
                             fontWeight: FontWeight.w500,
@@ -219,7 +219,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
             // Description
             if (_revision.description.isNotEmpty) ...[
               Text(
-                'Description',
+                'Deskripsi',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: const Color(0xFF2D3436),
                       fontWeight: FontWeight.w600,
@@ -247,7 +247,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
 
             // Changes
             Text(
-              'Changes',
+              'Perubahan',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: const Color(0xFF2D3436),
                     fontWeight: FontWeight.w600,
@@ -282,7 +282,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Created',
+                        'Dibuat',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontWeight: FontWeight.w500,
@@ -305,7 +305,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'Last Updated',
+                        'Terakhir Diperbarui',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontWeight: FontWeight.w500,

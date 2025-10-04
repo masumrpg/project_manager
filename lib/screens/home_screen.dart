@@ -114,7 +114,7 @@ class HomeScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 16),
                                 Text(
-                                  '${projects.length} projects',
+                                  '${projects.length} proyek',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.headlineSmall
@@ -175,7 +175,7 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: HoverExpandableFab(
         onPressed: () => _showProjectDialog(context),
         icon: Icons.add_rounded,
-        label: 'New Project',
+        label: 'Proyek Baru',
         backgroundColor: HomeConstants.accentOrange,
         foregroundColor: Colors.white,
       ),
@@ -230,14 +230,14 @@ class HomeScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               title: Text(
-                'Delete Project',
+                'Hapus Proyek',
                 style: TextStyle(
                   color: HomeConstants.darkText,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               content: Text(
-                'Are you sure you want to delete "${project.title}"? This action cannot be undone.',
+                'Apakah Anda yakin ingin menghapus "${project.title}"? Tindakan ini tidak dapat dibatalkan.',
                 style: TextStyle(color: HomeConstants.lightText),
               ),
               actions: [
@@ -246,7 +246,7 @@ class HomeScreen extends StatelessWidget {
                       ? null
                       : () => Navigator.pop(context, false),
                   child: Text(
-                    'Cancel',
+                    'Batal',
                     style: TextStyle(color: HomeConstants.lightText),
                   ),
                 ),
@@ -268,7 +268,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         )
                       : const Text(
-                          'Delete',
+                          'Hapus',
                           style: TextStyle(color: Colors.white),
                         ),
                 ),
@@ -287,8 +287,8 @@ class HomeScreen extends StatelessWidget {
           context,
           success: success,
           message: success
-              ? 'Project deleted successfully!'
-              : provider.error ?? 'Failed to delete project.',
+              ? 'Proyek berhasil dihapus!'
+              : provider.error ?? 'Gagal menghapus proyek.',
         );
       }
     }
@@ -299,20 +299,20 @@ class HomeScreen extends StatelessWidget {
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return 'Today';
+      return 'Hari ini';
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return 'Kemarin';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
+      return '${difference.inDays} hari yang lalu';
     } else if (difference.inDays < 30) {
       final weeks = (difference.inDays / 7).floor();
-      return '$weeks week${weeks > 1 ? 's' : ''} ago';
+      return '$weeks minggu yang lalu';
     } else if (difference.inDays < 365) {
       final months = (difference.inDays / 30).floor();
-      return '$months month${months > 1 ? 's' : ''} ago';
+      return '$months bulan yang lalu';
     } else {
       final years = (difference.inDays / 365).floor();
-      return '$years year${years > 1 ? 's' : ''} ago';
+      return '$years tahun yang lalu';
     }
   }
 
@@ -363,14 +363,14 @@ class HomeScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               title: Text(
-                'Sign Out',
+                'Keluar',
                 style: TextStyle(
                   color: HomeConstants.darkText,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               content: Text(
-                'Are you sure you want to sign out from this device?',
+                'Apakah Anda yakin ingin keluar dari perangkat ini?',
                 style: TextStyle(color: HomeConstants.lightText),
               ),
               actions: [
@@ -379,7 +379,7 @@ class HomeScreen extends StatelessWidget {
                       ? null
                       : () => Navigator.pop(context, false),
                   child: Text(
-                    'Cancel',
+                    'Batal',
                     style: TextStyle(color: HomeConstants.lightText),
                   ),
                 ),
@@ -401,7 +401,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         )
                       : const Text(
-                          'Sign Out',
+                          'Keluar',
                           style: TextStyle(color: Colors.white),
                         ),
                 ),
@@ -516,9 +516,9 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
 
     final message = success
         ? (widget.project == null
-              ? 'Project created successfully!'
-              : 'Project updated successfully!')
-        : provider.error ?? 'An unknown error occurred.';
+              ? 'Proyek berhasil dibuat!'
+              : 'Proyek berhasil diperbarui!')
+        : provider.error ?? 'Terjadi kesalahan yang tidak diketahui.';
 
     if (!mounted) return;
 
@@ -572,8 +572,8 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
               children: [
                 Text(
                   widget.project == null
-                      ? 'Create New Project'
-                      : 'Edit Project',
+                      ? 'Buat Proyek Baru'
+                      : 'Edit Proyek',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -583,10 +583,10 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _titleController,
-                  decoration: _fieldDecoration('Project Title'),
+                  decoration: _fieldDecoration('Judul Proyek'),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a project title';
+                      return 'Silakan masukkan judul proyek';
                     }
                     return null;
                   },
@@ -594,7 +594,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: _fieldDecoration('Description'),
+                  decoration: _fieldDecoration('Deskripsi'),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
@@ -602,7 +602,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                   initialValue: _selectedCategory,
                   dropdownColor: HomeConstants.cardBackground,
                   borderRadius: BorderRadius.circular(16),
-                  decoration: _fieldDecoration('Category'),
+                  decoration: _fieldDecoration('Kategori'),
                   items: AppCategory.values
                       .map(
                         (cat) => DropdownMenuItem(
@@ -622,7 +622,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                   initialValue: _selectedEnvironment,
                   dropdownColor: HomeConstants.cardBackground,
                   borderRadius: BorderRadius.circular(16),
-                  decoration: _fieldDecoration('Environment'),
+                  decoration: _fieldDecoration('Lingkungan'),
                   items: Environment.values
                       .map(
                         (env) => DropdownMenuItem(
@@ -661,8 +661,8 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                           )
                         : Text(
                             widget.project == null
-                                ? 'Create Project'
-                                : 'Update Project',
+                                ? 'Buat Proyek'
+                                : 'Perbarui Proyek',
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                   ),

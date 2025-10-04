@@ -19,13 +19,13 @@ extension TodoStatusX on TodoStatus {
   String get label {
     switch (this) {
       case TodoStatus.pending:
-        return 'Pending';
+        return 'Menunggu';
       case TodoStatus.inProgress:
-        return 'In Progress';
+        return 'Sedang Dikerjakan';
       case TodoStatus.completed:
-        return 'Completed';
+        return 'Selesai';
       case TodoStatus.cancelled:
-        return 'Cancelled';
+        return 'Dibatalkan';
     }
   }
 

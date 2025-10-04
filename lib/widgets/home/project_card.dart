@@ -245,7 +245,7 @@ class _ModernProjectCardState extends State<ModernProjectCard>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Edit',
+                      'Ubah',
                       style: TextStyle(
                         color: HomeConstants.darkText,
                         fontWeight: FontWeight.w500,
@@ -265,7 +265,7 @@ class _ModernProjectCardState extends State<ModernProjectCard>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Delete',
+                      'Hapus',
                       style: TextStyle(
                         color: Colors.red.shade400,
                         fontWeight: FontWeight.w500,
@@ -344,20 +344,20 @@ class _ModernProjectCardState extends State<ModernProjectCard>
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return 'Today';
+      return 'Hari ini';
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return 'Kemarin';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
+      return '${difference.inDays} hari yang lalu';
     } else if (difference.inDays < 30) {
       final weeks = (difference.inDays / 7).floor();
-      return '$weeks week${weeks > 1 ? 's' : ''} ago';
+      return '$weeks minggu yang lalu';
     } else if (difference.inDays < 365) {
       final months = (difference.inDays / 30).floor();
-      return '$months month${months > 1 ? 's' : ''} ago';
+      return '$months bulan yang lalu';
     } else {
       final years = (difference.inDays / 365).floor();
-      return '$years year${years > 1 ? 's' : ''} ago';
+      return '$years tahun yang lalu';
     }
   }
 }

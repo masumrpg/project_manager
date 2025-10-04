@@ -124,7 +124,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         title: const Text(
-          'Note Detail',
+          'Detail Catatan',
           style: TextStyle(
             color: Color(0xFF2D3436),
             fontWeight: FontWeight.w600,
@@ -144,7 +144,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                 ),
               );
               if (!mounted || result != true) return;
-              _showFeedback(success: true, message: 'Note updated successfully');
+              _showFeedback(success: true, message: 'Catatan berhasil diperbarui');
             },
             icon: const Icon(Icons.edit_outlined, color: Color(0xFF2D3436)),
           ),
@@ -173,7 +173,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Title',
+              'Judul',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: const Color(0xFF636E72),
                     fontWeight: FontWeight.w500,
@@ -190,7 +190,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             const SizedBox(height: 32),
             if (description.isNotEmpty) ...[
               Text(
-                'Description',
+                'Deskripsi',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: const Color(0xFF2D3436),
                       fontWeight: FontWeight.w600,
@@ -216,7 +216,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               const SizedBox(height: 32),
             ],
             Text(
-              'Content',
+              'Konten',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: const Color(0xFF2D3436),
                     fontWeight: FontWeight.w600,
@@ -251,7 +251,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Created',
+                        'Dibuat',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontWeight: FontWeight.w500,
@@ -274,7 +274,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'Last Updated',
+                        'Terakhir Diperbarui',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: const Color(0xFF636E72),
                               fontWeight: FontWeight.w500,

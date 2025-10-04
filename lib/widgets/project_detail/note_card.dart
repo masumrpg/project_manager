@@ -49,14 +49,14 @@ class NoteCard extends StatelessWidget {
                     ),
                   ),
                   PopupMenuButton<String>(
-                    tooltip: 'More actions',
+                    tooltip: 'Tindakan lainnya',
                     onSelected: (value) {
                       if (value == 'edit') onEdit();
                       if (value == 'delete') onDelete();
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                      const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                      const PopupMenuItem(value: 'edit', child: Text('Ubah')),
+                      const PopupMenuItem(value: 'delete', child: Text('Hapus')),
                     ],
                     icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant),
                   ),
