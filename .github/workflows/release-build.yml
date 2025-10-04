@@ -76,7 +76,7 @@ jobs:
         run: flutter precache --linux --android --no-ios --no-web
 
       - name: Configure Android signing (optional)
-        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
           printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_PASSWORD" > android/key.properties
@@ -106,7 +106,7 @@ jobs:
           if-no-files-found: error
 
       - name: Clean up signing artifacts
-        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
           rm -f android/app/release.keystore android/key.properties
         shell: bash
@@ -151,13 +151,18 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          echo "APP_VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //; s/+.*//')" >> $GITHUB_ENV
+          VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //; s/+.*//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Inno Setup
+        run: |
+          choco install innosetup -y
+        shell: pwsh
 
       - name: Compile Inno Setup
-        uses: Minionguyjpro/Inno-Setup-Action@v1
-        with:
-          script-file: tool/package_windows.iss
-          args: /DAppVersion=${{ env.APP_VERSION }}
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.get_version.outputs.version }} tool\package_windows.iss
+        shell: pwsh
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -224,6 +229,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      FLUTTER_ENV_FILE_BASE64: ${{ secrets.FLUTTER_ENV_FILE_BASE64 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -233,6 +240,15 @@ jobs:
         with:
           channel: stable
           cache: true
+
+      - name: Restore .env
+        run: |
+          if [ -z "$FLUTTER_ENV_FILE_BASE64" ]; then
+            echo 'FLUTTER_ENV_FILE_BASE64 secret is not set' >&2
+            exit 1
+          fi
+          echo "$FLUTTER_ENV_FILE_BASE64" | base64 --decode > .env
+        shell: bash
 
       - name: Enable web
         run: flutter config --enable-web
