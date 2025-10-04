@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:catatan_kaki/widgets/project_detail/project_edit_sheet.dart';
 import 'dart:convert';
@@ -14,7 +15,6 @@ import '../models/todo.dart';
 import '../providers/project_detail_provider.dart';
 import '../repositories/project_repository.dart';
 import '../providers/project_provider.dart';
-import 'long_description_editor_screen.dart';
 import '../widgets/project_detail/note_form_sheet.dart';
 import '../widgets/project_detail/revision_form_sheet.dart';
 import '../widgets/project_detail/todo_form_sheet.dart';
@@ -575,12 +575,36 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     ProjectDetailProvider provider,
     Project project,
   ) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => LongDescriptionEditorScreen(
-          projectTitle: project.title,
-          initialJson: project.longDescription,
-          onSave: (json) async {
+    context.push('/long-description-editor', extra: {
+      'projectTitle': project.title,
+      'initialJson': project.longDescription,
+      'onSave': (json) async {
+        final ok = await provider.updateLongDescription(json);
+        if (context.mounted) {
+          _showFeedback(
+            context,
+            success: ok,
+            message: ok
+                ? 'Deskripsi panjang disimpan'
+                : provider.error ?? 'Gagal menyimpan',
+          );
+        }
+        return ok;
+      },
+    });
+  }
+
+  void _openLongDescriptionViewer(BuildContext context, Project project) {
+    final provider = context.read<ProjectDetailProvider>();
+    context.push('/long-description-editor', extra: {
+      'projectTitle': project.title,
+      'initialJson': project.longDescription,
+      'readOnly': true,
+      'onEdit': () {
+        context.push('/long-description-editor', extra: {
+          'projectTitle': project.title,
+          'initialJson': project.longDescription,
+          'onSave': (json) async {
             final ok = await provider.updateLongDescription(json);
             if (context.mounted) {
               _showFeedback(
@@ -593,45 +617,9 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
             }
             return ok;
           },
-        ),
-      ),
-    );
-  }
-
-  void _openLongDescriptionViewer(BuildContext context, Project project) {
-    final provider = context.read<ProjectDetailProvider>();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => LongDescriptionEditorScreen(
-          projectTitle: project.title,
-          initialJson: project.longDescription,
-          readOnly: true,
-          onEdit: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => LongDescriptionEditorScreen(
-                  projectTitle: project.title,
-                  initialJson: project.longDescription,
-                  onSave: (json) async {
-                    final ok = await provider.updateLongDescription(json);
-                    if (context.mounted) {
-                      _showFeedback(
-                        context,
-                        success: ok,
-                        message: ok
-                            ? 'Deskripsi panjang disimpan'
-                            : provider.error ?? 'Gagal menyimpan',
-                      );
-                    }
-                    return ok;
-                  },
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
+        });
+      },
+    });
   }
 
   Future<void> _showEditProjectDialog(
@@ -897,7 +885,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
+              onPressed: () => dialogContext.pop(false),
               style: TextButton.styleFrom(
                 foregroundColor: const Color(0xFF636E72),
               ), // lightText
@@ -911,7 +899,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
+              onPressed: () => dialogContext.pop(true),
               child: const Text('Hapus'),
             ),
           ],

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/revision.dart';
 import '../../providers/project_detail_provider.dart';
-import '../../screens/revision_detail_screen.dart';
 import 'empty_state.dart';
 import 'revision_card.dart';
 
@@ -28,15 +28,10 @@ class RevisionsTab extends StatelessWidget {
         detailProvider.loadProject(showLoading: false);
 
     void openRevisionDetail(Revision revision) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) =>
-              ChangeNotifierProvider<ProjectDetailProvider>.value(
-            value: detailProvider,
-            child: RevisionDetailScreen(revision: revision),
-          ),
-        ),
-      );
+      context.push('/revision', extra: {
+        'revision': revision,
+        'provider': detailProvider,
+      });
     }
 
     const scrollPhysics = AlwaysScrollableScrollPhysics(

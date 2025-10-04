@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -9,17 +10,14 @@ import '../models/enums/todo_priority.dart';
 import '../models/enums/todo_status.dart';
 import '../models/todo.dart';
 import '../providers/project_detail_provider.dart';
-import 'todo_edit_screen.dart';
 
 class TodoDetailScreen extends StatefulWidget {
   const TodoDetailScreen({
     required this.todo,
-    required this.onStatusChange,
     super.key,
   });
 
   final Todo todo;
-  final Future<void> Function(Todo, TodoStatus) onStatusChange;
 
   @override
   State<TodoDetailScreen> createState() => _TodoDetailScreenState();
@@ -125,7 +123,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
         backgroundColor: const Color(0xFFFFFBF7),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         title: Text(
@@ -138,15 +136,13 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-              final detailProvider = context.read<ProjectDetailProvider>();
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ChangeNotifierProvider<ProjectDetailProvider>.value(
-                    value: detailProvider,
-                    child: TodoEditScreen(todo: _todo),
-                  ),
-                ),
+              final provider = context.read<ProjectDetailProvider>();
+              final result = await context.push<bool>(
+                '/todo/edit',
+                extra: {
+                  'todo': _todo,
+                  'provider': provider,
+                },
               );
               if (!mounted || result != true) return;
               _showFeedback(success: true, message: 'Tugas berhasil diperbarui');
@@ -407,17 +403,41 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                       : Checkbox(
                           value: _currentStatus == TodoStatus.completed,
                           onChanged: (bool? value) async {
+                            final previousStatus = _currentStatus;
                             setState(() {
                               _isLoading = true;
                             });
                             final newStatus =
                                 value == true ? TodoStatus.completed : TodoStatus.pending;
-                            await widget.onStatusChange(_todo, newStatus);
-                            if (mounted) {
-                              setState(() {
-                                _isLoading = false;
+                            final provider = context.read<ProjectDetailProvider>();
+                            final success =
+                                await provider.updateTodoStatus(_todo.id, newStatus);
+                            if (!mounted) return;
+                            setState(() {
+                              _isLoading = false;
+                              if (success) {
                                 _currentStatus = newStatus;
-                              });
+                                _todo = _todo.copyWith(
+                                  status: newStatus,
+                                  updatedAt: DateTime.now(),
+                                  completedAt: newStatus == TodoStatus.completed
+                                      ? (_todo.completedAt ?? DateTime.now())
+                                      : null,
+                                );
+                              } else {
+                                _currentStatus = previousStatus;
+                              }
+                            });
+                            if (!success) {
+                              _showFeedback(
+                                success: false,
+                                message: provider.error ?? 'Gagal memperbarui status',
+                              );
+                            } else {
+                              _showFeedback(
+                                success: true,
+                                message: 'Status tugas diperbarui',
+                              );
                             }
                           },
                           activeColor: const Color(0xFF00B894),

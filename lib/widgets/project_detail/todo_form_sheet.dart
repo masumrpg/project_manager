@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -343,7 +344,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                              onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                              onPressed: _isLoading ? null : () => context.pop(false),
                               child: const Text('Batal'),
                             ),
                             const SizedBox(width: 12),
@@ -358,7 +359,6 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                         _isLoading = true;
                                       });
 
-                                      final navigator = Navigator.of(context);
                                       final now = DateTime.now();
 
                                       final descriptionText = _descriptionController.text.trim();
@@ -368,8 +368,8 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                               _contentQuillController.document.toDelta().toJson(),
                                             );
 
-                                      final didSucceed = widget.todo == null
-                                          ? await widget.onCreate(
+                                      final didSucceed = await (widget.todo == null
+                                          ? widget.onCreate(
                                               Todo(
                                                 id: widget.uuid.v4(),
                                                 projectId: widget.projectId,
@@ -384,7 +384,7 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                                 completedAt: _selectedStatus == TodoStatus.completed ? now : null,
                                               ),
                                             )
-                                          : await widget.onUpdate(
+                                          : widget.onUpdate(
                                               widget.todo!
                                                 ..title = _titleController.text.trim()
                                                 ..description = descriptionText
@@ -396,9 +396,9 @@ class _TodoFormSheetState extends State<TodoFormSheet> {
                                                 ..completedAt = _selectedStatus == TodoStatus.completed
                                                     ? (widget.todo?.completedAt ?? DateTime.now())
                                                     : null,
-                                            );
-                                      if (!mounted) return;
-                                      navigator.pop(didSucceed);
+                                            ));
+                                      if (!context.mounted) return;
+                                      context.pop(didSucceed);
                                     },
                               child: _isLoading
                                   ? const SizedBox(

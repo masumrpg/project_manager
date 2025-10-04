@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/note.dart';
 import '../../providers/project_detail_provider.dart';
-import '../../screens/note_detail_screen.dart';
 import 'note_card.dart';
 
 class NotesTab extends StatelessWidget {
@@ -27,15 +27,10 @@ class NotesTab extends StatelessWidget {
         detailProvider.loadProject(showLoading: false);
 
     void openNoteDetail(Note note) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) =>
-              ChangeNotifierProvider<ProjectDetailProvider>.value(
-            value: detailProvider,
-            child: NoteDetailScreen(note: note),
-          ),
-        ),
-      );
+      context.push('/note', extra: {
+        'note': note,
+        'provider': detailProvider,
+      });
     }
 
     const scrollPhysics = AlwaysScrollableScrollPhysics(

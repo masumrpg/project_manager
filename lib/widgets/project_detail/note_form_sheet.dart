@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
 
@@ -285,7 +286,7 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                              onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
+                              onPressed: _isLoading ? null : () => context.pop(false),
                               child: const Text('Batal'),
                             ),
                             const SizedBox(width: 12),
@@ -315,14 +316,13 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                                         _isLoading = true;
                                       });
 
-                                      final navigator = Navigator.of(context);
                                       final now = DateTime.now();
 
                                       // Convert Quill document to JSON string
                                       final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
 
-                                      final didSucceed = widget.note == null
-                                          ? await widget.onCreate(
+                                      final didSucceed = await (widget.note == null
+                                          ? widget.onCreate(
                                               Note(
                                                 id: widget.uuid.v4(),
                                                 projectId: widget.projectId,
@@ -334,19 +334,16 @@ class _NoteFormSheetState extends State<NoteFormSheet> {
                                                 updatedAt: now,
                                               ),
                                             )
-                                          : widget.note != null
-                                              ? await widget.onUpdate(
-                                                  widget.note!
-                                                    ..title = _titleController.text.trim()
-                                                    ..description = _descriptionController.text.trim()
-                                                    ..content = contentJson
-                                                    ..status = _selectedStatus
-                                                    ..updatedAt = now,
-                                                )
-                                              : false;
-
-                                      if (!mounted) return;
-                                      navigator.pop(didSucceed);
+                                          : widget.onUpdate(
+                                              widget.note!
+                                                ..title = _titleController.text.trim()
+                                                ..description = _descriptionController.text.trim()
+                                                ..content = contentJson
+                                                ..status = _selectedStatus
+                                                ..updatedAt = now,
+                                            ));
+                                      if (!context.mounted) return;
+                                      context.pop(didSucceed);
                                     },
                               child: _isLoading
                                   ? const SizedBox(

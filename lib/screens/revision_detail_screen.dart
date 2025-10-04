@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/enums/revision_status.dart';
 import '../models/revision.dart';
 import '../providers/project_detail_provider.dart';
-import 'revision_edit_screen.dart';
 
 class RevisionDetailScreen extends StatefulWidget {
   const RevisionDetailScreen({
@@ -109,7 +109,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
         backgroundColor: const Color(0xFFFFFBF7),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         title: Text(
@@ -122,15 +122,13 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-              final detailProvider = context.read<ProjectDetailProvider>();
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ChangeNotifierProvider<ProjectDetailProvider>.value(
-                    value: detailProvider,
-                    child: RevisionEditScreen(revision: _revision),
-                  ),
-                ),
+              final provider = context.read<ProjectDetailProvider>();
+              final result = await context.push<bool>(
+                '/revision/edit',
+                extra: {
+                  'revision': _revision,
+                  'provider': provider,
+                },
               );
               if (!mounted || result != true) return;
               _showFeedback(

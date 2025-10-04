@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/enums/todo_status.dart';
 import '../../../models/todo.dart';
 import '../../providers/project_detail_provider.dart';
-import '../../screens/todo_detail_screen.dart';
 import 'todo_card.dart';
 
 class TodosTab extends StatelessWidget {
@@ -30,18 +30,10 @@ class TodosTab extends StatelessWidget {
         detailProvider.loadProject(showLoading: false);
 
     void openTodoDetail(Todo todo) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) =>
-              ChangeNotifierProvider<ProjectDetailProvider>.value(
-            value: detailProvider,
-            child: TodoDetailScreen(
-              todo: todo,
-              onStatusChange: onStatusChange,
-            ),
-          ),
-        ),
-      );
+      context.push('/todo', extra: {
+        'todo': todo,
+        'provider': detailProvider,
+      });
     }
 
     const scrollPhysics = AlwaysScrollableScrollPhysics(

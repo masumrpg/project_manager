@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/enums/note_status.dart';
 import '../models/note.dart';
 import '../providers/project_detail_provider.dart';
-import 'note_edit_screen.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   const NoteDetailScreen({
@@ -120,7 +120,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         backgroundColor: const Color(0xFFFFFBF7),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2D3436)),
         ),
         title: const Text(
@@ -133,15 +133,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-              final detailProvider = context.read<ProjectDetailProvider>();
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ChangeNotifierProvider<ProjectDetailProvider>.value(
-                    value: detailProvider,
-                    child: NoteEditScreen(note: _note),
-                  ),
-                ),
+              final provider = context.read<ProjectDetailProvider>();
+              final result = await context.push<bool>(
+                '/note/edit',
+                extra: {
+                  'note': _note,
+                  'provider': provider,
+                },
               );
               if (!mounted || result != true) return;
               _showFeedback(success: true, message: 'Catatan berhasil diperbarui');
