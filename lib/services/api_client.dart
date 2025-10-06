@@ -1,13 +1,10 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-
+import 'package:dio/dio.dart';
 import 'auth_storage.dart';
 
 class ApiException implements Exception {
   ApiException(this.message, {this.statusCode, this.body});
 
-  final String message;
+  final String? message;
   final int? statusCode;
   final dynamic body;
 
@@ -20,156 +17,81 @@ class ApiClient {
   ApiClient({
     required String baseUrl,
     required AuthStorage authStorage,
-    http.Client? httpClient,
-  })  : _baseUrl = baseUrl,
-        _authStorage = authStorage,
-        _httpClient = httpClient ?? http.Client();
+  }) : _dio = Dio(BaseOptions(baseUrl: baseUrl)) {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await authStorage.readToken();
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          options.headers['Accept'] = 'application/json';
+          return handler.next(options);
+        },
+        onError: (DioException e, handler) {
+          return handler.next(e);
+        },
+      ),
+    );
+  }
 
-  final String _baseUrl;
-  final AuthStorage _authStorage;
-  final http.Client _httpClient;
+  final Dio _dio;
 
   Future<dynamic> get(
     String path, {
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
   }) async {
-    return _send(
-      'GET',
-      path,
-      queryParameters: queryParameters,
+    return _request(
+      () => _dio.get(path, queryParameters: queryParameters),
     );
   }
 
   Future<dynamic> post(
     String path, {
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     Object? body,
   }) async {
-    return _send(
-      'POST',
-      path,
-      queryParameters: queryParameters,
-      body: body,
+    return _request(
+      () => _dio.post(path, queryParameters: queryParameters, data: body),
     );
   }
 
   Future<dynamic> patch(
     String path, {
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     Object? body,
   }) async {
-    return _send(
-      'PATCH',
-      path,
-      queryParameters: queryParameters,
-      body: body,
+    return _request(
+      () => _dio.patch(path, queryParameters: queryParameters, data: body),
     );
   }
 
   Future<dynamic> delete(
     String path, {
-    Map<String, String>? queryParameters,
+    Map<String, dynamic>? queryParameters,
     Object? body,
   }) async {
-    return _send(
-      'DELETE',
-      path,
-      queryParameters: queryParameters,
-      body: body,
+    return _request(
+      () => _dio.delete(path, queryParameters: queryParameters, data: body),
     );
   }
 
-  Future<dynamic> _send(
-    String method,
-    String path, {
-    Map<String, String>? queryParameters,
-    Object? body,
-  }) async {
-    final token = await _authStorage.readToken();
-    final headers = <String, String>{
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    };
-    if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-
-    final uri = _buildUri(path, queryParameters);
-
-    http.Response response;
+  Future<dynamic> _request(Future<Response<dynamic>> Function() request) async {
     try {
-      switch (method) {
-        case 'GET':
-          response = await _httpClient.get(uri, headers: headers);
-          break;
-        case 'POST':
-          response = await _httpClient.post(
-            uri,
-            headers: headers,
-            body: body == null ? null : jsonEncode(body),
-          );
-          break;
-        case 'PATCH':
-          response = await _httpClient.patch(
-            uri,
-            headers: headers,
-            body: body == null ? null : jsonEncode(body),
-          );
-          break;
-        case 'DELETE':
-          response = await _httpClient.delete(
-            uri,
-            headers: headers,
-            body: body == null ? null : jsonEncode(body),
-          );
-          break;
-        default:
-          throw ApiException('Unsupported HTTP method: $method');
-      }
-    } catch (error) {
-      throw ApiException('Failed to connect to server: $error');
+      final response = await request();
+      return response.data;
+    } on DioException catch (e) {
+      throw ApiException(
+        e.message,
+        statusCode: e.response?.statusCode,
+        body: e.response?.data,
+      );
+    } catch (e) {
+      throw ApiException('An unexpected error occurred: $e');
     }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) {
-        return null;
-      }
-      try {
-        return jsonDecode(response.body);
-      } catch (_) {
-        return response.body;
-      }
-    }
-
-    dynamic errorBody;
-    if (response.body.isNotEmpty) {
-      try {
-        errorBody = jsonDecode(response.body);
-      } catch (_) {
-        errorBody = response.body;
-      }
-    }
-
-    throw ApiException(
-      'Request failed with status ${response.statusCode}',
-      statusCode: response.statusCode,
-      body: errorBody,
-    );
-  }
-
-  Uri _buildUri(String path, Map<String, String>? queryParameters) {
-    final normalizedPath = path.startsWith('/') ? path : '/$path';
-    final uri = Uri.parse('$_baseUrl$normalizedPath');
-    if (queryParameters == null || queryParameters.isEmpty) {
-      return uri;
-    }
-    return uri.replace(queryParameters: {
-      ...uri.queryParameters,
-      ...queryParameters,
-    });
   }
 
   void close() {
-    _httpClient.close();
+    _dio.close();
   }
 }

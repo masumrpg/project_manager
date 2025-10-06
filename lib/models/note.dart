@@ -1,94 +1,61 @@
 import 'dart:convert';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'enums/note_status.dart';
 
-class Note {
-  Note({
-    required this.id,
-    required this.projectId,
-    required this.title,
-    this.description,
-    required this.content,
-    this.status = NoteStatus.draft,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+part 'note.freezed.dart';
+part 'note.g.dart';
 
-  String id;
-  String projectId;
-  String title;
-  String content;
-  String? description;
-  DateTime createdAt;
-  DateTime updatedAt;
-  NoteStatus status;
+class NoteContentConverter implements JsonConverter<String, dynamic> {
+  const NoteContentConverter();
 
-  factory Note.fromJson(Map<String, dynamic> json, {String? fallbackProjectId}) {
-    return Note(
-      id: json['id'] as String? ?? '',
-      projectId: json['projectId'] as String? ?? fallbackProjectId ?? '',
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String?,
-      content: _encodeContent(json['content']),
-      status: NoteStatusX.fromApiValue(json['status'] as String? ?? 'draft'),
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-          DateTime.now(),
-    );
-  }
-
-  Map<String, dynamic> toApiPayload() {
-    return {
-      'title': title,
-      if (description != null && description!.trim().isNotEmpty)
-        'description': description,
-      'content': _decodeContent(),
-      'status': status.apiValue,
-    };
-  }
-
-  Note copyWith({
-    String? id,
-    String? projectId,
-    String? title,
-    String? description,
-    String? content,
-    NoteStatus? status,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return Note(
-      id: id ?? this.id,
-      projectId: projectId ?? this.projectId,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      content: content ?? this.content,
-      status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
-  static String _encodeContent(dynamic content) {
-    if (content == null) return '[]';
-    if (content is String) return content;
+  @override
+  String fromJson(dynamic json) {
+    if (json == null) return '[]';
+    if (json is String) return json;
     try {
-      return jsonEncode(content);
+      return jsonEncode(json);
     } catch (_) {
-      return content.toString();
+      return json.toString();
     }
   }
 
-  dynamic _decodeContent() {
-    if (content.isEmpty) {
-      return [];
-    }
-
+  @override
+  dynamic toJson(String object) {
+    if (object.isEmpty) return [];
     try {
-      return jsonDecode(content);
+      return jsonDecode(object);
     } catch (_) {
-      return content;
+      return object;
     }
   }
+}
+
+@freezed
+class Note with _$Note {
+    const Note._();
+
+    const factory Note({
+        required String id,
+        required String projectId,
+        required String title,
+        String? description,
+        @NoteContentConverter() required String content,
+        @Default(NoteStatus.draft) NoteStatus status,
+        required DateTime createdAt,
+        required DateTime updatedAt,
+    }) = _Note;
+
+    factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);
+
+    Map<String, dynamic> toApiPayload() {
+        return {
+            'title': title,
+            if (description != null && description!.trim().isNotEmpty)
+                'description': description,
+            'content': const NoteContentConverter().toJson(content),
+            'status': status.apiValue,
+        };
+    }
 }

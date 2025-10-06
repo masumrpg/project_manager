@@ -1,19 +1,19 @@
-class DashboardStatistics {
-  const DashboardStatistics({
-    required this.projectsCount,
-    required this.noteCount,
-    required this.todoCount,
-    required this.revisionsCount,
-  });
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  factory DashboardStatistics.fromJson(Map<String, dynamic> json) {
-    return DashboardStatistics(
-      projectsCount: json['projectsCount'] as int? ?? 0,
-      noteCount: json['noteCount'] as int? ?? 0,
-      todoCount: json['todoCount'] as int? ?? 0,
-      revisionsCount: json['revisionsCount'] as int? ?? 0,
-    );
-  }
+part 'dashboard_statistics.freezed.dart';
+part 'dashboard_statistics.g.dart';
+
+@freezed
+class DashboardStatistics with _$DashboardStatistics {
+  const factory DashboardStatistics({
+    required int projectsCount,
+    required int noteCount,
+    required int todoCount,
+    required int revisionsCount,
+  }) = _DashboardStatistics;
+
+  factory DashboardStatistics.fromJson(Map<String, dynamic> json) =>
+      _$DashboardStatisticsFromJson(json);
 
   static const empty = DashboardStatistics(
     projectsCount: 0,
@@ -21,9 +21,4 @@ class DashboardStatistics {
     todoCount: 0,
     revisionsCount: 0,
   );
-
-  final int projectsCount;
-  final int noteCount;
-  final int todoCount;
-  final int revisionsCount;
 }

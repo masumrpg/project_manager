@@ -1,40 +1,57 @@
 import 'dart:convert';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'enums/revision_status.dart';
 
-class Revision {
-  Revision({
-    required this.id,
-    required this.projectId,
-    required this.version,
-    required this.description,
-    required this.changes,
-    this.status = RevisionStatus.pending,
-    required this.createdAt,
-    DateTime? updatedAt,
-  }) : updatedAt = updatedAt ?? createdAt;
+part 'revision.freezed.dart';
+part 'revision.g.dart';
 
-  String id;
-  String projectId;
-  String version;
-  String description;
-  List<String> changes;
-  DateTime createdAt;
-  DateTime updatedAt;
-  RevisionStatus status;
+class ChangesConverter implements JsonConverter<List<String>, dynamic> {
+  const ChangesConverter();
 
-  factory Revision.fromJson(Map<String, dynamic> json, {String? fallbackProjectId}) {
-    return Revision(
-      id: json['id'] as String? ?? '',
-      projectId: json['projectId'] as String? ?? fallbackProjectId ?? '',
-      version: json['version'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      changes: _parseChanges(json['changes']),
-      status: RevisionStatusX.fromApiValue(json['status'] as String? ?? 'pending'),
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
-    );
+  @override
+  List<String> fromJson(dynamic json) {
+     if (json is List) {
+      return json.map((item) => item.toString()).toList();
+    }
+    if (json is String && json.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(json);
+        if (decoded is List) {
+          return decoded.map((item) => item.toString()).toList();
+        }
+      } catch (_) {
+        // ignore
+      }
+      return json.split('\n');
+    }
+    return <String>[];
   }
+
+  @override
+  dynamic toJson(List<String> object) {
+    return object;
+  }
+}
+
+@freezed
+class Revision with _$Revision {
+  const Revision._();
+
+  const factory Revision({
+    required String id,
+    required String projectId,
+    required String version,
+    required String description,
+    @ChangesConverter() required List<String> changes,
+    @Default(RevisionStatus.pending) RevisionStatus status,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+  }) = _Revision;
+
+  factory Revision.fromJson(Map<String, dynamic> json) =>
+      _$RevisionFromJson(json);
 
   Map<String, dynamic> toApiPayload() {
     return {
@@ -43,45 +60,5 @@ class Revision {
       'changes': changes,
       'status': status.apiValue,
     };
-  }
-
-  Revision copyWith({
-    String? id,
-    String? projectId,
-    String? version,
-    String? description,
-    List<String>? changes,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    RevisionStatus? status,
-  }) {
-    return Revision(
-      id: id ?? this.id,
-      projectId: projectId ?? this.projectId,
-      version: version ?? this.version,
-      description: description ?? this.description,
-      changes: changes ?? List<String>.from(this.changes),
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      status: status ?? this.status,
-    );
-  }
-
-  static List<String> _parseChanges(dynamic value) {
-    if (value is List) {
-      return value.map((item) => item.toString()).toList();
-    }
-    if (value is String && value.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(value);
-        if (decoded is List) {
-          return decoded.map((item) => item.toString()).toList();
-        }
-      } catch (_) {
-        // ignore
-      }
-      return value.split('\n');
-    }
-    return <String>[];
   }
 }

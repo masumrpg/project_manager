@@ -1,10 +1,15 @@
+import 'package:catatan_kaki/models/enums/sync_status.dart';
+import 'package:catatan_kaki/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
 import '../../models/user.dart';
 import 'dashboard_metrics.dart';
 import 'home_constants.dart';
 
-// Modern Header Component
-class ModernHeader extends StatelessWidget {
+class ModernHeader extends ConsumerWidget {
   const ModernHeader({
     super.key,
     required this.metrics,
@@ -23,9 +28,13 @@ class ModernHeader extends StatelessWidget {
   final User? user;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final currentUser = user;
+
+    final syncStatus = ref.watch(syncStatusProvider);
+    final lastSyncTime = ref.watch(lastSyncTimestampProvider).value;
+    final pendingCount = ref.watch(syncQueueCountProvider).value ?? 0;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -47,7 +56,7 @@ class ModernHeader extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   HomeConstants.accentOrange,
-                  HomeConstants.accentOrange.withValues(alpha: 0.85),
+                  HomeConstants.accentOrange.withAlpha(215),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -68,7 +77,7 @@ class ModernHeader extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: isDesktop ? 28 : 24,
-                      backgroundColor: Colors.white.withValues(alpha: 0.18),
+                      backgroundColor: Colors.white.withAlpha(46),
                       child: const Icon(
                         Icons.dashboard_customize_rounded,
                         color: Colors.white,
@@ -87,7 +96,7 @@ class ModernHeader extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleMedium?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.76),
+                              color: Colors.white.withAlpha(194),
                               fontWeight: FontWeight.w500,
                               letterSpacing: 0.2,
                             ),
@@ -98,7 +107,7 @@ class ModernHeader extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.55),
+                              color: Colors.white.withAlpha(140),
                             ),
                           ),
                         ],
@@ -106,7 +115,7 @@ class ModernHeader extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: Colors.white.withAlpha(38),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: PopupMenuButton<String>(
@@ -119,6 +128,27 @@ class ModernHeader extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: 'settings',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.settings_outlined,
+                                  color: HomeConstants.darkText,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Pengaturan',
+                                  style: TextStyle(
+                                    color: HomeConstants.darkText,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuDivider(),
                           PopupMenuItem(
                             value: 'sign_out',
                             child: Row(
@@ -142,6 +172,7 @@ class ModernHeader extends StatelessWidget {
                         ],
                         onSelected: (value) {
                           if (value == 'sign_out') onSignOut();
+                          if (value == 'settings') context.push('/settings');
                         },
                       ),
                     ),
@@ -210,12 +241,86 @@ class ModernHeader extends StatelessWidget {
                     );
                   },
                 ),
+                const SizedBox(height: 24),
+                _buildSyncStatus(context, syncStatus, lastSyncTime, pendingCount),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildSyncStatus(BuildContext context, SyncStatus status, DateTime? lastSync, int pendingCount) {
+    Widget icon;
+    String text;
+
+    switch (status) {
+      case SyncStatus.syncing:
+        icon = const SizedBox(
+          width: 14,
+          height: 14,
+          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white70),
+        );
+        text = 'Menyinkronkan...';
+        break;
+      case SyncStatus.success:
+        icon = const Icon(Icons.check_circle, color: Colors.white70, size: 14);
+        text = 'Sinkron ${_formatTimestamp(lastSync)}';
+        break;
+      case SyncStatus.error:
+        icon = const Icon(Icons.error, color: Colors.orange, size: 14);
+        text = 'Sinkronisasi gagal';
+        break;
+      case SyncStatus.idle:
+      default:
+        icon = const Icon(Icons.cloud_done, color: Colors.white70, size: 14);
+        text = 'Sinkron ${_formatTimestamp(lastSync)}';
+        break;
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        icon,
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70),
+        ),
+        if (pendingCount > 0) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade800,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '$pendingCount',
+              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ]
+      ],
+    );
+  }
+
+  String _formatTimestamp(DateTime? time) {
+    if (time == null) return 'tidak pernah';
+
+    final now = DateTime.now();
+    final difference = now.difference(time);
+
+    if (difference.inSeconds < 60) {
+      return 'baru saja';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} menit lalu';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} jam lalu';
+    } else {
+      return DateFormat.yMd().add_jm().format(time);
+    }
   }
 
   String _buildGreeting(User user) {
@@ -249,16 +354,16 @@ class _StatBlock extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: Colors.white.withAlpha(38),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        border: Border.all(color: Colors.white.withAlpha(30)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.white.withAlpha(46),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 18, color: accent),
@@ -285,7 +390,7 @@ class _StatBlock extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.75),
+                    color: Colors.white.withAlpha(191),
                     letterSpacing: 0.3,
                   ),
                 ),

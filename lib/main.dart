@@ -1,89 +1,80 @@
+import 'package:catatan_kaki/repositories/project_repository.dart';
+import 'package:catatan_kaki/services/api_client.dart';
+import 'package:catatan_kaki/services/auth_service.dart';
+import 'package:catatan_kaki/services/auth_storage.dart';
+import 'package:catatan_kaki/services/background_sync_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:catatan_kaki/providers.dart';
+import 'package:catatan_kaki/services/settings_service.dart';
 
-import 'providers/auth_provider.dart';
-import 'providers/project_provider.dart';
-import 'repositories/project_repository.dart';
-import 'router/app_router.dart';
-import 'services/api_client.dart';
-import 'services/auth_service.dart';
-import 'services/auth_storage.dart';
+// ... (imports)
+
+// ... (createContainer function)
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
 
-  final envBaseUrl = dotenv.env['BASE_URL']?.trim();
-  if (envBaseUrl == null || envBaseUrl.isEmpty) {
-    throw StateError('BASE_URL is not set in .env');
+  // Initialize Workmanager
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+
+  final container = await createContainer();
+
+  // Perform initial sync
+  try {
+    await container.read(syncServiceProvider).syncProjects();
+  } catch (e) {
+    // Log error, but don't block app start
+    print('Initial sync failed: $e');
   }
 
-  final authStorage = await AuthStorage.create();
-  final apiClient = ApiClient(baseUrl: envBaseUrl, authStorage: authStorage);
-  final authService = AuthService(apiClient: apiClient, storage: authStorage);
+  // Register background task only if enabled
+  final settingsService = SettingsService();
+  if (await settingsService.isAutoSyncEnabled()) {
+    Workmanager().registerPeriodicTask(
+      "1", // Unique name
+      backgroundSyncTask,
+      frequency: const Duration(minutes: 15),
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+      ),
+    );
+  }
 
-  runApp(ProjectManagerApp(
-    apiClient: apiClient,
-    authService: authService,
-  ));
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const ProjectManagerApp(),
+    ),
+  );
 }
 
-class ProjectManagerApp extends StatelessWidget {
-  const ProjectManagerApp({
-    required this.apiClient,
-    required this.authService,
-    super.key,
-  });
-
-  final ApiClient apiClient;
-  final AuthService authService;
+class ProjectManagerApp extends ConsumerWidget {
+  const ProjectManagerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<ApiClient>.value(value: apiClient),
-        Provider<AuthService>.value(value: authService),
-        Provider<ProjectRepository>(
-          create: (context) => ProjectRepository(context.read<ApiClient>()),
-        ),
-        ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(context.read<AuthService>())
-            ..bootstrap(),
-        ),
-        ChangeNotifierProvider<ProjectProvider>(
-          create: (context) =>
-              ProjectProvider(context.read<ProjectRepository>()),
-        ),
-        Provider<GoRouter>(
-          lazy: false,
-          create: (context) => createRouter(context.read<AuthProvider>()),
-        ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
+      routerConfig: router,
+      debugShowCheckedModeBanner: false,
+      title: 'Catatan Kaki',
+      theme: _buildTheme(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
       ],
-      child: Consumer<GoRouter>(
-        builder: (context, router, _) {
-          return MaterialApp.router(
-            routerConfig: router,
-            debugShowCheckedModeBanner: false,
-            title: 'Catatan Kaki',
-            theme: _buildTheme(),
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              FlutterQuillLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en'),
-              Locale('id'),
-            ],
-          );
-        },
-      ),
+      supportedLocales: const [
+        Locale('en'),
+        Locale('id'),
+      ],
     );
   }
 }

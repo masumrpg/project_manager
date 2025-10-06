@@ -16,9 +16,7 @@ import '../screens/note_edit_screen.dart';
 import '../screens/project_detail_screen.dart';
 import '../screens/revision_detail_screen.dart';
 import '../screens/revision_edit_screen.dart';
-import '../screens/splash_screen.dart';
-import '../screens/todo_detail_screen.dart';
-import '../screens/todo_edit_screen.dart';
+import '../screens/settings_screen.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
@@ -63,6 +61,12 @@ GoRouter createRouter(AuthProvider authProvider) {
         path: '/home',
         builder: (BuildContext context, GoRouterState state) {
           return const HomeScreen();
+        },
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (BuildContext context, GoRouterState state) {
+          return const SettingsScreen();
         },
       ),
       GoRoute(

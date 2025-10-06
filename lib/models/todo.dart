@@ -1,52 +1,59 @@
 import 'dart:convert';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'enums/todo_priority.dart';
 import 'enums/todo_status.dart';
 
-class Todo {
-  Todo({
-    required this.id,
-    required this.projectId,
-    required this.title,
-    this.description,
-    this.content,
-    required this.priority,
-    required this.status,
-    this.dueDate,
-    required this.createdAt,
-    this.completedAt,
-    DateTime? updatedAt,
-  }) : updatedAt = updatedAt ?? createdAt;
+part 'todo.freezed.dart';
+part 'todo.g.dart';
 
-  String id;
-  String projectId;
-  String title;
-  String? description;
-  String? content;
-  TodoPriority priority;
-  TodoStatus status;
-  DateTime? dueDate;
-  DateTime createdAt;
-  DateTime? completedAt;
-  DateTime updatedAt;
+class TodoContentConverter implements JsonConverter<String?, dynamic> {
+  const TodoContentConverter();
 
-  factory Todo.fromJson(Map<String, dynamic> json, {String? fallbackProjectId}) {
-    return Todo(
-      id: json['id'] as String? ?? '',
-      projectId: json['projectId'] as String? ?? fallbackProjectId ?? '',
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String?,
-      content: _encodeContent(json['content']),
-      priority: TodoPriorityX.fromApiValue(json['priority'] as String? ?? 'medium'),
-      status: TodoStatusX.fromApiValue(json['status'] as String? ?? 'pending'),
-      dueDate: _parseDate(json['dueDate']),
-      createdAt: _parseDate(json['createdAt']) ?? DateTime.now(),
-      completedAt: _parseDate(json['completedAt']),
-      updatedAt: _parseDate(json['updatedAt']) ?? _parseDate(json['createdAt']) ?? DateTime.now(),
-    );
+  @override
+  String? fromJson(dynamic json) {
+    if (json == null) return null;
+    if (json is String) return json;
+    try {
+      return jsonEncode(json);
+    } catch (_) {
+      return json.toString();
+    }
   }
 
-  Map<String, dynamic> toApiPayload({bool includeStatus = true}) {
+  @override
+  dynamic toJson(String? object) {
+    if (object == null || object.isEmpty) return [];
+    try {
+      return jsonDecode(object);
+    } catch (_) {
+      return object;
+    }
+  }
+}
+
+@freezed
+class Todo with _$Todo {
+  const Todo._();
+
+  const factory Todo({
+    required String id,
+    required String projectId,
+    required String title,
+    String? description,
+    @TodoContentConverter() String? content,
+    required TodoPriority priority,
+    required TodoStatus status,
+    DateTime? dueDate,
+    required DateTime createdAt,
+    DateTime? completedAt,
+    required DateTime updatedAt,
+  }) = _Todo;
+
+  factory Todo.fromJson(Map<String, dynamic> json) => _$TodoFromJson(json);
+
+   Map<String, dynamic> toApiPayload({bool includeStatus = true}) {
     return {
       'title': title,
       if (description != null && description!.trim().isNotEmpty)
@@ -56,63 +63,7 @@ class Todo {
       if (dueDate != null) 'dueDate': dueDate!.toUtc().toIso8601String(),
       if (completedAt != null)
         'completedAt': completedAt!.toUtc().toIso8601String(),
-      if (content != null && content!.isNotEmpty) 'content': _decodeContent(),
+      if (content != null && content!.isNotEmpty) 'content': const TodoContentConverter().toJson(content),
     };
-  }
-
-  Todo copyWith({
-    String? id,
-    String? projectId,
-    String? title,
-    String? description,
-    String? content,
-    TodoPriority? priority,
-    TodoStatus? status,
-    DateTime? dueDate,
-    DateTime? createdAt,
-    DateTime? completedAt,
-    DateTime? updatedAt,
-  }) {
-    return Todo(
-      id: id ?? this.id,
-      projectId: projectId ?? this.projectId,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      content: content ?? this.content,
-      priority: priority ?? this.priority,
-      status: status ?? this.status,
-      dueDate: dueDate ?? this.dueDate,
-      createdAt: createdAt ?? this.createdAt,
-      completedAt: completedAt ?? this.completedAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
-  static String? _encodeContent(dynamic content) {
-    if (content == null) return null;
-    if (content is String) return content;
-    try {
-      return jsonEncode(content);
-    } catch (_) {
-      return content.toString();
-    }
-  }
-
-  dynamic _decodeContent() {
-    if (content == null || content!.isEmpty) return [];
-    try {
-      return jsonDecode(content!);
-    } catch (_) {
-      return content;
-    }
-  }
-
-  static DateTime? _parseDate(dynamic value) {
-    if (value == null) return null;
-    if (value is DateTime) return value;
-    if (value is String && value.isNotEmpty) {
-      return DateTime.tryParse(value);
-    }
-    return null;
   }
 }

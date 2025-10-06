@@ -1,178 +1,199 @@
+import 'package:catatan_kaki/models/enums/app_category.dart';
+import 'package:catatan_kaki/models/enums/environment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../models/enums/app_category.dart';
-import '../models/enums/environment.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:catatan_kaki/providers.dart';
+import 'package:uuid/uuid.dart';
+
 import '../models/project.dart';
-import '../providers/auth_provider.dart';
-import '../providers/project_provider.dart';
 import '../widgets/home/dashboard_metrics.dart';
 import '../widgets/home/home_constants.dart';
 import '../widgets/home/modern_header.dart';
 import '../widgets/home/project_grid.dart';
 import '../widgets/home/state_widgets.dart';
-import '../widgets/shared/hover_expandable_fab.dart';
+import '../widgets/shared/offline_banner.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 1024;
     final isTablet = screenWidth > 768 && screenWidth <= 1024;
-    final auth = context.watch<AuthProvider>();
+    final auth = ref.watch(authProvider);
     final isAndroid = Theme.of(context).platform == TargetPlatform.android;
+
+    final projectsAsync = ref.watch(projectListStreamProvider);
+
+    ref.listen<String?>(syncErrorProvider, (previous, next) {
+      if (next != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sync Error: $next'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        // Reset the error after showing it
+        ref.read(syncErrorProvider.notifier).state = null;
+      }
+    });
 
     final scaffold = Scaffold(
       backgroundColor: HomeConstants.primaryBeige,
       body: SafeArea(
-        child: Consumer<ProjectProvider>(
-          builder: (context, provider, _) {
-            if (provider.isLoading) {
-              return const CenteredLoader();
-            }
-
-            if (provider.error != null) {
-              return ErrorState(
-                error: provider.error!,
-                onRetry: () => provider.loadProjects(),
-              );
-            }
-
-            final projects = provider.projects;
-            final metrics = DashboardMetrics.fromData(
-              stats: provider.statistics,
-              projects: projects,
-            );
-
-            return RefreshIndicator(
-              onRefresh: () => provider.loadProjects(showLoading: false),
-              color: HomeConstants.accentOrange,
-              backgroundColor: HomeConstants.cardBackground,
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            const OfflineBanner(),
+            Expanded(
+              child: projectsAsync.when(
+                loading: () => const CenteredLoader(),
+                error: (err, stack) => ErrorState(
+                  error: err.toString(),
+                  onRetry: () => ref.refresh(projectListStreamProvider),
                 ),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: ModernHeader(
-                      metrics: metrics,
-                      onCreateProject: () => _showProjectDialog(context),
-                      isDesktop: isDesktop,
-                      isTablet: isTablet,
-                      onSignOut: () => _confirmSignOut(context),
-                      user: auth.currentUser,
-                    ),
-                  ),
-                  if (projects.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: isDesktop ? 120 : 110,
-                        ),
-                        child: const EmptyState(),
+                data: (projects) {
+                  final metrics = DashboardMetrics(
+                    projectCount: projects.length,
+                    noteCount: 0, // Placeholder
+                    todoCount: 0, // Placeholder
+                    revisionCount: 0, // Placeholder
+                    completionPercentage: 0, // Placeholder
+                  );
+
+                  return RefreshIndicator(
+                    onRefresh: () => ref.read(syncServiceProvider).syncProjects(),
+                    color: HomeConstants.accentOrange,
+                    backgroundColor: HomeConstants.cardBackground,
+                    child: CustomScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
                       ),
-                    )
-                  else ...[
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          isDesktop ? 48 : 24,
-                          24,
-                          isDesktop ? 48 : 24,
-                          0,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: ModernHeader(
+                            metrics: metrics,
+                            onCreateProject: () => _showProjectDialog(context, ref),
+                            isDesktop: isDesktop,
+                            isTablet: isTablet,
+                            onSignOut: () => _confirmSignOut(context, ref),
+                            user: auth.currentUser,
+                          ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(14),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: HomeConstants.shadowColor
-                                            .withValues(alpha: 0.25),
-                                        blurRadius: 18,
-                                        offset: const Offset(0, 8),
+                        if (projects.isEmpty)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: isDesktop ? 120 : 110,
+                              ),
+                              child: const EmptyState(),
+                            ),
+                          )
+                        else ...[
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                isDesktop ? 48 : 24,
+                                24,
+                                isDesktop ? 48 : 24,
+                                0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(14),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: HomeConstants.shadowColor
+                                                  .withAlpha(64),
+                                              blurRadius: 18,
+                                              offset: const Offset(0, 8),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.grid_view_rounded,
+                                          color: HomeConstants.accentOrange,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        '${projects.length} proyek',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                              color: HomeConstants.darkText,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: -0.2,
+                                            ),
                                       ),
                                     ],
                                   ),
-                                  child: const Icon(
-                                    Icons.grid_view_rounded,
-                                    color: HomeConstants.accentOrange,
-                                    size: 22,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Text(
-                                  '${projects.length} proyek',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.headlineSmall
-                                      ?.copyWith(
-                                        color: HomeConstants.darkText,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: -0.2,
+                                ],
+                              ),
+                            ),
+                          ),
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(
+                              isDesktop ? 48 : 24,
+                              16,
+                              isDesktop ? 48 : 24,
+                              32,
+                            ),
+                            sliver: isDesktop
+                                ? SliverToBoxAdapter(
+                                    child: DesktopProjectGrid(
+                                      projects: projects,
+                                      onProjectTap: (project) =>
+                                          _openProjectDetail(context, project),
+                                      onEditProject: (project) => _showProjectDialog(
+                                        context,
+                                        ref,
+                                        project: project,
                                       ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                                      onDeleteProject: (project) =>
+                                          _confirmDelete(context, ref, project),
+                                    ),
+                                  )
+                                : SliverToBoxAdapter(
+                                    child: MobileProjectList(
+                                      projects: projects,
+                                      onProjectTap: (project) =>
+                                          _openProjectDetail(context, project),
+                                      onEditProject: (project) => _showProjectDialog(
+                                        context,
+                                        ref,
+                                        project: project,
+                                      ),
+                                      onDeleteProject: (project) =>
+                                          _confirmDelete(context, ref, project),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ],
                     ),
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(
-                        isDesktop ? 48 : 24,
-                        16,
-                        isDesktop ? 48 : 24,
-                        32,
-                      ),
-                      sliver: isDesktop
-                          ? SliverToBoxAdapter(
-                              child: DesktopProjectGrid(
-                                projects: projects,
-                                onProjectTap: (project) =>
-                                    _openProjectDetail(context, project),
-                                onEditProject: (project) => _showProjectDialog(
-                                  context,
-                                  project: project,
-                                ),
-                                onDeleteProject: (project) =>
-                                    _confirmDelete(context, project),
-                              ),
-                            )
-                          : SliverToBoxAdapter(
-                              child: MobileProjectList(
-                                projects: projects,
-                                onProjectTap: (project) =>
-                                    _openProjectDetail(context, project),
-                                onEditProject: (project) => _showProjectDialog(
-                                  context,
-                                  project: project,
-                                ),
-                                onDeleteProject: (project) =>
-                                    _confirmDelete(context, project),
-                              ),
-                            ),
-                    ),
-                  ],
-                ],
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
       floatingActionButton: HoverExpandableFab(
-        onPressed: () => _showProjectDialog(context),
+        onPressed: () => _showProjectDialog(context, ref),
         icon: Icons.add_rounded,
         label: 'Proyek Baru',
         backgroundColor: HomeConstants.accentOrange,
@@ -193,10 +214,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Future<void> _showProjectDialog(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     Project? project,
   }) async {
-    final auth = context.read<AuthProvider>();
+    final auth = ref.read(authProvider);
     final currentUserId = auth.currentUser?.id ?? '';
 
     final result = await showModalBottomSheet<_ProjectDialogResult>(
@@ -204,9 +226,12 @@ class HomeScreen extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return _ProjectFormBottomSheet(
-          project: project,
-          currentUserId: currentUserId,
+        return ProviderScope(
+          parent: ProviderScope.containerOf(context),
+          child: _ProjectFormBottomSheet(
+            project: project,
+            currentUserId: currentUserId,
+          ),
         );
       },
     );
@@ -216,7 +241,7 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _confirmDelete(BuildContext context, Project project) async {
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, Project project) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -266,39 +291,25 @@ class HomeScreen extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final provider = context.read<ProjectProvider>();
-      final success = await provider.deleteProject(project.id);
-      if (context.mounted) {
-        _showFeedback(
-          context,
-          success: success,
-          message: success
-              ? 'Proyek berhasil dihapus!'
-              : provider.error ?? 'Gagal menghapus proyek.',
-        );
+      final localRepo = ref.read(projectLocalRepositoryProvider);
+      try {
+        await localRepo.deleteProject(project.id);
+        if (context.mounted) {
+          _showFeedback(
+            context,
+            success: true,
+            message: 'Proyek berhasil dihapus!',
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          _showFeedback(
+            context,
+            success: false,
+            message: 'Gagal menghapus proyek: $e',
+          );
+        }
       }
-    }
-  }
-
-  String formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return 'Hari ini';
-    } else if (difference.inDays == 1) {
-      return 'Kemarin';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} hari yang lalu';
-    } else if (difference.inDays < 30) {
-      final weeks = (difference.inDays / 7).floor();
-      return '$weeks minggu yang lalu';
-    } else if (difference.inDays < 365) {
-      final months = (difference.inDays / 30).floor();
-      return '$months bulan yang lalu';
-    } else {
-      final years = (difference.inDays / 365).floor();
-      return '$years tahun yang lalu';
     }
   }
 
@@ -321,8 +332,8 @@ class HomeScreen extends StatelessWidget {
           content: Text(message, style: const TextStyle(color: Colors.white)),
           behavior: SnackBarBehavior.floating,
           backgroundColor: success
-              ? const Color(0xFF2E7D32) // A slightly darker green
-              : const Color(0xFFC62828), // A slightly darker red
+              ? const Color(0xFF2E7D32)
+              : const Color(0xFFC62828),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -331,7 +342,7 @@ class HomeScreen extends StatelessWidget {
     });
   }
 
-  Future<void> _confirmSignOut(BuildContext context) async {
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -394,10 +405,9 @@ class HomeScreen extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final auth = context.read<AuthProvider>();
-      final projects = context.read<ProjectProvider>();
+      final auth = ref.read(authProvider);
+      await ref.read(appDatabaseProvider).deleteAllData();
       await auth.signOut();
-      projects.clear();
       if (!context.mounted) return;
       context.go('/auth');
     }
@@ -411,9 +421,9 @@ class _ProjectDialogResult {
   final String message;
 }
 
-class _ProjectFormBottomSheet extends StatefulWidget {
+class _ProjectFormBottomSheet extends ConsumerStatefulWidget {
   const _ProjectFormBottomSheet({
-    required this.project,
+    this.project,
     required this.currentUserId,
   });
 
@@ -421,11 +431,12 @@ class _ProjectFormBottomSheet extends StatefulWidget {
   final String currentUserId;
 
   @override
-  State<_ProjectFormBottomSheet> createState() =>
+  ConsumerState<_ProjectFormBottomSheet> createState() =>
       _ProjectFormBottomSheetState();
 }
 
-class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
+class _ProjectFormBottomSheetState
+    extends ConsumerState<_ProjectFormBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
@@ -437,9 +448,8 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.project?.title ?? '');
-    _descriptionController = TextEditingController(
-      text: widget.project?.description ?? '',
-    );
+    _descriptionController =
+        TextEditingController(text: widget.project?.description ?? '');
     _selectedCategory = widget.project?.category ?? AppCategory.mobile;
     _selectedEnvironment =
         widget.project?.environment ?? Environment.development;
@@ -459,50 +469,49 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
 
     setState(() => _isLoading = true);
 
-    final provider = context.read<ProjectProvider>();
+    final localRepo = ref.read(projectLocalRepositoryProvider);
     final now = DateTime.now();
+    final isCreating = widget.project == null;
 
-    final updatedProject =
-        widget.project?.copyWith(
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          category: _selectedCategory,
-          environment: _selectedEnvironment,
-          updatedAt: now,
-        ) ??
-        Project(
-          id: '',
-          userId: widget.currentUserId,
-          title: _titleController.text.trim(),
-          description: _descriptionController.text.trim(),
-          category: _selectedCategory,
-          environment: _selectedEnvironment,
-          createdAt: now,
-          updatedAt: now,
-        );
-
-    bool success;
-    try {
-      if (widget.project == null) {
-        success = await provider.createProject(updatedProject);
-      } else {
-        success = await provider.updateProject(updatedProject);
-      }
-    } catch (_) {
-      success = false;
-    }
-
-    final message = success
-        ? (widget.project == null
-              ? 'Proyek berhasil dibuat!'
-              : 'Proyek berhasil diperbarui!')
-        : provider.error ?? 'Terjadi kesalahan yang tidak diketahui.';
-
-    if (!mounted) return;
-
-    context.pop(
-      _ProjectDialogResult(success: success, message: message),
+    final project = (isCreating
+            ? Project(
+                id: const Uuid().v4(),
+                userId: widget.currentUserId,
+                createdAt: now,
+                title: '',
+                category: AppCategory.other,
+                environment: Environment.development,
+                updatedAt: now,
+              )
+            : widget.project!)
+        .copyWith(
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      category: _selectedCategory,
+      environment: _selectedEnvironment,
+      updatedAt: now,
     );
+
+    try {
+      await localRepo.insertOrUpdateProject(project);
+      if (!mounted) return;
+      context.pop(
+        _ProjectDialogResult(
+          success: true,
+          message: isCreating
+              ? 'Proyek berhasil dibuat!'
+              : 'Proyek berhasil diperbarui!',
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      context.pop(
+        _ProjectDialogResult(
+          success: false,
+          message: 'Gagal menyimpan proyek: $e',
+        ),
+      );
+    }
   }
 
   InputDecoration _fieldDecoration(String label) {
@@ -576,7 +585,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<AppCategory>(
-                  initialValue: _selectedCategory,
+                  value: _selectedCategory,
                   dropdownColor: HomeConstants.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                   decoration: _fieldDecoration('Kategori'),
@@ -596,7 +605,7 @@ class _ProjectFormBottomSheetState extends State<_ProjectFormBottomSheet> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<Environment>(
-                  initialValue: _selectedEnvironment,
+                  value: _selectedEnvironment,
                   dropdownColor: HomeConstants.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                   decoration: _fieldDecoration('Lingkungan'),
