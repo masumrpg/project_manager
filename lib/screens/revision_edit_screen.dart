@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:go_router/go_router.dart';
@@ -33,8 +35,12 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
     Document document;
     final existingChanges = widget.revision.changes;
     if (existingChanges.isNotEmpty) {
-      final text = existingChanges.join('\n');
-      document = Document()..insert(0, text);
+      try {
+        final json = jsonDecode(existingChanges);
+        document = Document.fromJson(json);
+      } catch (e) {
+        document = Document()..insert(0, existingChanges);
+      }
     } else {
       document = Document();
     }
@@ -80,16 +86,12 @@ class _RevisionEditScreenState extends State<RevisionEditScreen> {
     final provider = context.read<ProjectDetailProvider>();
     final messenger = ScaffoldMessenger.of(context);
 
-    final changeLines = changesText
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .toList();
+    final changesJson = jsonEncode(_changeLogController.document.toDelta().toJson());
 
     final updatedRevision = widget.revision
       ..version = _versionController.text.trim()
       ..description = _descriptionController.text.trim()
-      ..changes = changeLines
+      ..changes = changesJson
       ..status = _selectedStatus
       ..updatedAt = DateTime.now();
 

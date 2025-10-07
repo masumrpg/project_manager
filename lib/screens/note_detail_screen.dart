@@ -58,7 +58,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     return QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
-      readOnly: true, // Make it read-only for detail view
     );
   }
 

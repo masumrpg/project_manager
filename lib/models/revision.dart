@@ -18,7 +18,7 @@ class Revision {
   String projectId;
   String version;
   String description;
-  List<String> changes;
+  String changes;
   DateTime createdAt;
   DateTime updatedAt;
   RevisionStatus status;
@@ -29,7 +29,7 @@ class Revision {
       projectId: json['projectId'] as String? ?? fallbackProjectId ?? '',
       version: json['version'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      changes: _parseChanges(json['changes']),
+      changes: _parseChangesFromJson(json['changes']),
       status: RevisionStatusX.fromApiValue(json['status'] as String? ?? 'pending'),
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
@@ -50,7 +50,7 @@ class Revision {
     String? projectId,
     String? version,
     String? description,
-    List<String>? changes,
+    String? changes,
     DateTime? createdAt,
     DateTime? updatedAt,
     RevisionStatus? status,
@@ -60,28 +60,27 @@ class Revision {
       projectId: projectId ?? this.projectId,
       version: version ?? this.version,
       description: description ?? this.description,
-      changes: changes ?? List<String>.from(this.changes),
+      changes: changes ?? this.changes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
     );
   }
 
-  static List<String> _parseChanges(dynamic value) {
-    if (value is List) {
-      return value.map((item) => item.toString()).toList();
+  static String _parseChangesFromJson(dynamic changesValue) {
+    if (changesValue == null) {
+      return '';
     }
-    if (value is String && value.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(value);
-        if (decoded is List) {
-          return decoded.map((item) => item.toString()).toList();
-        }
-      } catch (_) {
-        // ignore
-      }
-      return value.split('\n');
+    // If it's already a string, it's the new JSON delta format (or a plain text from even older data).
+    if (changesValue is String) {
+      return changesValue;
     }
-    return <String>[];
+    // If it's a list, it's likely a pre-parsed JSON array from the API (a Quill delta).
+    if (changesValue is List) {
+      // We need to convert this List<dynamic> (which is a delta) back into a JSON string.
+      return jsonEncode(changesValue);
+    }
+    // Fallback for other unexpected types.
+    return '';
   }
 }
