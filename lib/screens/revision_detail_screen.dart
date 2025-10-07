@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:go_router/go_router.dart';
@@ -41,15 +43,19 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
     Document document;
     final changes = revision.changes;
     if (changes.isNotEmpty) {
-      final text = changes.join('\n');
-      document = Document()..insert(0, text);
+      try {
+        final json = jsonDecode(changes);
+        document = Document.fromJson(json);
+      } catch (e) {
+        // For backward compatibility with old plain text data
+        document = Document()..insert(0, changes);
+      }
     } else {
       document = Document();
     }
     return QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
-      readOnly: true,
     );
   }
 
@@ -265,9 +271,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                 child: AbsorbPointer(
                   child: QuillEditor.basic(
                     controller: _changesQuillController,
-                    config: const QuillEditorConfig(
-                      padding: EdgeInsets.zero,
-                    ),
+                    config: const QuillEditorConfig(padding: EdgeInsets.zero),
                   ),
                 ),
               ),

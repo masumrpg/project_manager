@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:go_router/go_router.dart';
@@ -40,22 +42,26 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
     super.initState();
     _versionController = TextEditingController(text: widget.revision?.version ?? '');
     _descriptionController = TextEditingController(text: widget.revision?.description ?? '');
-    
+
     // Initialize Quill controller for changes
     Document document;
-    final existingChanges = widget.revision?.changes ?? const <String>[];
+    final existingChanges = widget.revision?.changes ?? '';
     if (existingChanges.isNotEmpty) {
-      final text = existingChanges.join('\n');
-      document = Document()..insert(0, text);
+      try {
+        final json = jsonDecode(existingChanges);
+        document = Document.fromJson(json);
+      } catch (e) {
+        document = Document()..insert(0, existingChanges);
+      }
     } else {
       document = Document();
     }
-    
+
     _changeLogController = QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    
+
     _selectedStatus = widget.revision?.status ?? RevisionStatus.pending;
   }
 
@@ -293,11 +299,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                       });
 
                                       final now = DateTime.now();
-                                      final changeLines = changesText
-                                          .split('\n')
-                                          .map((line) => line.trim())
-                                          .where((line) => line.isNotEmpty)
-                                          .toList();
+                                      final changesJson = jsonEncode(_changeLogController.document.toDelta().toJson());
 
                                       final didSucceed = await (widget.revision == null
                                           ? widget.onCreate(
@@ -306,7 +308,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                                 projectId: widget.projectId,
                                                 version: _versionController.text.trim(),
                                                 description: _descriptionController.text.trim(),
-                                                changes: changeLines,
+                                                changes: changesJson,
                                                 status: _selectedStatus,
                                                 createdAt: now,
                                                 updatedAt: now,
@@ -316,7 +318,7 @@ class _RevisionFormSheetState extends State<RevisionFormSheet> {
                                               widget.revision!
                                                 ..version = _versionController.text.trim()
                                                 ..description = _descriptionController.text.trim()
-                                                ..changes = changeLines
+                                                ..changes = changesJson
                                                 ..status = _selectedStatus
                                                 ..updatedAt = now,
                                             ));
