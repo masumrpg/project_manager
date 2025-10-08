@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -12,9 +13,14 @@ import 'router/app_router.dart';
 import 'services/api_client.dart';
 import 'services/auth_service.dart';
 import 'services/auth_storage.dart';
+import 'services/http_overrides.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Apply SSL overrides for .workers.dev domains
+  HttpOverrides.global = ProductionHttpOverrides();
+
   await dotenv.load(fileName: '.env');
 
   final envBaseUrl = dotenv.env['BASE_URL']?.trim();
