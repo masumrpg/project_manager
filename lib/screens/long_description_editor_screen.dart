@@ -34,7 +34,22 @@ class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScree
     _controller = QuillController(
       document: _loadInitialDocument(widget.initialJson),
       selection: const TextSelection.collapsed(offset: 0),
+      readOnly: widget.readOnly,
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant LongDescriptionEditorScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.readOnly != oldWidget.readOnly) {
+      final newController = QuillController(
+        document: _controller.document,
+        readOnly: widget.readOnly,
+        selection: _controller.selection,
+      );
+      _controller.dispose();
+      _controller = newController;
+    }
   }
 
   @override
@@ -125,9 +140,7 @@ class _LongDescriptionEditorScreenState extends State<LongDescriptionEditorScree
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: widget.readOnly
-                  ? AbsorbPointer(child: QuillEditor.basic(controller: _controller))
-                  : QuillEditor.basic(controller: _controller),
+              child: QuillEditor.basic(controller: _controller),
             ),
           ),
         ],

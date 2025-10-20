@@ -58,6 +58,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     return QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
+      readOnly: true,
     );
   }
 
@@ -177,7 +178,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   ),
             ),
             const SizedBox(height: 4),
-            Text(
+            SelectableText(
               _note.title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: const Color(0xFF2D3436),
@@ -202,7 +203,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   border: Border.all(color: const Color(0xFFE8D5C4)),
                 ),
                 padding: const EdgeInsets.all(16),
-                child: Text(
+                child: SelectableText(
                   description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: const Color(0xFF2D3436),
@@ -230,12 +231,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: AbsorbPointer(
-                  child: QuillEditor.basic(
-                    controller: _quillController,
-                    config: const QuillEditorConfig(
-                      padding: EdgeInsets.zero,
-                    ),
+                child: QuillEditor.basic(
+                  controller: _quillController,
+                  config: const QuillEditorConfig(
+                    padding: EdgeInsets.zero,
                   ),
                 ),
               ),

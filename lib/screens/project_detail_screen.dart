@@ -22,8 +22,33 @@ import '../widgets/project_detail/notes_tab.dart';
 import '../widgets/project_detail/revisions_tab.dart';
 import '../widgets/project_detail/todos_tab.dart';
 import '../widgets/project_detail/error_section.dart';
-import '../widgets/project_detail/tab_button.dart';
-import '../widgets/shared/hover_expandable_fab.dart';
+
+import 'package:catatan_kaki/widgets/shared/hover_expandable_fab.dart';
+
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  const _SliverTabBarDelegate(this.tabBar);
+  final TabBar tabBar;
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    // A simple container that sticks the tab bar to the top
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
+    return tabBar != oldDelegate.tabBar;
+  }
+}
 
 class ProjectDetailScreen extends StatelessWidget {
   const ProjectDetailScreen({required this.projectId, super.key});
@@ -52,23 +77,139 @@ class _ProjectDetailView extends StatefulWidget {
 class _ProjectDetailViewState extends State<_ProjectDetailView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
   final Uuid _uuid = const Uuid();
-  // Toggle header long description preview expand/collapse
-  bool _isLongDescExpanded = false;
+  double _titleOpacity = 0.0;
+  double _appBarHeight = 0.0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(() {
-      setState(() {});
+
+    _scrollController.addListener(() {
+      final scrollOffset = _scrollController.offset;
+      // Use the state field _appBarHeight, which is updated in build()
+      final fadeStartOffset = _appBarHeight - kToolbarHeight - 100;
+
+      if (scrollOffset > fadeStartOffset) {
+        final rawOpacity = (scrollOffset - fadeStartOffset) / 100;
+        final newOpacity = rawOpacity.clamp(0.0, 1.0);
+        if (newOpacity != _titleOpacity) {
+          setState(() {
+            _titleOpacity = newOpacity;
+          });
+        }
+      } else {
+        if (_titleOpacity != 0.0) {
+          setState(() {
+            _titleOpacity = 0.0;
+          });
+        }
+      }
     });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  Widget _buildProjectHeader(
+    BuildContext context,
+    Project project,
+    bool isDesktop,
+    Color darkText,
+    Color lightText,
+    Color cardBackground,
+  ) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        isDesktop ? 32 : 24,
+        kToolbarHeight +
+            MediaQuery.of(context).padding.top, // Top padding for status bar
+        isDesktop ? 32 : 24,
+        16,
+      ),
+      decoration: BoxDecoration(
+        color: cardBackground,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Opacity(
+            opacity: 1.0 - _titleOpacity,
+            child: Text(
+              project.title,
+              style: TextStyle(
+                fontSize: isDesktop ? 32 : 24,
+                fontWeight: FontWeight.w700,
+                color: darkText,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          if ((project.longDescription ?? '').isNotEmpty) ...[
+            Builder(builder: (context) {
+              Document doc;
+              try {
+                doc = Document.fromJson(
+                  (jsonDecode(project.longDescription!) as List<dynamic>),
+                );
+              } catch (_) {
+                doc = Document()..insert(0, project.longDescription!);
+              }
+              final plainText =
+                  doc.toPlainText().replaceAll('\n', ' ').trim();
+              return Text(
+                plainText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: isDesktop ? 18 : 16,
+                  color: lightText,
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () => _openLongDescriptionViewer(context, project),
+                  child: const Text('Buka layar penuh'),
+                ),
+              ],
+            ),
+          ] else ...[
+            Text(
+              project.description ?? '',
+              style: TextStyle(
+                fontSize: isDesktop ? 18 : 16,
+                color: lightText,
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 16,
+                color: lightText,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Dibuat ${DateFormat('MMM d, y').format(project.createdAt)}',
+                style: TextStyle(fontSize: 14, color: lightText),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -209,333 +350,139 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     final todos = List<Todo>.from(project.todos)
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
+    final bool hasLongDesc = (project.longDescription ?? '').isNotEmpty;
+    // Responsive app bar height
+    if (isDesktop) {
+      _appBarHeight = hasLongDesc ? 260.0 : 220.0;
+    } else {
+      _appBarHeight = hasLongDesc ? 220.0 : 180.0;
+    }
+
     return Scaffold(
       backgroundColor: primaryBeige,
-      appBar: AppBar(
-        backgroundColor: cardBackground,
-        elevation: 0,
-        title: Text(
-          project.title,
-          style: TextStyle(
-            color: darkText,
-            fontSize: isDesktop ? 24 : 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        actions: [
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color: cardBackground.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                tooltip: 'Segarkan proyek',
-                onPressed: () => provider.loadProject(),
-                icon: Icon(Icons.refresh_rounded, color: accentOrange),
-              ),
-            ),
-          ),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color: cardBackground.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                tooltip: 'Edit proyek',
-                onPressed: () => _showEditProjectDialog(context, project),
-                icon: Icon(Icons.edit_outlined, color: accentOrange),
-              ),
-            ),
-          ),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: cardBackground.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                tooltip: (project.longDescription ?? '').isEmpty
-                    ? 'Tambah deskripsi panjang'
-                    : 'Edit deskripsi panjang',
-                onPressed: () =>
-                    _openLongDescriptionEditor(context, provider, project),
-                icon: Icon(Icons.notes_outlined, color: accentOrange),
-              ),
-            ),
-          ),
-        ],
+      floatingActionButton: ListenableBuilder(
+        listenable: _tabController,
+        builder: (context, _) {
+          return _buildModernFab(context, provider, accentOrange);
+        },
       ),
-      floatingActionButton: _buildModernFab(context, provider, accentOrange),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-            children: [
-              // Project header
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(isDesktop ? 32 : 24),
-                decoration: BoxDecoration(
-                  color: cardBackground,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
+      body: NestedScrollView(
+        controller: _scrollController,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              backgroundColor: cardBackground, // Static color
+              surfaceTintColor: cardBackground, // Prevent tinting on scroll
+              elevation: 0,
+              pinned: true,
+              floating: true,
+              stretch: true,
+              centerTitle: false,
+              expandedHeight: _appBarHeight,
+              title: Opacity(
+                opacity: _titleOpacity,
+                child: Text(
+                  project.title,
+                  style: TextStyle(
+                    color: darkText,
+                    fontSize: isDesktop ? 22 : 18,
+                    fontWeight: FontWeight.w700,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: shadowColor.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      project.title,
-                      style: TextStyle(
-                        fontSize: isDesktop ? 32 : 24,
-                        fontWeight: FontWeight.w700,
-                        color: darkText,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    if ((project.longDescription ?? '').isNotEmpty) ...[
-                      // Render longDescription with Quill (read-only, limited height)
-                      Builder(
-                        builder: (context) {
-                          Document doc;
-                          try {
-                            doc = Document.fromJson(
-                              (jsonDecode(project.longDescription!)
-                                  as List<dynamic>),
-                            );
-                          } catch (_) {
-                            doc = Document()..insert(0, project.longDescription!);
-                          }
-                          final ctrl = QuillController(
-                            document: doc,
-                            selection: const TextSelection.collapsed(offset: 0),
-                          );
-                          final maxH = _isLongDescExpanded
-                              ? (isDesktop ? 480.0 : 360.0)
-                              : (isDesktop ? 220.0 : 160.0);
-                          return Stack(
-                            children: [
-                              Container(
-                                constraints: BoxConstraints(
-                                  maxHeight: maxH,
-                                  minWidth: double.infinity,
-                                ),
-                                padding: const EdgeInsets.only(top: 4),
-                                child: ClipRect(
-                                  child: AbsorbPointer(
-                                    child: Scrollbar(
-                                      child: QuillEditor.basic(
-                                        controller: ctrl,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // Fade hint to indicate more content (always show for visual consistency)
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                child: IgnorePointer(
-                                  child: Container(
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          cardBackground
-                                              .withValues(alpha: 0.0),
-                                          cardBackground
-                                              .withValues(alpha: 0.9),
-                                          cardBackground,
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      Row(
-                        children: [
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _isLongDescExpanded = !_isLongDescExpanded;
-                              });
-                            },
-                            child: Text(
-                              _isLongDescExpanded
-                                  ? 'Tutup'
-                                  : 'Lihat lebih banyak',
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () =>
-                                _openLongDescriptionViewer(context, project),
-                            child: const Text('Buka layar penuh'),
-                          ),
-                        ],
-                      ),
-                    ] else ...[
-                      Text(
-                        project.description ?? '',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 18 : 16,
-                          color: lightText,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today_outlined,
-                          size: 16,
-                          color: lightText,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Dibuat ${DateFormat('MMM d, y').format(project.createdAt)}',
-                          style: TextStyle(fontSize: 14, color: lightText),
-                        ),
-                      ],
-                    ),
+              ),
+              actions: [
+                IconButton(
+                  tooltip: 'Segarkan proyek',
+                  onPressed: () => provider.loadProject(),
+                  icon: Icon(Icons.refresh_rounded, color: accentOrange),
+                ),
+                IconButton(
+                  tooltip: 'Edit proyek',
+                  onPressed: () => _showEditProjectDialog(context, project),
+                  icon: Icon(Icons.edit_outlined, color: accentOrange),
+                ),
+                IconButton(
+                  tooltip: (project.longDescription ?? '').isEmpty
+                      ? 'Tambah deskripsi panjang'
+                      : 'Edit deskripsi panjang',
+                  onPressed: () =>
+                      _openLongDescriptionEditor(context, provider, project),
+                  icon: Icon(Icons.notes_outlined, color: accentOrange),
+                ),
+                const SizedBox(width: 8),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                collapseMode: CollapseMode.parallax,
+                stretchModes: const [
+                  StretchMode.zoomBackground,
+                  StretchMode.fadeTitle,
+                ],
+                background: _buildProjectHeader(
+                  context,
+                  project,
+                  isDesktop,
+                  darkText,
+                  lightText,
+                  cardBackground,
+                ),
+              ),
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverTabBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  labelColor: accentOrange,
+                  unselectedLabelColor: lightText,
+                  indicatorSize: TabBarIndicatorSize.label, // Match the label width
+                  indicator: UnderlineTabIndicator(
+                    borderSide: BorderSide(color: accentOrange, width: 3),
+                  ),
+                  tabs: const [
+                    Tab(text: 'Catatan'),
+                    Tab(text: 'Revisi'),
+                    Tab(text: 'Tugas'),
                   ],
                 ),
               ),
-              // Tab bar with badge/card style
-              Container(
-                padding: EdgeInsets.fromLTRB(
-                  isDesktop ? 32 : 24,
-                  8,
-                  isDesktop ? 32 : 24,
-                  0,
-                ),
-                width: double.infinity,
-                decoration: BoxDecoration(color: primaryBeige),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: TabButton(
-                            text: 'Catatan',
-                            isSelected: _tabController.index == 0,
-                            onTap: () => _tabController.animateTo(0),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: TabButton(
-                            text: 'Revisi',
-                            isSelected: _tabController.index == 1,
-                            onTap: () => _tabController.animateTo(1),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: TabButton(
-                            text: 'Tugas',
-                            isSelected: _tabController.index == 2,
-                            onTap: () => _tabController.animateTo(2),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            ),
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            NotesTab(
+              notes: notes,
+              onEdit: (note) => _showNoteSheet(context, provider, note: note),
+              onDelete: (note) => _confirmDeleteNote(context, provider, note),
+              onAdd: () => _showNoteSheet(context, provider),
+            ),
+            RevisionsTab(
+              revisions: revisions,
+              onEdit: (revision) => _showRevisionSheet(
+                context,
+                provider,
+                revision: revision,
               ),
-              // Tab content
-              Container(
-                decoration: BoxDecoration(
-                  color: primaryBeige,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(24),
-                    bottomRight: Radius.circular(24),
-                  ),
-                ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: isDesktop ? 32 : 16,
-                  vertical: isDesktop ? 24 : 16,
-                ),
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.6,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      NotesTab(
-                        notes: notes,
-                        onEdit: (note) =>
-                            _showNoteSheet(context, provider, note: note),
-                        onDelete: (note) =>
-                            _confirmDeleteNote(context, provider, note),
-                        onAdd: () => _showNoteSheet(context, provider),
-                      ),
-                      RevisionsTab(
-                        revisions: revisions,
-                        onEdit: (revision) => _showRevisionSheet(
-                          context,
-                          provider,
-                          revision: revision,
-                        ),
-                        onDelete: (revision) =>
-                            _confirmDeleteRevision(context, provider, revision),
-                        onAdd: () => _showRevisionSheet(context, provider),
-                      ),
-                      TodosTab(
-                        todos: todos,
-                        onEdit: (todo) =>
-                            _showTodoSheet(context, provider, todo: todo),
-                        onDelete: (todo) =>
-                            _confirmDeleteTodo(context, provider, todo),
-                        onStatusChange: (todo, status) =>
-                            _updateTodoStatus(context, provider, todo, status),
-                        onAdd: () => _showTodoSheet(context, provider),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Add bottom padding to prevent content cutoff
-              SizedBox(height: isDesktop ? 100 : 80),
-            ],
-          ),
+              onDelete: (revision) =>
+                  _confirmDeleteRevision(context, provider, revision),
+              onAdd: () => _showRevisionSheet(context, provider),
+            ),
+            TodosTab(
+              todos: todos,
+              onEdit: (todo) => _showTodoSheet(context, provider, todo: todo),
+              onDelete: (todo) => _confirmDeleteTodo(context, provider, todo),
+              onStatusChange: (todo, status) =>
+                  _updateTodoStatus(context, provider, todo, status),
+              onAdd: () => _showTodoSheet(context, provider),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget? _buildModernFab(
+  Widget _buildModernFab(
     BuildContext context,
     ProjectDetailProvider provider,
     Color accentOrange,
@@ -566,7 +513,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
           foregroundColor: Colors.white,
         );
       default:
-        return null;
+        return const SizedBox.shrink();
     }
   }
 

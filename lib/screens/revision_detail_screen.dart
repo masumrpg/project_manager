@@ -56,6 +56,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
     return QuillController(
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
+      readOnly: true,
     );
   }
 
@@ -184,7 +185,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                             ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      SelectableText(
                         _revision.version,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: const Color(0xFF2D3436),
@@ -238,7 +239,7 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFE8D5C4)),
                 ),
-                child: Text(
+                child: SelectableText(
                   _revision.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: const Color(0xFF2D3436),
@@ -268,11 +269,9 @@ class _RevisionDetailScreenState extends State<RevisionDetailScreen> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: AbsorbPointer(
-                  child: QuillEditor.basic(
-                    controller: _changesQuillController,
-                    config: const QuillEditorConfig(padding: EdgeInsets.zero),
-                  ),
+                child: QuillEditor.basic(
+                  controller: _changesQuillController,
+                  config: const QuillEditorConfig(padding: EdgeInsets.zero),
                 ),
               ),
             ),
