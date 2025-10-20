@@ -348,7 +348,22 @@ class _ProjectDetailViewState extends State<_ProjectDetailView>
     final revisions = List<Revision>.from(project.revisions)
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final todos = List<Todo>.from(project.todos)
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      ..sort((a, b) {
+        // Custom sort: unfinished first, then by newest
+        int statusValue(TodoStatus status) {
+          return status == TodoStatus.completed || status == TodoStatus.cancelled
+              ? 1
+              : 0;
+        }
+
+        final statusCompare =
+            statusValue(a.status).compareTo(statusValue(b.status));
+        if (statusCompare != 0) {
+          return statusCompare;
+        }
+        // If status is the same group, sort by newest created
+        return b.createdAt.compareTo(a.createdAt);
+      });
 
     final bool hasLongDesc = (project.longDescription ?? '').isNotEmpty;
     // Responsive app bar height
