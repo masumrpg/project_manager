@@ -189,7 +189,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      SelectableText(
                         _todo.title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: const Color(0xFF2D3436),
@@ -262,7 +262,7 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                   border: Border.all(color: const Color(0xFFE8D5C4)),
                 ),
                 padding: const EdgeInsets.all(16),
-                child: Text(
+                child: SelectableText(
                   description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: const Color(0xFF2D3436),
@@ -360,12 +360,10 @@ class _TodoDetailScreenState extends State<TodoDetailScreen> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: AbsorbPointer(
-                    child: QuillEditor.basic(
-                      controller: _contentQuillController,
-                      config: const QuillEditorConfig(
-                        padding: EdgeInsets.zero,
-                      ),
+                  child: QuillEditor.basic(
+                    controller: _contentQuillController,
+                    config: const QuillEditorConfig(
+                      padding: EdgeInsets.zero,
                     ),
                   ),
                 ),

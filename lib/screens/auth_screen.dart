@@ -22,6 +22,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _signUpNameController = TextEditingController();
   final _signUpEmailController = TextEditingController();
   final _signUpPasswordController = TextEditingController();
+  final _signUpConfirmPasswordController = TextEditingController();
 
   bool _isSignInMode = true;
   bool _isSubmitting = false;
@@ -33,6 +34,7 @@ class _AuthScreenState extends State<AuthScreen> {
     _signUpNameController.dispose();
     _signUpEmailController.dispose();
     _signUpPasswordController.dispose();
+    _signUpConfirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -286,6 +288,22 @@ class _AuthScreenState extends State<AuthScreen> {
             validator: (value) {
               if (value == null || value.length < 8) {
                 return 'Kata sandi minimal harus 8 karakter';
+              }
+              return null;
+            },
+            textInputAction: TextInputAction.next,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _signUpConfirmPasswordController,
+            decoration: _inputDecoration('Konfirmasi Kata Sandi'),
+            obscureText: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Konfirmasi kata sandi harus diisi';
+              }
+              if (value != _signUpPasswordController.text) {
+                return 'Kata sandi tidak cocok';
               }
               return null;
             },

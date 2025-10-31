@@ -121,6 +121,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.8.3"
+  diagram_editor:
+    dependency: "direct main"
+    description:
+      name: diagram_editor
+      sha256: "7e939bac883615fc5780f9b6c0d1a36d70747d22e7dfe65027abf2e3959e5aee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.3"
   diff_match_patch:
     dependency: transitive
     description:
