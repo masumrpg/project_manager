@@ -180,3 +180,170 @@ lib/
 - SSL certificates handled via custom HttpOverrides
 - API endpoint should be HTTPS in production
 - Consider different API endpoints per environment
+
+## Diagram Editor Implementation
+
+The application includes a diagram editor feature built with the **simple_diagram_editor** Flutter library, allowing users to create, edit, and manage diagrams within their projects.
+
+### Flutter Library Integration
+
+**Library**: `simple_diagram_editor` (https://github.com/Arokip/fdl_demo_app)
+
+**Core Data Models**:
+- **MyComponentData**: Component visual and text properties
+- **MyLinkData**: Connection properties between components
+
+### API Endpoints
+
+#### Diagram Management
+```
+GET    /api/projects/:projectId/diagrams                    # List all diagrams in project
+POST   /api/projects/:projectId/diagrams                    # Create new diagram
+GET    /api/projects/:projectId/diagrams/:id                # Get diagram details
+PUT    /api/projects/:projectId/diagrams/:id                # Update diagram metadata
+DELETE /api/projects/:projectId/diagrams/:id                # Delete diagram (soft delete)
+GET    /api/projects/:projectId/diagrams/:id/export         # Export diagram as JSON
+POST   /api/projects/:projectId/diagrams/:id/duplicate      # Duplicate diagram
+```
+
+#### Component Operations
+```
+GET    /api/projects/:projectId/diagrams/:id/components     # List all components
+POST   /api/projects/:projectId/diagrams/:id/components     # Add component to diagram
+PUT    /api/projects/:projectId/diagrams/:id/components/:cid # Update component
+DELETE /api/projects/:projectId/diagrams/:id/components/:cid # Delete component
+```
+
+#### Link Operations
+```
+GET    /api/projects/:projectId/diagrams/:id/links          # List all links
+POST   /api/projects/:projectId/diagrams/:id/links          # Add link between components
+PUT    /api/projects/:projectId/diagrams/:id/links/:lid     # Update link
+DELETE /api/projects/:projectId/diagrams/:id/links/:lid     # Delete link
+```
+
+#### Version Control
+```
+GET    /api/projects/:projectId/diagrams/:id/versions       # Get version history
+POST   /api/projects/:projectId/diagrams/:id/versions       # Create version snapshot
+GET    /api/projects/:projectId/diagrams/:id/versions/:versionId # Get specific version
+POST   /api/projects/:projectId/diagrams/:id/restore/:versionId # Restore to specific version
+```
+
+### Flutter Data Models
+
+#### Component Model (Based on Flutter Library)
+```dart
+class ComponentData {
+  Color color;           // Fill color
+  Color borderColor;     // Border color
+  double borderWidth;    // Border width
+  String text;           // Text content
+  Alignment textAlignment; // Text alignment
+  double textSize;       // Font size
+  bool isHighlightVisible; // Selection state
+
+  // Additional properties for position and size managed by editor
+  double x, y;           // Position
+  double width, height;  // Size
+  String shapeType;      // rectangle, circle, text, etc.
+  int zIndex;            // Layer ordering
+}
+```
+
+#### Link Model (Based on Flutter Library)
+```dart
+class LinkData {
+  String startLabel;     // Label near start point
+  String endLabel;       // Label near end point
+
+  // Additional properties for connection management
+  String componentIdStart; // Source component ID
+  String componentIdEnd;   // Target component ID
+  Color color;            // Line color
+  double width;           // Line thickness
+  String style;           // solid, dashed, dotted
+  bool showStartArrow;    // Arrow at start
+  bool showEndArrow;      // Arrow at end
+}
+```
+
+### Implementation Architecture
+
+#### Directory Structure
+```
+lib/
+├── models/
+│   ├── diagram.dart        # Diagram entity
+│   ├── component_data.dart # Component data model
+│   └── link_data.dart      # Link data model
+├── providers/
+│   └── diagram_provider.dart # Diagram state management
+├── repositories/
+│   └── diagram_repository.dart # Diagram API abstraction
+├── screens/
+│   └── diagram_editor_screen.dart # Main diagram editor UI
+├── widgets/
+│   └── diagram_editor/     # Diagram-specific widgets
+│       ├── diagram_canvas.dart
+│       ├── component_widget.dart
+│       └── link_widget.dart
+└── services/
+    └── diagram_service.dart # Diagram business logic
+```
+
+#### State Management
+- **DiagramProvider**: Manages diagram state, components, and links
+- Real-time updates with WebSocket support
+- Undo/redo functionality
+- Selection and highlighting management
+- Component and link data synchronization with API
+
+#### UI Components
+- **DiagramCanvas**: Main drawing area from simple_diagram_editor
+- **ComponentWidget**: Visual representation using MyComponentData
+- **LinkWidget**: Connection representation using MyLinkData
+- **PropertyPanel**: Component/link property editor
+- **Toolbar**: Diagram editing tools and shapes
+
+### Features
+
+#### Core Functionality
+- Drag-and-drop component positioning
+- Component selection and multi-selection with `isHighlightVisible`
+- Link creation between components
+- Component property editing (color, text, borders)
+- Text editing within components with configurable alignment
+- Component highlighting and visual feedback
+
+#### Advanced Features
+- Version control with snapshots
+- Diagram export/import (JSON format)
+- Collaborative editing (WebSocket)
+- Zoom and pan controls
+- Grid snapping
+- Keyboard shortcuts
+- Context menus
+
+#### Data Synchronization
+- Real-time component updates to API
+- Efficient batch updates for performance
+- Conflict resolution for collaborative editing
+- Local caching for offline capability
+
+### Integration with Existing Architecture
+
+#### Provider Integration
+- DiagramProvider integrates with existing ProjectDetailProvider
+- Shares authentication via AuthProvider
+- Uses same ApiClient for consistent HTTP handling
+
+#### Navigation Integration
+- Added to GoRouter configuration
+- Accessible from ProjectDetailScreen
+- Maintains existing navigation patterns
+
+#### API Integration
+- Follows existing repository pattern
+- Consistent error handling with other features
+- Same authentication token management
